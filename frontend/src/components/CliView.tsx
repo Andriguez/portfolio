@@ -3,8 +3,8 @@ import { useVfs } from "../hooks/useVfs"
 
 type LogEntry = { input: string; output: string };
 
-export function CliShell() {
-    const { currentFolder, currentPath, cd, resolveFile } = useVfs();
+export function CliView({ vfs }: { vfs: ReturnType<typeof useVfs> }) {
+    const { currentFolder, currentPath, cd, resolveFile } = vfs;
     const [ input, setInput ] = useState("");
     const [ log, setLog ] = useState<LogEntry[]>([]);
 
