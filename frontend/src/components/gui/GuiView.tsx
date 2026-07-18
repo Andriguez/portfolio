@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useVfs } from "../hooks/useVfs"
-import type { VfsFile } from "../types/vfs"
+import { useVfs } from "../../hooks/useVfs"
+import type { VfsFile } from "../../types/vfs"
 
 export function GuiView({ vfs }: { vfs: ReturnType<typeof useVfs> })  {
     const { currentFolder, currentPath, cd } = vfs;

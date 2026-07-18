@@ -1,0 +1,128 @@
+body {
+    margin: 0;
+    background: #000;
+    display: flex;
+    flex-wrap: wrap;
+    font-family: 'IBM Plex Mono', monospace;
+}
+
+form {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+input {
+    font-family: monospace;
+    background: transparent;
+    border: none;
+    outline: none;
+    caret-color: transparent;
+    font-size: 15px;
+}
+
+* { box-sizing: border-box; }
+
+.panel{
+    position: relative;
+    overflow: hidden;
+    text-align: left !important;
+}
+
+.cli {
+    background: radial-gradient(ellipse at center, var(--crt-panel) 0%, var(--crt-bg) 100%);
+    color: var(--cli-green);
+    padding: 24px;
+}
+
+.cli-boot {
+    font-size: 15px;
+    line-height: 1.6;
+    text-shadow: 0 0 2px var(--cli-green), 0 0 10px rgba(183, 242, 163, 0.35);
+    color: var(--cli-green) !important;
+}
+
+.cli-green {
+    color: var(--cli-green);
+}
+.cli-dim { color: var(--cli-green-dim); text-shadow: none; }
+.cli-prompter { color: var(--cli-prompter); text-shadow: 0 0 1px var(--cli-prompter), 0 0 8px rgba(255, 180, 84, 0.3); padding: 0; }
+
+
+.cli-cursor {
+    display: inline-block;
+    width: 9px;
+    height: 18px;
+    background: var(--cli-green);
+    box-shadow: 0 0 8px var(--cli-green);
+    animation: blink 1s steps(1) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+.cli-hero {
+    font-family: 'VT323', monospace;
+    font-size: 32px;
+    letter-spacing: 1px;
+    margin: 4px 0 8px;
+    text-shadow: 0 0 4px var(--cli-green), 0 0 16px rgba(183, 242, 163, 0.4);
+}
+
+.c-type {
+    overflow: hidden;
+    white-space: nowrap;
+    animation: type 2.2s steps(28) 1 both;
+    width: 28ch;
+}
+@keyframes type { from { width: 0; } }
+
+.cli-grain {
+    position: absolute;
+    inset: 0;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+}
+
+.cli-scanline {
+    position: absolute;
+    left: 0; right: 0;
+    height: 60px;
+    background: linear-gradient(to bottom, transparent, rgba(183, 242, 163, 0.06), transparent);
+    animation: sweep 9s linear infinite;
+    pointer-events: none;
+}
+@keyframes sweep {
+    0% { top: -60px; }
+    100% { top: 560px; }
+}
+
+.cli-lines {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+            to bottom,
+            rgba(0,0,0,0) 0px,
+            rgba(0,0,0,0) 1px,
+            rgba(0,0,0,0.18) 2px,
+            rgba(0,0,0,0.18) 2px
+    );
+    pointer-events: none;
+}
+
+.cli-glitch {
+    position: absolute;
+    left: 0; right: 0;
+    height: 3px;
+    background: rgba(183, 242, 163, 0.5);
+    animation: glitch 26s ease-in-out infinite;
+    pointer-events: none;
+    opacity: 0;
+}
+
+@keyframes glitch {
+    0%, 96%, 100% { opacity: 0; top: 40%; }
+    96.3% { opacity: 0.8; top: 22%; transform: translateX(4px); }
+    96.6% { opacity: 0; }
+    97.4% { opacity: 0.6; top: 61%; transform: translateX(-3px); }
+    97.7% { opacity: 0; }
+}

@@ -1,0 +1,14 @@
+:root {
+    --cli-bg: #0C100D;
+    --cli-panel: #12180F;
+    --cli-green: #B7F2A3;
+    --cli-green-dim: #6FA65C;
+    --cli-prompter: #7458dc;
+    --cli-error: #FFB454;
+
+    --gui-bg: #14181D;
+    --gui-panel: #1D232B;
+    --gui-border: #333B44;
+    --gui-text: #E7E3D8;
+    --gui-accent: #6FC2C2;
+}

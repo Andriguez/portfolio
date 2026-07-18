@@ -1,8 +1,8 @@
 import './App.css'
 import { useState } from 'react'
 import { useVfs } from "./hooks/useVfs"
-import { CliView } from "./components/CliView"
-import { GuiView } from "./components/GuiView"
+import { CliView } from "./components/cli/CliView"
+import { GuiView } from "./components/gui/GuiView"
 
 function App() {
     const vfs = useVfs();

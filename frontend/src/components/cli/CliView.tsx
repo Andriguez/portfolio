@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useVfs } from "../hooks/useVfs"
+import { useVfs } from "../../hooks/useVfs"
+import "./cli-view.css"
 
-type LogEntry = { input: string; output: string };
+type LogEntry = { input: string; output: string; path: string };
 
 export function CliView({ vfs }: { vfs: ReturnType<typeof useVfs> }) {
     const { currentFolder, currentPath, cd, resolveFile } = vfs;
@@ -9,6 +10,7 @@ export function CliView({ vfs }: { vfs: ReturnType<typeof useVfs> }) {
     const [ log, setLog ] = useState<LogEntry[]>([]);
 
     function runCommand(raw: string) {
+        const promptPath = currentPath;
         const [cmd, ...args] = raw.trim().split(/\s+/);
         let output = "";
 
@@ -41,16 +43,21 @@ export function CliView({ vfs }: { vfs: ReturnType<typeof useVfs> }) {
                 output = `command not found: ${cmd}`;
         }
 
-        setLog((prev) => [...prev, {input: raw, output}]);
+        setLog((prev) => [...prev, {input: raw, output, path: promptPath}]);
 
     }
 
     return (
-        <div style={{ fontFamily: "monospace", padding: "1rem" }}>
+        <div className={"panel cli-dim"} style={{fontFamily: "monospace", padding: "1rem"}}>
+            <div className={"cli-boot"}>
+                <div>loading andi's portfolio.sys...</div>
+                <div>type 'help' for a list of commands</div>
+            </div>
+
             {log.map((entry, i) => (
                 <div key={i}>
                     <div>
-                        {currentPath}$ {entry.input}
+                        guest@andriguez:{entry.path}{"\>"} {entry.input}
                     </div>
                     {entry.output && <div>{entry.output}</div>}
                 </div>
@@ -62,21 +69,29 @@ export function CliView({ vfs }: { vfs: ReturnType<typeof useVfs> }) {
                     setInput("");
                 }}
             >
-                <span>{currentPath}$ </span>
+                <span className="cli-prompter">guest@andriguez:{currentPath}{"\>"} </span>
                 <input
+                    className={"cli-green"}
+                    id={"input"}
                     autoFocus
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    style={{
-                        fontFamily: "monospace",
-                        background: "transparent",
-                        border: "none",
-                        outline: "none",
-                        color: "inherit",
-                        width: "70%",
-                    }}
+                    style={{ width: `${Math.max(input.length + 0.5)}ch` }}
                 />
+                <span className="cli-cursor"></span>
             </form>
+
+
+            <div className="cli-lines"></div>
+            <div className="cli-scanline"></div>
+            <div className="cli-glitch"></div>
+            <svg className="cli-grain" width="100%" height="100%">
+                <filter id="grain">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"
+                                  stitchTiles="stitch"></feTurbulence>
+                </filter>
+                <rect width="100%" height="100%" filter="url(#grain)"></rect>
+            </svg>
         </div>
     );
 }
