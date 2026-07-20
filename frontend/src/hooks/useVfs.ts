@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { VfsNode, VfsFolder } from "../types/vfs";
+import type { VfsNode, VfsFolder, VfsFile } from "../types/vfs";
 import { root } from "../data/vfs";
 
 function findNode(current: VfsFolder, pathParts: string[]): VfsNode | null {
@@ -19,24 +19,37 @@ export function useVfs() {
     const currentFolder = (findNode(root as VfsFolder, pathParts) ??
         root) as VfsFolder;
 
-    function cd(target: string) {
-        if (target === "..") {
-            setPathParts((p) => p.slice(0, -1));
-            return true;
+    function resolvePath(base: string[], target: string): string[] | null {
+        const isAbsolute = target.startsWith("/") || target.startsWith("~");
+        const segments = target.split("/").filter((s) => s.length > 0 && s !== "~");
+        let working = isAbsolute ? [] : [...base];
+
+        for (const seg of segments) {
+            if (seg === ".") continue;
+            if (seg === "..") {
+                working = working.slice(0, -1);
+                continue;
+            }
+            const node = findNode(root as VfsFolder, working);
+            if (!node || node.type !== "folder") return null;
+            const child = node.children.find((c) => c.slug === seg && c.type === "folder");
+            if (!child) return null;
+            working = [...working, seg];
         }
-        const found = currentFolder.children.find(
-            (c) => c.slug === target && c.type === "folder"
-        );
-        if (found) {
-            setPathParts((p) => [...p, target]);
-            return true;
-        }
-        return false;
+
+        return working;
     }
 
-    function resolveFile(target: string) {
+    function cd(target: string): boolean {
+        const resolved = resolvePath(pathParts, target);
+        if (resolved === null) return false;
+        setPathParts(resolved);
+        return true;
+    }
+
+    function resolveFile(target: string): VfsFile | null {
         const found = currentFolder.children.find(
-            (c) => c.slug === target && c.type === "file"
+            (c): c is VfsFile => c.type === "file" && c.slug === target
         );
         return found ?? null;
     }

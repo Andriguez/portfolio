@@ -15,7 +15,7 @@ export function GuiView({ vfs }: { vfs: ReturnType<typeof useVfs> })  {
     }
 
     return (
-        <div style={{ padding: "1rem" }}>
+        <div style={{ padding: "3rem 1rem" }}>
             <div style={{ marginBottom: "1rem", fontFamily: "monospace" }}>
                 {currentPath || "/"}
                 {currentPath !== "" && (
@@ -80,6 +80,7 @@ export function GuiView({ vfs }: { vfs: ReturnType<typeof useVfs> })  {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <h2>{openFile.content.title}</h2>
+                        <img src={openFile.content.image} alt={openFile.content.title} style={{ width: "50%", height: "50%" }} />
                         <p>{openFile.content.body}</p>
                         <button onClick={() => setOpenFile(null)}>Close</button>
                     </div>

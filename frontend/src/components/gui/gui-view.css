@@ -1,5 +1,8 @@
 
 .gui {
+    position: fixed;
+    inset: 0;
+
     background: var(--gui-bg);
     color: var(--gui-text);
     font-family: 'IBM Plex Mono', monospace;
