@@ -23,7 +23,7 @@ export const commands: CommandDefinition[] = [
         description: "read the welcome message.",
         run: () => ({
             type: "text",
-            value: "Hello world type message... but on a terminal.",
+            value: "Hello world type message... but on a terminal. [implement]",
             color: "cli-dim"
         })
     },
@@ -104,6 +104,27 @@ export const commands: CommandDefinition[] = [
         },
     },
     {
+        name: "download-cv",
+        usage: "download-cv <type>",
+        options: ["webdev", "cybersec", "general"],
+        description: "get a copy of my cv with more details on my career and experience. [implement]",
+        run: () => ({
+            type: "text", value: "downloading cv...", color: "cli-green"
+        })
+    },
+    {
+        name: "contact",
+        alias: "email",
+        usage: "contact <msg>",
+        options: ["message"],
+        description: "come on.. send me an email. [implement]",
+        run: () => ({
+            type: "text",
+            value: "message sent...",
+            color: "cli-green"
+        })
+    },
+    {
         name: "source",
         usage: "source",
         description: "get the link to the public repo. [implement]",
@@ -120,18 +141,6 @@ export const commands: CommandDefinition[] = [
         })
     },
     {
-        name: "contact",
-        alias: "email",
-        usage: "contact <msg>",
-        options: ["message"],
-        description: "come on.. send me an email.",
-        run: () => ({
-            type: "text",
-            value: "message sent...",
-            color: "cli-green"
-        })
-    },
-    {
         name: "echo",
         alias: "say",
         usage: "echo <text>",
@@ -145,7 +154,7 @@ export const commands: CommandDefinition[] = [
     {
         name: "date",
         usage: "date",
-        description: "in case you were wondering what date is it.",
+        description: "in case you were wondering: when are we??",
         run: () => ({
             type: "text",
             value: new Date().toString(),
@@ -166,7 +175,7 @@ export const commands: CommandDefinition[] = [
     {
         name: "sudo",
         usage: "sudo",
-        description: "try it.. i dare you. :3",
+        description: "try it.. i dare you..",
         run: () => ({
             type: "error",
             value: "lool nice try.. you don't have root on someone else's portfolio..",
@@ -176,7 +185,7 @@ export const commands: CommandDefinition[] = [
     {
         name: "secret",
         usage: "secret",
-        description: "pick my brain! learn something random about me.",
+        description: "pick my brain! learn something random about me.[implement]",
         run: () => ({
             type: "text",
             value: randomThoughts[Math.floor(Math.random() * randomThoughts.length)],
@@ -186,7 +195,7 @@ export const commands: CommandDefinition[] = [
     {
         name: "fortune",
         usage: "fortune",
-        description: "i'm a piscis, if i focus hard enough, i can basically predict your future..",
+        description: "i'm a piscis, if i focus hard enough, i can basically predict your future.. [implement]",
         run: () => ({
             type: "text",
             value: fortunes[Math.floor(Math.random() * fortunes.length)],
@@ -223,7 +232,7 @@ export const commands: CommandDefinition[] = [
         name: "exit",
         alias: "bye",
         usage: "exit",
-        description: "when you're ready to leave..",
+        description: "when you're ready to leave.. just say it",
         run: () => "EXIT"
     }
 ];
