@@ -10,6 +10,7 @@ type CommandContext = {
 export type CommandDefinition = {
     name: string;
     alias?: string;
+    options?: string[];
     usage: string;
     description: string;
     run: (args: string[], ctx: CommandContext) => CommandOutput | "CLEAR" | "EXIT";
@@ -57,6 +58,7 @@ export const commands: CommandDefinition[] = [
         name: "cd",
         alias: "enter",
         usage: "cd <page>",
+        options: [" .. ","../../ ", "~ ", "directory/folder "],
         description: "go into a page; type 'cd ..' to go back.",
         run: (args, ctx) => {
             if (!args[0]) return { type: "error", value: "usage: cd <folder>", color: "cli-info" };
@@ -84,7 +86,8 @@ export const commands: CommandDefinition[] = [
     {
         name: "links",
         usage: "links <media>",
-        description: "let's connect through [linkedin, github].",
+        options: [" github ", " linkedin "],
+        description: "let's get friendly :).",
         run: (args) => {
             if (!args[0]) return { type: "error", value: "usage: links <media>", color: "cli-info" };
 
@@ -120,6 +123,7 @@ export const commands: CommandDefinition[] = [
         name: "contact",
         alias: "email",
         usage: "contact <msg>",
+        options: ["message"],
         description: "come on.. send me an email.",
         run: () => ({
             type: "text",
@@ -191,7 +195,8 @@ export const commands: CommandDefinition[] = [
     },
     {
         name: "8ball",
-        usage: "8ball <question>",
+        usage: "8ball <q>",
+        options: ["question"],
         description: "you have doubts, i have answers.. let's go!",
         run: (args) => {
             if (!args[0]) return { type: "error", value: "ehh, what was the question?? <br> usage: 8ball <question>", color: "cli-info" };

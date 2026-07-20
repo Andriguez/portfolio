@@ -47,8 +47,8 @@ function App() {
                   checked={mode === "gui"}
                   onCheckedChange={(checked: boolean) => setMode(checked ? "gui" : "cli")}
               >
-                  <Terminal className="switch-icon switch-icon--left" size={14} />
-                  <Eye className="switch-icon switch-icon--right" size={14} />
+                  <Terminal className="switch-icon switch-icon--left" size={16} />
+                  <Eye className="switch-icon switch-icon--right" size={16} />
                   <Switch.Thumb className="SwitchThumb" />
               </Switch.Root>
           </div> }

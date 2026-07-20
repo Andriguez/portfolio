@@ -11,11 +11,16 @@ export function HelpList() {
                 >
                     <span className="help-usage">
                         {c.usage}
-                        <span className={"cli-dim"} style={{ fontSize: "10px", display: "block"}}>
-                            {c.alias ? `(${c.alias})` : ""}
+                        <span className={"help-meta"} style={{ fontSize: "10px", display: "block"}}>
+                            {c.alias ? `alias: (${c.alias})` : ""}
                         </span>
                     </span>
-                    <span className="help-desc"> — {c.description}</span>
+                    <span className="help-desc">
+                        — {c.description}
+                        <span className={"help-meta"}>
+                            {c.options ? `<options>: [${c.options.join(", ")}]` : ""}
+                        </span>
+                    </span>
                 </div>
             ))}
         </div>

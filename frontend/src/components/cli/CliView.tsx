@@ -218,7 +218,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown 
                 >
                     {!booted && <div className="cli-star" />}
                     {booted && <span className="cli-prompter" style={{ flexShrink: 0 }}>guest@andriguez:~{currentPath}&gt; </span>}
-                    <span style={{ display: "inline-flex", alignItems: "center", minWidth: "3ch" }}>
+                    <span style={{ display: "inline-flex", alignItems: "center", minWidth: "3ch", flex: 1}}>
                         <input
                             ref={inputRef}
                             className={"cli-green"}
@@ -227,7 +227,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown 
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            style={{  width: `min(${input.length + 0.75}ch, 90%)` }}
+                            style={{ width: `min(${input.length + 0.75}ch, 90%)` }}
                         />
                         <span className="cli-cursor" />
                         {suggestionTail && (

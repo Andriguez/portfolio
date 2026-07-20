@@ -9,7 +9,7 @@ body {
     height: 100%;
     width: 100%;
 
-    overflow: hidden;
+    overflow: hidden !important;
 }
 
 form {
@@ -40,8 +40,9 @@ input {
 .panel {
     position: absolute;
     inset: 0;
-    padding: 2rem 1rem;
+    padding: 3rem 1rem 2rem 1rem;
     height: 100% !important;
+    width: 100%;
     min-height: 4rem !important;
     overflow-x: hidden;
     overflow-y: auto;
@@ -159,7 +160,7 @@ input {
 }
 .log-command {
     color: var(--cli-green);
-    font-weight: 600;
+    font-weight: 500;
 }
 .log-output {
     padding-left: 1.2em;
@@ -201,7 +202,7 @@ input {
 
 .help-row {
     display: grid;
-    grid-template-columns: minmax(18ch, max-content) 1fr;
+    grid-template-columns: minmax(16ch, max-content) 1fr;
     column-gap: 0.8em;
     padding: 0.15rem 0;
     animation: fadeInList 200ms ease-out forwards;
@@ -209,6 +210,11 @@ input {
 }
 .help-usage { color: var(--cli-green); font-weight: 600; }
 .help-desc { color: var(--cli-green-dim); font-size: 0.85em }
+.help-meta {
+    color: #6c7c66;
+    font-size: 0.625rem;
+    display: block;
+}
 
 .prompt-pulse-wrap {
     position: relative;
