@@ -1,7 +1,19 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #000;
+    font-family: 'IBM Plex Mono', monospace;
+    height: 100%;
+    width: 100%;
+
+    overflow: hidden !important;
+}
 
 .gui {
-    position: fixed;
-    inset: 0;
+    position: relative;
 
     background: var(--gui-bg);
     color: var(--gui-text);

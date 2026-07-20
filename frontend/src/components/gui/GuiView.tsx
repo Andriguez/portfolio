@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useVfs } from "../../hooks/useVfs"
 import type { VfsFile } from "../../types/vfs"
+import { FileExplorer } from "./FileExplorer";
+import "./gui-view.css"
 
 export function GuiView({ vfs }: { vfs: ReturnType<typeof useVfs> })  {
     const { currentFolder, currentPath, cd } = vfs;
@@ -15,7 +17,8 @@ export function GuiView({ vfs }: { vfs: ReturnType<typeof useVfs> })  {
     }
 
     return (
-        <div style={{ padding: "3rem 1rem" }}>
+        <div style={{ padding: "4rem 4rem" }}>
+            <FileExplorer />
             <div style={{ marginBottom: "1rem", fontFamily: "monospace" }}>
                 {currentPath || "/"}
                 {currentPath !== "" && (
