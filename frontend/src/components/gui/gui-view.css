@@ -14,7 +14,6 @@ body {
 
 .gui {
     position: relative;
-
     background: var(--gui-bg);
     color: var(--gui-text);
     font-family: 'IBM Plex Mono', monospace;
@@ -55,18 +54,15 @@ body {
     padding: 10px 6px;
     border-radius: 4px;
     cursor: pointer;
+
 }
 .gui-item:hover { background: rgba(111, 194, 194, 0.1); }
 
 .gui-icon {
-    width: 36px;
-    height: 36px;
-    border: 1px solid var(--gui-border);
-    background: var(--gui-panel);
-    border-radius: 3px;
+    font-size: 2rem;
 }
 
-.gui-item-label { font-size: 11px; text-align: center; color: #C9C4B4; }
+.gui-item-label { font-size: 0.8rem; text-align: center; color: #C9C4B4; }
 
 .gui-dialog {
     margin-top: 24px;

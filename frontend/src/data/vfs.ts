@@ -27,7 +27,7 @@ export const root: VfsNode = {
             children: [
                 {
                     type: "folder",
-                    name: "cyber-security-projects",
+                    name: "cybersecurity",
                     slug: "cybersec",
                     description: "Checkout some cyber security projects.",
                     updatedAt: "19/07/2026",
@@ -58,7 +58,7 @@ export const root: VfsNode = {
                 },
                 {
                     type: "folder",
-                    name: "webdev-projects",
+                    name: "webdev",
                     slug: "webdev",
                     description: "View web/software development projects.",
                     updatedAt: "19/07/2026",
@@ -87,7 +87,7 @@ export const root: VfsNode = {
                         },
                         {
                             type: "file",
-                            name: "example-project.md",
+                            name: "project-2.md",
                             slug: "example-project",
                             description: "webdev project 3 goes here.",
                             updatedAt: "19/07/2026",

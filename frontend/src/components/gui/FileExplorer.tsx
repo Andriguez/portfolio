@@ -1,37 +1,47 @@
+import { useState } from "react";
+import type { VfsFile } from "../../types/vfs";
+import { useVfs } from "../../hooks/useVfs"
 import { ExplorerButtons } from './ExplorerButtons';
 import { ExplorerBreadcrumbs } from './ExplorerBreadcrumbs';
+import { ExplorerItem } from './ExplorerItem';
 
-export function FileExplorer() {
+export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
+    const { currentFolder, currentPath, cd } = vfs;
+
+    const [ openFile, setOpenFile ] = useState<VfsFile | null>(null);
+
+    function handleClick(item: (typeof currentFolder.children)[number]) {
+        if (item.type === "folder") {
+            cd(item.slug);
+        } else {
+            setOpenFile(item);
+        }
+    }
+
     return (
         <div>
-            <div className="panel gui">
+            <div className="gui">
                 <div className="gui-titlebar">
                     <span>portfolio</span>
                     <ExplorerButtons />
                 </div>
                 <div className="gui-body">
-                    <ExplorerBreadcrumbs />
+                    <ExplorerBreadcrumbs currentPath={currentPath} cd={cd} />
                     <div className="gui-grid">
-                        <div className="gui-item">
-                            <div className="gui-icon"></div>
-                            <span className="gui-item-label">about.md</span></div>
-                        <div className="gui-item">
-                            <div className="gui-icon"></div>
-                            <span className="gui-item-label">contact.md</span></div>
-                        <div className="gui-item">
-                            <div className="gui-icon"></div>
-                            <span className="gui-item-label">ecommerce-app</span></div>
-                        <div className="gui-item">
-                            <div className="gui-icon"></div>
-                            <span className="gui-item-label">cli-portfolio</span></div>
+                        { currentFolder.children.map((item) => (
+                            <ExplorerItem
+                                item={item}
+                                onClick={() => handleClick(item)}
+                            />
+                        ))}
                     </div>
+                    { openFile &&
                     <div className="gui-dialog">
-                        <div className="gui-dialog-title">ecommerce-app</div>
-                        <div className="gui-dialog-body">
-                            Overview dialog — this is where the file's content renders when clicked, styled as a card
-                            rather than a raw text dump.
-                        </div>
+                        <div className="gui-dialog-title">{ openFile?.content.title }</div>
+                        <img src={openFile?.content.image} alt={openFile.content.title} style={{ width: "50%", height: "50%" }} />
+                        <div className="gui-dialog-body"> { openFile?.content.body } </div>
                     </div>
+                    }
                 </div>
                 <svg className="gui-grain" width="100%" height="100%">
                     <filter id="grain2">
