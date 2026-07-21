@@ -5,5 +5,5 @@ export type CommandOutput =
     | { type: "error"; value: string, color: string }
     | { type: "none", color: string}
     | { type: "markdown", file: VfsFile , color: string }
-    | { type: "help", color: string}
+    | { type: "help", extra: boolean, color: string}
     | { type: "link", value: string, url: string, color: string };

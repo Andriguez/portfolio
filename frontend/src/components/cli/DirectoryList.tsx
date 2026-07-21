@@ -21,7 +21,7 @@ export function DirectoryList({ items, onSelect }: {
                     style={{ animationDelay: `${i * 120}ms` }}
                     onClick={(e) => {
                         if (isTouchDevice()) e.stopPropagation();
-                        onSelect(item.isFolder ? `enter ${item.slug}`
+                        onSelect(item.isFolder ? `dir ${item.slug}`
                             : `view ${item.slug}`)}
                     }
                 >
@@ -31,7 +31,7 @@ export function DirectoryList({ items, onSelect }: {
                     </span>
                     <span className="ls-name">{item.isFolder ? `${item.name}/` : item.name}</span>
                     <span className="ls-hint">
-                        {item.isFolder ? ` enter ${item.slug}` : ` view ${item.slug}`}
+                        {item.isFolder ? ` dir ${item.slug}` : ` view ${item.slug}`}
                     </span>
                     <div className="ls-meta">
                         {item.isFolder ? `${item.itemCount ?? 0} items` : item.description ?? ""}

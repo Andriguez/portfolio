@@ -1,9 +1,15 @@
-import { commands } from "../../types/commands"
+import {type CommandDefinition, commands} from "../../types/commands"
 
-export function HelpList() {
+export function HelpList({ showExtra }: { showExtra: boolean} ) {
+
+    function getCommandsList(): CommandDefinition[] {
+        return commands.filter((c) => c.show === !showExtra)
+    }
+
     return (
         <div>
-            {commands.map((c, i) => (
+            {
+                getCommandsList().map((c, i) => (
                 <div
                     key={c.name}
                     className="help-row"
@@ -23,6 +29,7 @@ export function HelpList() {
                     </span>
                 </div>
             ))}
+            { !showExtra && <p className={"help-meta"} style={{ fontSize: "0.85rem", fontWeight: "bold" }}> type 'help --extra' for more commands..</p> }
         </div>
     );
 }

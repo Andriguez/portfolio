@@ -11,7 +11,7 @@ export function OutputRenderer({ output, runCommand }: { output: CommandOutput, 
 
     if (output.type === "list") return <DirectoryList items={output.items} onSelect={runCommand} />;
 
-    if (output.type === "help") return <HelpList />
+    if (output.type === "help") return <HelpList showExtra={output.extra}/>
 
     if (output.type === "markdown") return <FileContentCard file={output.file} />
 

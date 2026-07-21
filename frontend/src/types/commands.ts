@@ -3,7 +3,7 @@ import type { CommandOutput } from "./CommandOutput";
 
 type CommandContext = {
     currentFolder: VfsFolder;
-    cd: (target: string) => boolean;
+    cd: (target: string) => VfsFolder;
     resolveFile: (target: string) => VfsFile | null;
 };
 
@@ -12,6 +12,7 @@ export type CommandDefinition = {
     alias?: string;
     options?: string[];
     usage: string;
+    show: boolean;
     description: string;
     run: (args: string[], ctx: CommandContext) => CommandOutput | "CLEAR" | "EXIT";
 };
@@ -21,6 +22,7 @@ export const commands: CommandDefinition[] = [
         name: "hello",
         usage: "hello",
         description: "read the welcome message.",
+        show: true,
         run: () => ({
             type: "text",
             value: "Hello world type message... but on a terminal. [implement]",
@@ -30,40 +32,54 @@ export const commands: CommandDefinition[] = [
     {
         name: "help",
         usage: "help",
+        show: false,
         description: "list everything(?) you can do here.",
-        run: () => ({
-            type: "help",
-            color: "cli-green"
-        }),
+        run: (_args) => {
+
+            let showExtra = false;
+            if (_args[0] === "--extra") showExtra = true;
+
+                return {
+                    type: "help",
+                    extra: showExtra,
+                    color: "cli-green"
+                }
+        },
     },
     {
         name: "ls",
         alias: "dir",
         usage: "ls",
+        show: true,
         description: "check what's in here.",
-        run: (_args, ctx) => ({
-            type: "list",
-            items: ctx.currentFolder.children.map((c) => ({
-                name: c.name,
-                slug: c.slug,
-                isFolder: c.type === "folder",
-                description: c.description,
-                itemCount: ctx.currentFolder.children.length,
-                updatedAt: c.updatedAt,
-            })),
-            color: "cli-green"
-        }),
+        run: (_args, ctx) => {
+            const folder = _args[0] ? ctx.cd(_args[0]) : ctx.currentFolder;
+
+            return ({
+                type: "list",
+                items: folder.children.map((c) => ({
+                    name: c.name,
+                    slug: c.slug,
+                    isFolder: c.type === "folder",
+                    description: c.description,
+                    itemCount: folder.children.length,
+                    updatedAt: c.updatedAt,
+                })),
+                color: "cli-green"
+            })
+        },
     },
     {
         name: "cd",
         alias: "enter",
         usage: "cd <page>",
-        options: [" .. ","../../ ", "~ ", "directory/folder "],
-        description: "go into a page; type 'cd ..' to go back.",
+        show: true,
+        options: [" .. ","../../ ", "~ ", "directory/folder ", "back "],
+        description: "go into a page; type 'cd back' to go backwards.",
         run: (args, ctx) => {
             if (!args[0]) return { type: "error", value: "usage: cd <folder>", color: "cli-info" };
 
-            if (!ctx.cd(args[0]))
+            if (ctx.cd(args[0]) === null)
                 return { type: "error", value: `cd: no such folder: ${args[0]}`, color: "cli-info" };
             return { type: "none", color: "cli-green" };
         },
@@ -72,6 +88,7 @@ export const commands: CommandDefinition[] = [
         name: "cat",
         alias: "view",
         usage: "cat <file>",
+        show: true,
         description: "open and read a page's entry.",
         run: (args, ctx) => {
             if (!args[0]) return { type: "error", value: "usage: cat <file>", color: "cli-info" };
@@ -86,6 +103,7 @@ export const commands: CommandDefinition[] = [
     {
         name: "links",
         usage: "links <media>",
+        show: true,
         options: [" github ", " linkedin "],
         description: "let's get friendly :).",
         run: (args) => {
@@ -106,8 +124,9 @@ export const commands: CommandDefinition[] = [
     {
         name: "download-cv",
         usage: "download-cv <type>",
+        show: true,
         options: ["webdev", "cybersec", "general"],
-        description: "get a copy of my cv with more details on my career and experience. [implement]",
+        description: "get a copy of my cv. [implement]",
         run: () => ({
             type: "text", value: "downloading cv...", color: "cli-green"
         })
@@ -115,6 +134,7 @@ export const commands: CommandDefinition[] = [
     {
         name: "contact",
         alias: "email",
+        show: true,
         usage: "contact <msg>",
         options: ["message"],
         description: "come on.. send me an email. [implement]",
@@ -127,6 +147,7 @@ export const commands: CommandDefinition[] = [
     {
         name: "source",
         usage: "source",
+        show: false,
         description: "get the link to the public repo. [implement]",
         run: () => ({
             type: "link", value: `>Go to my github repo clicking here<`, url: "", color: "cli-green"
@@ -135,6 +156,7 @@ export const commands: CommandDefinition[] = [
     {
         name: "stack",
         usage: "stack",
+        show: false,
         description: "lists the technology used for this portfolio. [implement]",
         run: () => ({
             type: "text", value: "...", color: "cli-green"
@@ -143,6 +165,7 @@ export const commands: CommandDefinition[] = [
     {
         name: "echo",
         alias: "say",
+        show: false,
         usage: "echo <text>",
         description: "prints input back, like an online parrot.",
         run: (args) => {
@@ -154,6 +177,7 @@ export const commands: CommandDefinition[] = [
     {
         name: "date",
         usage: "date",
+        show: false,
         description: "in case you were wondering: when are we??",
         run: () => ({
             type: "text",
@@ -165,6 +189,7 @@ export const commands: CommandDefinition[] = [
         name: "pwd",
         usage: "pwd",
         alias: "where",
+        show: false,
         description: "wanna know where you at?",
         run: ([], ctx: CommandContext) => ({
             type: "text",
@@ -175,6 +200,7 @@ export const commands: CommandDefinition[] = [
     {
         name: "sudo",
         usage: "sudo",
+        show: false,
         description: "try it.. i dare you..",
         run: () => ({
             type: "error",
@@ -185,6 +211,7 @@ export const commands: CommandDefinition[] = [
     {
         name: "secret",
         usage: "secret",
+        show: false,
         description: "pick my brain! learn something random about me.[implement]",
         run: () => ({
             type: "text",
@@ -195,6 +222,7 @@ export const commands: CommandDefinition[] = [
     {
         name: "fortune",
         usage: "fortune",
+        show: false,
         description: "i'm a piscis, if i focus hard enough, i can basically predict your future.. [implement]",
         run: () => ({
             type: "text",
@@ -205,6 +233,7 @@ export const commands: CommandDefinition[] = [
     {
         name: "8ball",
         usage: "8ball <q>",
+        show: false,
         options: ["question"],
         description: "you have doubts, i have answers.. let's go!",
         run: (args) => {
@@ -216,6 +245,7 @@ export const commands: CommandDefinition[] = [
     {
         name: "changelog",
         usage: "changelog",
+        show: false,
         description: "check what i have been doing in here. [implement]",
         run: () => ({
             type: "text", value: "...", color: "cli-green"
@@ -224,6 +254,7 @@ export const commands: CommandDefinition[] = [
     {
         name: "clear",
         usage: "clear",
+        show: false,
         alias: "cls",
         description: "wipe the screen.",
         run: () => "CLEAR",
@@ -231,6 +262,7 @@ export const commands: CommandDefinition[] = [
     {
         name: "exit",
         alias: "bye",
+        show: true,
         usage: "exit",
         description: "when you're ready to leave.. just say it",
         run: () => "EXIT"

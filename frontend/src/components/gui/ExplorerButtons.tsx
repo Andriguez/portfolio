@@ -1,5 +1,7 @@
 export function ExplorerButtons() {
     return (
-        <span>— □ ×</span>
+        <div>
+            <span>— □ ×</span>
+        </div>
     )
 }
