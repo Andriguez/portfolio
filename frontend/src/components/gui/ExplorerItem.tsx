@@ -3,7 +3,7 @@ import type { VfsNode } from "../../types/vfs";
 export function ExplorerItem({ item, onClick }: { item: VfsNode, onClick: () => void }) {
 
     return (
-        <div className="gui-item" onClick={onClick}>
+        <div className="grid-item" onClick={onClick}>
                 <span className="gui-icon">
                     {item.type === "folder" ? "📁" : "📄"}
                 </span>

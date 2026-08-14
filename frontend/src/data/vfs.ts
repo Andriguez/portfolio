@@ -27,7 +27,7 @@ export const root: VfsNode = {
             children: [
                 {
                     type: "folder",
-                    name: "cybersecurity",
+                    name: "cyber security",
                     slug: "cybersec",
                     description: "Checkout some cyber security projects.",
                     updatedAt: "19/07/2026",
