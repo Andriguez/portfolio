@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
- import { useVfs } from "../../hooks/useVfs"
+ import { useVfs, searchVfs } from "../../hooks/useVfs"
 import { ExplorerButtons } from './ExplorerButtons';
 import { TreeColumn } from "./TreeColumn";
 import { GridColumn } from "./GridColumn";
 import { DetailPanel } from "./DetailPanel";
+import type {VfsNode} from "../../types/vfs.ts";
 
 export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -40,6 +41,25 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
         return () => window.removeEventListener("keydown", handleKey);
     }, [openFile, handleCloseFile]);
 
+    type WindowState = "open" | "minimizing" | "minimized" | "restoring";
+    const [windowState, setWindowState] = useState<WindowState>("open");
+
+    function handleMinimizeWindow() {
+        setWindowState("minimizing");
+        setTimeout(() => setWindowState("minimized"), 320);
+    }
+    function handleRestoreWindow() {
+        setWindowState("restoring");
+        setTimeout(() => setWindowState("open"), 320);
+    }
+
+    const [shuttingDown, setShuttingDown] = useState(false);
+
+    function handleCloseWindow() {
+        setShuttingDown(true);
+        setTimeout(() => window.close(), 500);
+    }
+
     const items = vfs.currentFolder.children;
     const folderCount = items.filter((i) => i.type === "folder").length;
     const fileCount = items.length - folderCount;
@@ -48,20 +68,45 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
     const [searchQuery, setSearchQuery] = useState("");
     const [menuOpen, setMenuOpen] = useState(false);
 
-    const visibleItems = vfs.currentFolder.children.filter((item) =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const searchResults = searchQuery ? searchVfs(searchQuery) : null;
+    const visibleItems = searchResults ? searchResults.map((r) => r.node) : vfs.currentFolder.children;
+
+    const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+
+    function handleItemClick(item: VfsNode) {
+        if (searchResults) {
+            const match = searchResults.find((r) => r.node === item);
+            if (!match) return;
+            if (item.type === "folder") {
+                vfs.goToPath(match.path);
+            } else {
+                navigate(`/${match.path.slice(0, -1).join("/")}?open=${item.slug}`);
+            }
+            setSearchQuery("");
+            return;
+        }
+
+        if (item.type === "folder") vfs.cd(item.slug)
+        else handleOpenFile(item.slug);
+    }
 
     return (
         <div>
-            <div className="gui">
+            <div className={`gui ${
+                windowState === "minimizing" ? "gui-window--minimizing"
+                    : windowState === "minimized" ? "gui-window--hidden"
+                        : windowState === "restoring" ? "gui-window--restoring"
+                            : ""
+                } ${shuttingDown ? "cli-power-off" : ""}`}
+            >
+
                 <div className="gui-titlebar">
                     <span>portfolio</span>
-                    <ExplorerButtons />
+                    <ExplorerButtons onMinimize={handleMinimizeWindow} onClose={handleCloseWindow} />
                 </div>
                 <div className="gui-toolbar">
-                    <button className="toolbar-btn nav-btn" onClick={() => navigate(-1)} aria-label="back">‹</button>
-                    <button className="toolbar-btn nav-btn" onClick={() => navigate(1)} aria-label="forward">›</button>
+                    <button title="back" className="toolbar-btn nav-btn" onClick={() => navigate(-1)} aria-label="back">‹</button>
+                    <button title="forward" className="toolbar-btn nav-btn" onClick={() => navigate(1)} aria-label="forward">›</button>
 
                     <div className="address-field">
                         <span className="crumb-pill" onClick={() => vfs.goToPath([])}>home</span>
@@ -75,14 +120,19 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
 
                     <input
                         className="search-field"
-                        placeholder="search this page..."
+                        placeholder="search it.."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                    <button className="toolbar-btn search-btn" onClick={() => {}} aria-label="search">🔍︎︎</button>
+
+                    <button className="toolbar-btn search-btn"
+                            onClick={() => setMobileSearchOpen((v) => !v)}
+                            aria-label="search">
+                        🔍︎︎
+                    </button>
 
                     <div className="toolbar-menu">
-                        <button className="toolbar-btn menu-btn" onClick={() => setMenuOpen((v) => !v)} aria-label="menu">⋮</button>
+                        <button title="options" className="toolbar-btn menu-btn" onClick={() => setMenuOpen((v) => !v)} aria-label="menu">⋮</button>
                         {menuOpen && (
                             <div className="toolbar-menu-dropdown">
                                 <div className="menu-item" onClick={() => setMenuOpen(false)}>theme: green / amber</div>
@@ -93,9 +143,25 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                     </div>
 
                 </div>
+                {mobileSearchOpen && (
+                    <div className="mobile-search-row">
+                        <input
+                            className="mobile-search-input"
+                            autoFocus
+                            placeholder="search it.."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                        <button className="toolbar-btn search-btn"
+                                onClick={() => setMobileSearchOpen((v) => !v)}
+                                aria-label="search">
+                            ×
+                        </button>
+                    </div>
+                )}
                 <div className="gui-body">
                     <TreeColumn vfs={vfs} expandedPaths={expandedPaths} setExpandedPaths={setExpandedPaths} />
-                    <GridColumn vfs={vfs} onOpenFile={handleOpenFile} items={visibleItems} viewMode={viewMode} />
+                    <GridColumn vfs={vfs} onOpenFile={handleOpenFile} items={visibleItems} viewMode={viewMode} openedFile={openSlug} onItemClick={handleItemClick} />
                     {openFile && (
                         <div className="detail-overlay-wrap">
                         <div className="detail-backdrop" onClick={handleCloseFile} />
@@ -104,10 +170,10 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                     )}
                 </div>
                 <div className="gui-statusbar">
-                        <span>{items.length} items | { folderCount > 0 ? `${folderCount} folder(s)` : "" }  {fileCount > 0 ? `${fileCount} file(s)` : "" } | </span>
+                        <span title="content summary" >{items.length} items | { folderCount > 0 ? `${folderCount} folder(s)` : "" }  {fileCount > 0 ? `${fileCount} file(s)` : "" } | </span>
                     <div className="view-toggle">
-                        <button className={viewMode === "grid" ? "view-btn view-btn--active" : "view-btn"} onClick={() => setViewMode("grid")} aria-label="grid view">⊞</button>
-                        <button className={viewMode === "list" ? "view-btn view-btn--active" : "view-btn"} onClick={() => setViewMode("list")} aria-label="list view">☰</button>
+                        <button title="grid view" className={viewMode === "grid" ? "view-btn view-btn--active" : "view-btn"} onClick={() => setViewMode("grid")} aria-label="grid view">⊞</button>
+                        <button title="list view" className={viewMode === "list" ? "view-btn view-btn--active" : "view-btn"} onClick={() => setViewMode("list")} aria-label="list view">☰</button>
                     </div>
                 </div>
                 <svg className="gui-grain" width="100%" height="100%">
@@ -118,6 +184,11 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                     <rect width="100%" height="100%" filter="url(#grain2)"></rect>
                 </svg>
             </div>
+            { windowState === "minimized" && (
+                <div className="gui-taskbar-pill" onClick={handleRestoreWindow}>
+                    andi.sys — file explorer
+                </div>
+            )}
         </div>
     )
 }

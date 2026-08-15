@@ -31,9 +31,6 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown 
     const [ draft, setDraft ] = useState("");
 
     const [ pulseKey, setPulseKey ] = useState(0);
-    const [ glitchKey, setGlitchKey ] = useState(0);
-    const [ scanKey, setScanKey ] = useState(0);
-    const [scanReverse, setScanReverse] = useState(false);
 
     function getSuggestion(value: string): string | null {
         if (!value) return null;
@@ -143,17 +140,6 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown 
         }
     }, [log]);
 
-    useEffect(() => {
-        function scheduleGlitch() {
-            const delay = 15000 + Math.random() * 30000; // 15–45s, never the same twice
-            return setTimeout(() => {
-                setGlitchKey((k) => k + 1);
-                scheduleGlitch();
-            }, delay);
-        }
-        const timeout = scheduleGlitch();
-        return () => clearTimeout(timeout);
-    }, []);
 
     useEffect(() => {
         function skipBoot() {
@@ -169,19 +155,6 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown 
     }, []);
 
     useEffect(() => {
-        function scheduleScan() {
-            const delay = 2000 + Math.random() * 6000;
-            return setTimeout(() => {
-                setScanReverse(Math.random() > 0.4);
-                setScanKey((k) => k + 1);
-                scheduleScan();
-            }, delay);
-        }
-        const timeout = scheduleScan();
-        return () => clearTimeout(timeout);
-    }, []);
-
-    useEffect(() => {
         const t = setTimeout(() => {
             setBooting(false);
             setPulseKey((k) => k + 1);
@@ -191,7 +164,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown 
 
     return (
         <div
-            className={shuttingDown ? "cli-screen cli-power-off" : booting ? "cli-screen cli-power-on" : "cli-screen"}
+            className={shuttingDown ? "cli-power-off" : booting ? "cli-power-on" : ""}
             onClick={handleContainerClick}
         >
             <div
@@ -246,22 +219,6 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown 
             </form>
                 <div ref={bottomRef} />
             </div>
-
-                <div key={scanKey} className={`cli-scanline ${scanReverse ? "cli-scanline--reverse" : ""}`} />
-                { booted && <div key={glitchKey}
-                 className="cli-glitch"
-                 style={{
-                     top: `${ 17.89 + Math.random() * 60}%`,
-                     animationDuration: `${180 + Math.random() * 200}ms` }}
-            /> }
-            <svg className="cli-grain" width="100%" height="100%">
-                <filter id="grain">
-                    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"
-                                  stitchTiles="stitch"></feTurbulence>
-                </filter>
-                <rect width="100%" height="100%" filter="url(#grain)"></rect>
-            </svg>
-                <div className="cli-vignette" />
-            </div>
+        </div>
     );
 }

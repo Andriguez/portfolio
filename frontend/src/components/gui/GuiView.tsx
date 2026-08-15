@@ -6,6 +6,13 @@ export function GuiView({ vfs }: { vfs: ReturnType<typeof useVfs> })  {
     return (
         <div style={{ padding: "4rem 2rem" }}>
             <FileExplorer vfs={vfs} />
+            <svg className="gui-grain-extra" width="100%" height="100%">
+                <filter id="guiGrain">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" />
+                </filter>
+                <rect width="100%" height="100%" filter="url(#guiGrain)" />
+            </svg>
+
         </div>
     );
 }

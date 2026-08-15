@@ -95,3 +95,18 @@ export function useVfs() {
         getFolder,
     };
 }
+
+export function searchVfs(query: string): { node: VfsNode; path: string[] }[] {
+    if (!query) return [];
+    const results: { node: VfsNode; path: string[] }[] = [];
+    function walk(folder: VfsFolder, pathSoFar: string[]) {
+        for (const child of folder.children) {
+            if (child.name.toLowerCase().includes(query.toLowerCase())) {
+                results.push({ node: child, path: [...pathSoFar, child.slug] });
+            }
+            if (child.type === "folder") walk(child, [...pathSoFar, child.slug]);
+        }
+    }
+    walk(root as VfsFolder, []);
+    return results;
+}

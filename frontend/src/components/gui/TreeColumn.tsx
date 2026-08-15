@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { VfsFolder } from "../../types/vfs";
 import { root } from "../../data/vfs";
 import type { useVfs } from "../../hooks/useVfs";
-import {ChevronRight, ChevronDown, Folder, ComputerIcon, House} from "lucide-react";
+import {ChevronRight, ChevronDown, Folder, ComputerIcon, House, Trash2, Lock} from "lucide-react";
 
 type TreeVfs = ReturnType<typeof useVfs>;
 
@@ -60,8 +60,8 @@ export function TreeColumn({
     const rootFolder = root as VfsFolder;
     return (
         <div className="tree-column themed-scrollbar">
-            <div className="tree-row tree-row--pcn " onClick={() => setPcExpanded((v) => !v)}>
-                <span className="tree-disclosure">{pcExpanded ? "▾" : "▸"}</span>
+            <div className="tree-row tree-row--pcn" onClick={() => setPcExpanded((v) => !v)}>
+                <span title="This PC" className="tree-disclosure">{pcExpanded ? "▾" : "▸"}</span>
                 <ComputerIcon size={15} />
                 <span className="tree-label">ANDI-PC</span>
             </div>
@@ -78,6 +78,15 @@ export function TreeColumn({
                     ))}
                 </div>
             )}
+            <div className="tree-row tree-row--pcn">
+                <Trash2 size={15} />
+                <span className="tree-label">Trash</span>
+            </div>
+            <div className="tree-row tree-row--pcn">
+                <Lock size={15} />
+                <span className="tree-label">Login</span>
+            </div>
+
         </div>
     );
 }

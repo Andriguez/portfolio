@@ -31,12 +31,6 @@ input {
     caret-color: transparent;
 }
 
-.cli-screen {
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(ellipse at center, var(--cli-panel) 0%, var(--cli-bg) 100%);
-}
-
 .panel {
     position: absolute;
     inset: 0;
@@ -103,53 +97,6 @@ input {
     width: 28ch;
 }
 @keyframes type { from { width: 0; } }
-
-.cli-grain {
-    position: absolute;
-    inset: 0;
-    opacity: 0.2;
-    mix-blend-mode: overlay;
-    pointer-events: none;
-}
-
-
-.cli-scanline--reverse {
-    animation-direction: reverse;
-}
-
-.cli-scanline {
-    position: absolute;
-    left: 0; right: 0;
-    height: 70px;
-    background: linear-gradient(to bottom, transparent, rgba(183, 242, 163, 0.06), transparent);
-    animation: sweep 15s linear;
-    pointer-events: none;
-}
-
-@keyframes sweep {
-    0% { top: -60px; }
-    100% { top: 100%; }
-}
-
-.cli-glitch {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: rgba(183, 242, 163, 0.5);
-    pointer-events: none;
-    opacity: 0;
-    animation: glitchFlash 220ms ease-out;
-    transform: translate(-50%, -50%);
-    box-shadow: 0 0 6px 2px white;
-}
-
-.cli-vignette {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at center, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.7) 100%);
-    pointer-events: none;
-}
 
 .log-block {
     margin-bottom: 0.9rem;
@@ -259,13 +206,6 @@ input {
 @keyframes fadeInList {
     from { opacity: 0; transform: translateX(-4px); }
     to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes glitchFlash {
-    0%   { opacity: 0; transform: translateX(0); }
-    30%  { opacity: 0.8; transform: translateX(4px); }
-    60%  { opacity: 0; }
-    100% { opacity: 0; }
 }
 
 .invisible-scrollbar {
