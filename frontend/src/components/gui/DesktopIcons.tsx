@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Monitor, Trash2, KeyRound } from "lucide-react";
+import { ComputerIcon, Trash2, KeyRound } from "lucide-react";
 
 export function DesktopIcons({
                                  onRestore, onLoginClick,
@@ -9,7 +9,7 @@ export function DesktopIcons({
     return (
         <div className="desktop-icons">
             <div className="desktop-icon" onClick={onRestore}>
-                <Monitor size={30} />
+                <ComputerIcon size={30} />
                 <span>ANDRIGUEZ</span>
             </div>
             <div className="desktop-icon" onClick={() => setTrashOpen((v) => !v)}>

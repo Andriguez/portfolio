@@ -1,7 +1,7 @@
 import type { useVfs } from "../../hooks/useVfs";
 import type { VfsNode } from "../../types/vfs";
 import { ExplorerItem } from "./ExplorerItem.tsx";
-import { useState } from "react";
+import * as React from "react";
 
 export function GridColumn({
                                vfs,
@@ -20,24 +20,64 @@ export function GridColumn({
 }) {
     const { cd } = vfs;
 
-    const [contextMenu, setContextMenu] = useState<{
+    const [contextMenu, setContextMenu] = React.useState<{
         x: number;
         y: number;
         item: VfsNode;
     } | null>(null);
+
+    function displayContextMenu(x: number, y: number, item: VfsNode) {
+        const menuWidth = 140;
+        const menuHeight = 120;
+        let correctedX = x - ( menuWidth / 5 );
+        let correctedY = y - ( menuHeight / 7 );
+        if (correctedX + menuWidth > window.innerWidth) correctedX = window.innerWidth - menuWidth - 8;
+        if (correctedY + menuHeight > window.innerHeight) correctedY = window.innerHeight - menuHeight - 8;
+        setContextMenu({ x: correctedX, y: correctedY, item });
+    }
 
     function handleContextMenu(
         e: React.MouseEvent,
         item: VfsNode
     ) {
         e.preventDefault();
-        const menuWidth = 140;
-        const menuHeight = 120;
-        let x = e.clientX - ( menuWidth / 5 );
-        let y = e.clientY - ( menuHeight / 7 );
-        if (x + menuWidth > window.innerWidth) x = window.innerWidth - menuWidth - 8;
-        if (y + menuHeight > window.innerHeight) y = window.innerHeight - menuHeight - 8;
-        setContextMenu({ x, y, item });
+        displayContextMenu(e.clientX, e.clientY, item)
+    }
+
+    const pressTimer = React.useRef<number | null>(null);
+    const pressStart = React.useRef<{ x: number; y: number } | null>(null);
+    const longPressFired = React.useRef(false);
+
+    function handleTouchStart(e: React.TouchEvent, item: VfsNode) {
+        const touch = e.touches[0];
+        pressStart.current = { x: touch.clientX, y: touch.clientY };
+        longPressFired.current = false;
+        pressTimer.current = window.setTimeout(() => {
+            longPressFired.current = true;
+            if (navigator.vibrate) navigator.vibrate(15);
+            displayContextMenu(touch.clientX, touch.clientY, item);
+        }, 500);
+    }
+
+    function handleTouchMove(e: React.TouchEvent) {
+        if (!pressStart.current || pressTimer.current === null) return;
+        const touch = e.touches[0];
+        const dx = Math.abs(touch.clientX - pressStart.current.x);
+        const dy = Math.abs(touch.clientY - pressStart.current.y);
+        if (dx > 10 || dy > 10) {
+            clearTimeout(pressTimer.current);
+            pressTimer.current = null;
+        }
+    }
+
+    function handleTouchEnd(e: React.TouchEvent) {
+        if (pressTimer.current !== null) {
+            clearTimeout(pressTimer.current);
+            pressTimer.current = null;
+        }
+        if (longPressFired.current) {
+            e.preventDefault();
+        }
     }
 
     if (viewMode === "list") {
@@ -54,9 +94,10 @@ export function GridColumn({
                         key={item.slug}
                         className="list-row"
                         onClick={() => onItemClick(item)}
-                        onContextMenu={(e) =>
-                            handleContextMenu(e, item)
-                        }
+                        onContextMenu={(e) => handleContextMenu(e, item)}
+                        onTouchStart={(e) => handleTouchStart(e, item)}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
                     >
                         <span className="list-row-icon">
                             {item.type === "folder" ? "📁" : "📄"}
@@ -91,9 +132,10 @@ export function GridColumn({
                         key={item.slug}
                         item={item}
                         onClick={() => onItemClick(item)}
-                        onContextMenu={(e) =>
-                            handleContextMenu(e, item)
-                        }
+                        onTouchStart={(e) => handleTouchStart(e, item)}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
+                        onContextMenu={(e) => handleContextMenu(e, item)}
                         openedFile={openedFile}
                     />
                 ))}
