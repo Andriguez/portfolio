@@ -2,12 +2,12 @@ import { useState } from "react";
 import type { VfsFolder } from "../../types/vfs";
 import { root } from "../../data/vfs";
 import type { useVfs } from "../../hooks/useVfs";
-import {ChevronRight, ChevronDown, Folder, ComputerIcon, House, Trash2, Lock} from "lucide-react";
+import {ChevronRight, ChevronDown, Folder, ComputerIcon, House, Trash2, KeyRound} from "lucide-react";
 
 type TreeVfs = ReturnType<typeof useVfs>;
 
 function TreeNode({
-                      node, pathSoFar, depth, vfs, expandedPaths, setExpandedPaths,
+                      node, pathSoFar, depth, vfs, expandedPaths, setExpandedPaths
                   }: {
     node: VfsFolder; pathSoFar: string; depth: number; vfs: TreeVfs;
     expandedPaths: Set<string>; setExpandedPaths: React.Dispatch<React.SetStateAction<Set<string>>>;
@@ -16,7 +16,6 @@ function TreeNode({
     const isExpanded = expandedPaths.has(nodePath);
     const isActive = vfs.currentPath === `/${nodePath}`;
     const childFolders = node.children.filter((c) => c.type === "folder") as VfsFolder[];
-
 
     function toggleExpand(e: React.MouseEvent) {
         e.stopPropagation(); // don't also navigate when just expanding
@@ -51,9 +50,10 @@ function TreeNode({
 }
 
 export function TreeColumn({
-                               vfs, expandedPaths, setExpandedPaths,
+                               vfs, expandedPaths, setExpandedPaths, onLoginClick
                            }: {
     vfs: TreeVfs; expandedPaths: Set<string>; setExpandedPaths: React.Dispatch<React.SetStateAction<Set<string>>>;
+    onLoginClick: () => void;
 }) {
     const [pcExpanded, setPcExpanded] = useState(true);
 
@@ -63,7 +63,7 @@ export function TreeColumn({
             <div className="tree-row tree-row--pcn" onClick={() => setPcExpanded((v) => !v)}>
                 <span title="This PC" className="tree-disclosure">{pcExpanded ? "▾" : "▸"}</span>
                 <ComputerIcon size={15} />
-                <span className="tree-label">ANDI-PC</span>
+                <span className="tree-label">ANDRIGUEZ</span>
             </div>
             {pcExpanded && (
                 <div className="tree-pc-contents">
@@ -82,8 +82,8 @@ export function TreeColumn({
                 <Trash2 size={15} />
                 <span className="tree-label">Trash</span>
             </div>
-            <div className="tree-row tree-row--pcn">
-                <Lock size={15} />
+            <div className="tree-row tree-row--pcn" onClick={onLoginClick}>
+                <KeyRound size={15} />
                 <span className="tree-label">Login</span>
             </div>
 

@@ -7,6 +7,10 @@ import { TreeColumn } from "./TreeColumn";
 import { GridColumn } from "./GridColumn";
 import { DetailPanel } from "./DetailPanel";
 import type {VfsNode} from "../../types/vfs.ts";
+import {ThemeToggle} from "./ThemeToggle.tsx";
+import {useTheme} from "../../hooks/useTheme.ts";
+import {DesktopIcons} from "./DesktopIcons.tsx";
+import {LoginModal} from "./LoginModal.tsx";
 
 export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -15,6 +19,10 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
     const openFile = openSlug ? vfs.resolveFile(openSlug) : null;
 
     const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
+
+    const {theme, toggleTheme} = useTheme();
+
+    const [loginOpen, setLoginOpen] = useState(false);
 
     useEffect(() => {
         setExpandedPaths((prev) => {
@@ -90,7 +98,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
         else handleOpenFile(item.slug);
     }
 
-    return (
+        return (
         <div>
             <div className={`gui ${
                 windowState === "minimizing" ? "gui-window--minimizing"
@@ -108,7 +116,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                     <button title="back" className="toolbar-btn nav-btn" onClick={() => navigate(-1)} aria-label="back">‹</button>
                     <button title="forward" className="toolbar-btn nav-btn" onClick={() => navigate(1)} aria-label="forward">›</button>
 
-                    <div className="address-field">
+                    <div className="address-field themed-scrollbar">
                         <span className="crumb-pill" onClick={() => vfs.goToPath([])}>home</span>
                         {vfs.pathParts.map((part, i) => (
                             <span key={i}>
@@ -120,7 +128,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
 
                     <input
                         className="search-field"
-                        placeholder="search it.."
+                        placeholder="search.."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -135,8 +143,9 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                         <button title="options" className="toolbar-btn menu-btn" onClick={() => setMenuOpen((v) => !v)} aria-label="menu">⋮</button>
                         {menuOpen && (
                             <div className="toolbar-menu-dropdown">
-                                <div className="menu-item" onClick={() => setMenuOpen(false)}>theme: green / amber</div>
-                                <div className="menu-item" onClick={() => setMenuOpen(false)}>sort by: name / date</div>
+                                <div className="menu-item">
+                                    <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+                                </div>
                                 <div className="menu-item" onClick={() => setMenuOpen(false)}>about andi.sys</div>
                             </div>
                         )}
@@ -148,7 +157,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                         <input
                             className="mobile-search-input"
                             autoFocus
-                            placeholder="search it.."
+                            placeholder="search.."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
@@ -160,7 +169,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                     </div>
                 )}
                 <div className="gui-body">
-                    <TreeColumn vfs={vfs} expandedPaths={expandedPaths} setExpandedPaths={setExpandedPaths} />
+                    <TreeColumn vfs={vfs} expandedPaths={expandedPaths} setExpandedPaths={setExpandedPaths} onLoginClick={() => setLoginOpen(true)} />
                     <GridColumn vfs={vfs} onOpenFile={handleOpenFile} items={visibleItems} viewMode={viewMode} openedFile={openSlug} onItemClick={handleItemClick} />
                     {openFile && (
                         <div className="detail-overlay-wrap">
@@ -185,10 +194,12 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                 </svg>
             </div>
             { windowState === "minimized" && (
-                <div className="gui-taskbar-pill" onClick={handleRestoreWindow}>
-                    andi.sys — file explorer
+                <div>
+                <DesktopIcons onRestore={handleRestoreWindow} onLoginClick={() => setLoginOpen(true)} />
+                <div title="Start" className="gui-taskbar-pill" onClick={handleRestoreWindow} />
                 </div>
             )}
+            <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
         </div>
     )
 }

@@ -31,12 +31,13 @@ export function GridColumn({
         item: VfsNode
     ) {
         e.preventDefault();
-
-        setContextMenu({
-            x: e.clientX,
-            y: e.clientY,
-            item,
-        });
+        const menuWidth = 140;
+        const menuHeight = 120;
+        let x = e.clientX - ( menuWidth / 5 );
+        let y = e.clientY - ( menuHeight / 7 );
+        if (x + menuWidth > window.innerWidth) x = window.innerWidth - menuWidth - 8;
+        if (y + menuHeight > window.innerHeight) y = window.innerHeight - menuHeight - 8;
+        setContextMenu({ x, y, item });
     }
 
     if (viewMode === "list") {
