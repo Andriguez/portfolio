@@ -1,22 +1,33 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { useState } from "react";
+import {redirect} from "react-router-dom";
 
 export function LoginModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
+    function navigate(url: string) {
+        redirect(url)
+    }
+
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setLoading(true);
         setError(null);
 
-        // TODO: replace with a real call once the backend exists, e.g.
-        // const res = await fetch("/api/login", { method: "POST", body: JSON.stringify({ password }) });
-        // the server sets an httpOnly cookie on success — never store a token in JS-readable storage
-        await new Promise((r) => setTimeout(r, 500));
-        setError("login isn't wired up yet — check back once the backend's live.");
-        setLoading(false);
+        const res = await fetch("/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ password }),
+        });
+        if (!res.ok) {
+            setError("incorrect password.");
+        } else {
+            onOpenChange(false);
+            navigate("/admin");
+        }
     }
 
     return (
