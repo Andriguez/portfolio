@@ -29,7 +29,7 @@ def update_node(node_id: int, payload: schemas.VfsNodeUpdate, db: Session = Depe
     db.refresh(node)
     return node
 
-@router.delete("/{node_id", dependencies=[Depends(require_admin)])
+@router.delete("/{node_id}", dependencies=[Depends(require_admin)])
 def delete_node(node_id: int, db: Session = Depends(get_db)):
     node = db.get(models.VfsNode, node_id)
     if not node:
@@ -38,5 +38,5 @@ def delete_node(node_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="node has children nodes")
     db.delete(node)
     db.commit()
-    return {"ok", True}
+    return {"ok": True}
 

@@ -101,9 +101,8 @@ export function CMS(){
                                 <option value="file">file</option>
                             </select>
                         </label>
-                        <label>parent id (empty = root)
+                        <label>parent
                             <select value={editing.parent_id ?? ""} onChange={(e) => setEditing({ ...editing, parent_id: e.target.value ? Number(e.target.value) : null })}>
-                                <option key="root" value="">root</option>
                                 { nodes.filter((n) => n.type === "folder").map((n) => (<option key={n.id} value={n.id}> {n.name} </option>))}
                             </select>
                         </label>

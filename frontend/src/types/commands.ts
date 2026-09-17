@@ -57,7 +57,7 @@ export const commands: CommandDefinition[] = [
 
             return ({
                 type: "list",
-                items: folder.children.map((c) => ({
+                items: folder.children?.map((c) => ({
                     name: c.name,
                     slug: c.slug,
                     isFolder: c.type === "folder",

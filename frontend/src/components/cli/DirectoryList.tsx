@@ -13,8 +13,8 @@ export function DirectoryList({ items, onSelect }: {
 }) {
     return (
         <div>
-            <div className="ls-total">total {items.length} items</div>
-            {items.map((item, i) => (
+            <div className="ls-total">total {items?.length} items</div>
+            {items?.map((item, i) => (
                 <div
                     key={item.slug}
                     className="ls-row"
