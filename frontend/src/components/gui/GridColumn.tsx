@@ -5,20 +5,17 @@ import * as React from "react";
 
 export function GridColumn({
                                vfs,
-                               onOpenFile,
                                items,
                                viewMode,
                                openedFile,
                                onItemClick
                            }: {
     vfs: ReturnType<typeof useVfs>;
-    onOpenFile: (slug: string) => void;
-    items: VfsNode[];
+    items: VfsNode[] | undefined;
     viewMode: "grid" | "list";
     openedFile: string | null;
     onItemClick: (item: VfsNode) => void;
 }) {
-    const { cd } = vfs;
 
     const [contextMenu, setContextMenu] = React.useState<{
         x: number;

@@ -12,7 +12,7 @@ def list_nodes(db: Session = Depends(get_db)):
 
 @router.post("", response_model=schemas.VfsNodeOut, dependencies=[Depends(require_admin)])
 def create_node(payload: schemas.VfsNodeCreate, db: Session = Depends(get_db)):
-    node = models.VfsNode(**payload.model.dump())
+    node = models.VfsNode(**payload.model_dump())
     db.add(node)
     db.commit()
     db.refresh(node)

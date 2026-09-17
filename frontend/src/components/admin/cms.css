@@ -218,7 +218,7 @@
 .admin-preview {
     border: 1px solid white;
     border-radius: 4px;
-    overflow: hidden;
+    background: var(--cli-bg);
 }
 
 .admin-preview-label {

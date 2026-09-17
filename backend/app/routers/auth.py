@@ -1,7 +1,7 @@
 import os
 from fastapi import APIRouter, HTTPException, Response, Request
 from ..schemas import LoginRequest
-from ..auth import verify_password, create_access_token
+from ..auth import verify_password, create_access_token, require_admin
 from ..limiter import limiter
 
 router = APIRouter(prefix="/api", tags=["auth"])
@@ -29,3 +29,8 @@ def login(request: Request, payload: LoginRequest, response: Response):
 def logout(response: Response):
     response.delete_cookie("access_token")
     return {"ok": True}
+
+@router.get("/me")
+def isItAuth(request: Request, response: Response):
+    if require_admin(request):
+        return {"ok": True}
