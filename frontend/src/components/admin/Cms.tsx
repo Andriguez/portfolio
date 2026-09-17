@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import {SafeHtml} from "../SafeHtml.tsx";
+import "./cms.css";
+import {useNavigate} from "react-router-dom";
 
 type CMSNode = {
     id: number;
@@ -17,6 +19,7 @@ export function CMS(){
     const [nodes, setNodes] = useState<CMSNode[]>([]);
     const [editing, setEditing] = useState<Partial<CMSNode> | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     async function loadNodes() {
         const res = await fetch("/api/vfs", { credentials: "include"});
@@ -60,13 +63,19 @@ export function CMS(){
         loadNodes();
     }
 
+    async function handleLogout() {
+        const res = await fetch("http://localhost:8000/api/logout", { method: "POST", credentials: "include" });
+        if (!res.ok) { setError("logout failed"); return; }
+        else {navigate("/")}
+    }
+
     return(
         useIsAuthed() && <div className="admin-panel">
             <div className="admin-header">
-                <h2>content manager</h2>
+                <h2>CONTENT MANAGER</h2>
                 <button onClick={() => setEditing({ type: "file", parent_id: null })}>+ new node</button>
+                <button className="logout-btn" onClick={handleLogout}>Log Out</button>
             </div>
-            {error && <div className="admin-error">{error}</div>}
             <table className="admin-table">
                 <thead><tr><th>name</th><th>type</th><th>slug</th><th>parent</th><th /></tr></thead>
                 <tbody>
@@ -128,6 +137,7 @@ export function CMS(){
                             <button onClick={() => setEditing(null)}>cancel</button>
                             <button onClick={handleSave}>save</button>
                         </div>
+                        {error && <div className="admin-error">{error}</div>}
                     </div>
                 </div>
             )}
