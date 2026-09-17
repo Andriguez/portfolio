@@ -6,7 +6,7 @@ import { ExplorerButtons } from './ExplorerButtons';
 import { TreeColumn } from "./TreeColumn";
 import { GridColumn } from "./GridColumn";
 import { DetailPanel } from "./DetailPanel";
-import type {VfsNode} from "../../types/vfs.ts";
+import type {VfsFile, VfsNode} from "../../types/vfs.ts";
 import {ThemeToggle} from "./ThemeToggle.tsx";
 import {useTheme} from "../../hooks/useTheme.ts";
 import {DesktopIcons} from "./DesktopIcons.tsx";
@@ -16,7 +16,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
     const openSlug = searchParams.get("open");
-    const openFile = openSlug ? vfs.resolveFile(openSlug) : null;
+    const openFile: VfsFile | VfsNode | null = openSlug ? vfs.resolveFile(openSlug) : null;
 
     const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
 
@@ -68,16 +68,16 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
         setTimeout(() => window.close(), 500);
     }
 
-    const items = vfs.currentFolder.children;
-    const folderCount = items.filter((i) => i.type === "folder").length;
-    const fileCount = items.length - folderCount;
+    const items = vfs.currentFolder?.children;
+    const folderCount = items?.filter((i) => i.type === "folder").length;
+    const fileCount = items?.filter((i) => i.type === "file").length;
 
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     const [searchQuery, setSearchQuery] = useState("");
     const [menuOpen, setMenuOpen] = useState(false);
 
-    const searchResults = searchQuery ? searchVfs(searchQuery) : null;
-    const visibleItems = searchResults ? searchResults.map((r) => r.node) : vfs.currentFolder.children;
+    const searchResults = searchQuery && vfs.root ? searchVfs(vfs.root, searchQuery) : null;
+    const visibleItems = searchResults ? searchResults.map((r) => r.node) : items;
 
     const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
@@ -170,7 +170,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                 )}
                 <div className="gui-body">
                     <TreeColumn vfs={vfs} expandedPaths={expandedPaths} setExpandedPaths={setExpandedPaths} onLoginClick={() => setLoginOpen(true)} />
-                    <GridColumn vfs={vfs} onOpenFile={handleOpenFile} items={visibleItems} viewMode={viewMode} openedFile={openSlug} onItemClick={handleItemClick} />
+                    <GridColumn vfs={vfs} items={visibleItems} viewMode={viewMode} openedFile={openSlug} onItemClick={handleItemClick} />
                     {openFile && (
                         <div className="detail-overlay-wrap">
                         <div className="detail-backdrop" onClick={handleCloseFile} />
@@ -179,7 +179,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                     )}
                 </div>
                 <div className="gui-statusbar">
-                        <span title="content summary" >{items.length} items | { folderCount > 0 ? `${folderCount} folder(s)` : "" }  {fileCount > 0 ? `${fileCount} file(s)` : "" } | </span>
+                        <span title="content summary" >{items?.length} items | { folderCount > 0 ? `${folderCount} folder(s)` : "" }  {fileCount > 0 ? `${fileCount} file(s)` : "" } | </span>
                     <div className="view-toggle">
                         <button title="grid view" className={viewMode === "grid" ? "view-btn view-btn--active" : "view-btn"} onClick={() => setViewMode("grid")} aria-label="grid view">⊞</button>
                         <button title="list view" className={viewMode === "list" ? "view-btn view-btn--active" : "view-btn"} onClick={() => setViewMode("list")} aria-label="list view">☰</button>

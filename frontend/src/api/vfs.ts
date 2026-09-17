@@ -8,7 +8,7 @@ type FlatNode = {
 };
 
 export async function fetchVfsTree(): Promise<VfsFolder> {
-    const res = await fetch("/api/vfs", { credentials: "include" });
+    const res = await fetch("http://localhost:8000/api/vfs", { credentials: "include" });
     if (!res.ok) throw new Error("failed to load site content");
     const flat: FlatNode[] = await res.json();
 
@@ -26,6 +26,6 @@ export async function fetchVfsTree(): Promise<VfsFolder> {
         if (node._parentId === null) root = node;
         else byId.get(node._parentId)?.children.push(node);
     }
-    if (!root) throw new Error("no root node found — create one via the admin panel first");
+    if (!root) throw new Error("no root node found");
     return root as VfsFolder;
 }

@@ -17,7 +17,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(
     CORSMiddleware,
     ## TO-DO change to real url
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173", "192.168.1.35:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

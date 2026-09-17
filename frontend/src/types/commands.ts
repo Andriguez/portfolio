@@ -14,7 +14,7 @@ export type CommandDefinition = {
     usage: string;
     show: boolean;
     description: string;
-    run: (args: string[], ctx: CommandContext) => CommandOutput | "CLEAR" | "EXIT";
+    run: (args: string[], ctx: CommandContext) => CommandOutput | "CLEAR" | "EXIT" | "LOGIN";
 };
 
 export const commands: CommandDefinition[] = [
@@ -266,6 +266,14 @@ export const commands: CommandDefinition[] = [
         usage: "exit",
         description: "when you're ready to leave.. just say it",
         run: () => "EXIT"
+    },
+    {
+        name: "login",
+        alias: "admin",
+        show: false,
+        usage: "...",
+        description: "...",
+        run: () => "LOGIN"
     }
 ];
 

@@ -7,6 +7,7 @@ import { commands } from "../../types/commands"
 import { tokenize } from "../../helpers/tokenize"
 import { BootSequence } from "./BootSequence"
 import { isTouchDevice } from "../../helpers/is-touch-device"
+import {LoginModal} from "../gui/LoginModal.tsx";
 import "./cli-view.css"
 
 export type CliViewProps = {
@@ -18,7 +19,6 @@ export type CliViewProps = {
 }
 
 export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown }: CliViewProps ) {
-
     const { currentFolder, currentPath, cd, resolveFile } = vfs;
 
     const [ booting, setBooting ] = useState<boolean>(true);
@@ -41,7 +41,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown 
         }
         const lastWord = parts[parts.length - 1];
         if (!lastWord) return null;
-        const match = currentFolder.children.find(
+        const match = currentFolder?.children.find(
             (c) => c.slug.startsWith(lastWord) && c.slug !== lastWord
         );
         return match ? [...parts.slice(0, -1), match.slug].join(" ") : null;
@@ -58,6 +58,8 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown 
 
         inputRef.current?.focus();
     }
+
+    const [loginOpen, setLoginOpen] = useState(false);
 
     function runCommand(raw: string) {
         const promptPath = currentPath;
@@ -88,6 +90,9 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown 
                 setTimeout(() => {
                     window.close();
                 }, 500);
+                return;
+            } else if (result === "LOGIN") {
+                setLoginOpen(true);
                 return;
             }
             output = result;
@@ -219,6 +224,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown 
             </form>
                 <div ref={bottomRef} />
             </div>
+            <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
         </div>
     );
 }

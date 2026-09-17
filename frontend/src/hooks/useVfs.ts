@@ -1,102 +1,85 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import type { VfsNode, VfsFolder, VfsFile } from "../types/vfs";
-import { root } from "../data/vfs";
+import { fetchVfsTree } from "../api/vfs.ts";
+import { useEffect, useState } from "react";
 
 function findNode(current: VfsFolder, pathParts: string[]): VfsNode | null {
     if (pathParts.length === 0) return current;
-
     const [next, ...rest] = pathParts;
     const child = current.children.find((c) => c.slug === next);
-
     if (!child) return null;
-
     if (child.type === "file") return rest.length === 0 ? child : null;
-
     return findNode(child, rest);
 }
 
-function resolvePath(base: string[], target: string): string[] | null {
-    const isAbsolute = target.startsWith("/") || target.startsWith("~") || target.startsWith("home");
-    const segments = target
-        .split("/")
-        .filter((s) => s.length > 0 && s !== "~");
-
+function resolvePath(root: VfsFolder, base: string[], target: string): string[] | null {
+    const isAbsolute = target.startsWith("/") || target.startsWith("~");
+    const segments = target.split("/").filter((s) => s.length > 0 && s !== "~");
     let working = isAbsolute ? [] : [...base];
 
     for (const seg of segments) {
         if (seg === ".") continue;
+        if (seg === ".." || seg === "back") { working = working.slice(0, -1); continue; }
 
-        if (seg === ".." || seg === "back") {
-            working = working.slice(0, -1);
-            continue;
-        }
-
-        const node = findNode(root as VfsFolder, working);
+        const node = findNode(root, working); // <- uses the passed-in root now
         if (!node || node.type !== "folder") return null;
 
-        const child = node.children.find(
-            (c) => c.slug === seg && c.type === "folder"
-        );
-
+        const child = node.children.find((c) => c.slug === seg && c.type === "folder");
         if (!child) return null;
 
         working = [...working, seg];
     }
-
     return working;
 }
 
-
 export function useVfs() {
+    const [root, setRoot] = useState<VfsFolder | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const location = useLocation();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        let cancelled = false;
+        fetchVfsTree()
+            .then((tree) => { if (!cancelled) setRoot(tree); })
+            .catch((err) => { if (!cancelled) setError(err.message); })
+            .finally(() => { if (!cancelled) setLoading(false); });
+        return () => { cancelled = true; };
+    }, []);
+
     const pathParts = location.pathname.split("/").filter(Boolean);
+    const currentFolder = root ? ((findNode(root, pathParts) ?? root) as VfsFolder) : null;
 
-    const currentFolder =
-        (findNode(root as VfsFolder, pathParts) ?? root) as VfsFolder;
-
+    function resolveFile(target: string) {
+        if (!currentFolder) return null;
+        return currentFolder.children.find((c) => c.slug === target && c.type === "file") ?? null;
+    }
 
     function getFolder(path: string[]): VfsFolder | null {
-        const node = findNode(root as VfsFolder, path);
+        if (!root) return null;
+        const node = findNode(root, path);
         return node?.type === "folder" ? node : null;
     }
 
     function cd(target: string): VfsFolder | null {
-        const resolved = resolvePath(pathParts, target);
+        if (!root) return null;
+        const resolved = resolvePath(root, pathParts, target); // <- root passed explicitly
         if (!resolved) return null;
-
         const folder = getFolder(resolved);
         if (!folder) return null;
-
-        navigate("/"+resolved.join("/"));
-
+        navigate("/" + resolved.join("/"));
         return folder;
     }
 
     function goToPath(parts: string[]) {
-        navigate("/"+parts.join("/"));
+        navigate("/" + parts.join("/"));
     }
 
-    function resolveFile(target: string): VfsFile | null {
-        const found = currentFolder.children.find(
-            (c): c is VfsFile => c.type === "file" && c.slug === target
-        );
-
-        return found ?? null;
-    }
-
-    return {
-        currentFolder,
-        currentPath: "/" + pathParts.join("/"),
-        pathParts,
-        cd,
-        goToPath,
-        resolveFile,
-        getFolder,
-    };
+    return { root, loading, error, currentFolder, currentPath: "/" + pathParts.join("/"), pathParts, cd, goToPath, resolveFile, getFolder };
 }
 
-export function searchVfs(query: string): { node: VfsNode; path: string[] }[] {
+export function searchVfs(root: VfsFolder, query: string): { node: VfsNode; path: string[] }[] {
     if (!query) return [];
     const results: { node: VfsNode; path: string[] }[] = [];
     function walk(folder: VfsFolder, pathSoFar: string[]) {
@@ -107,6 +90,6 @@ export function searchVfs(query: string): { node: VfsNode; path: string[] }[] {
             if (child.type === "folder") walk(child, [...pathSoFar, child.slug]);
         }
     }
-    walk(root as VfsFolder, []);
+    walk(root, []);
     return results;
 }

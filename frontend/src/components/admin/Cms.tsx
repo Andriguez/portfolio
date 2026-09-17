@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import {SafeHtml} from "../SafeHtml.tsx";
 import "./cms.css";
 import {useNavigate} from "react-router-dom";
+import {DeleteIcon, EditIcon} from "lucide-react";
 
 type CMSNode = {
     id: number;
@@ -22,7 +23,7 @@ export function CMS(){
     const navigate = useNavigate();
 
     async function loadNodes() {
-        const res = await fetch("/api/vfs", { credentials: "include"});
+        const res = await fetch("http://localhost:8000/api/vfs", { credentials: "include"});
         setNodes(await res.json());
     }
 
@@ -34,7 +35,7 @@ export function CMS(){
         if (!editing) return;
         setError(null);
         const isNew = !editing.id;
-        const res = await fetch(isNew ? "/api/vfs" : `/api/vfs/${editing.id}`, {
+        const res = await fetch(isNew ? "http://localhost:8000/api/vfs" : `http://localhost:8000/api/vfs/${editing.id}`, {
             method: isNew ? "POST" : "PATCH",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -50,7 +51,7 @@ export function CMS(){
         if (!file) return;
         const formData = new FormData();
         formData.append("file", file);
-        const res = await fetch("/api/uploads", { method: "POST", credentials: "include", body: formData });
+        const res = await fetch("http://localhost:8000/api/uploads", { method: "POST", credentials: "include", body: formData });
         if (!res.ok) { setError("image upload failed"); return; }
         const { url } = await res.json();
         setEditing((prev) => (prev ? { ...prev, image: url } : prev));
@@ -58,7 +59,7 @@ export function CMS(){
 
     async function handleDelete(id: number) {
         if (!confirm("delete this node? this can't be undone.")) return;
-        const res = await fetch(`/api/vfs/${id}`, { method: "DELETE", credentials: "include" });
+        const res = await fetch(`http://localhost:8000/api/vfs/${id}`, { method: "DELETE", credentials: "include" });
         if (!res.ok) { setError("delete failed — does it still have children?"); return; }
         loadNodes();
     }
@@ -83,8 +84,8 @@ export function CMS(){
                     <tr key={n.id}>
                         <td>{n.name}</td><td>{n.type}</td><td>{n.slug}</td><td>{n.parent_id ?? "—"}</td>
                         <td>
-                            <button onClick={() => setEditing(n)}>edit</button>
-                            <button onClick={() => handleDelete(n.id)}>delete</button>
+                            <button onClick={() => setEditing(n)}><EditIcon size="12px"/></button>
+                            <button onClick={() => handleDelete(n.id)}><DeleteIcon size="12px" /></button>
                         </td>
                     </tr>
                 ))}
@@ -101,7 +102,10 @@ export function CMS(){
                             </select>
                         </label>
                         <label>parent id (empty = root)
-                            <input value={editing.parent_id ?? ""} onChange={(e) => setEditing({ ...editing, parent_id: e.target.value ? Number(e.target.value) : null })} />
+                            <select value={editing.parent_id ?? ""} onChange={(e) => setEditing({ ...editing, parent_id: e.target.value ? Number(e.target.value) : null })}>
+                                <option key="root" value="">root</option>
+                                { nodes.filter((n) => n.type === "folder").map((n) => (<option key={n.id} value={n.id}> {n.name} </option>))}
+                            </select>
                         </label>
                         <label>name
                             <input value={editing.name ?? ""} onChange={(e) => setEditing({ ...editing, name: e.target.value })} />
@@ -148,7 +152,7 @@ export function CMS(){
 function useIsAuthed() {
     const [authed, setAuthed] = useState<boolean | null>(null);
     useEffect(() => {
-        fetch("/api/me", { credentials: "include" })
+        fetch("http://localhost:8000/api/me", { credentials: "include" })
             .then((res) => setAuthed(res.ok))
             .catch(() => setAuthed(false));
     }, []);

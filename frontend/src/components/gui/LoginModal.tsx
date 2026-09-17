@@ -26,6 +26,14 @@ export function LoginModal({ open, onOpenChange }: { open: boolean; onOpenChange
             onOpenChange(false);
             navigate("/admin");
         }
+        setLoading(false);
+    }
+
+    function handleCancel() {
+        setPassword("");
+        setError(null);
+        setLoading(false);
+        onOpenChange(false);
     }
 
     return (
@@ -45,7 +53,7 @@ export function LoginModal({ open, onOpenChange }: { open: boolean; onOpenChange
                         />
                         </div>
                         <div className="login-modal-actions">
-                            <button type="button" className="login-modal-cancel" onClick={() => onOpenChange(false)}>cancel</button>
+                            <button type="button" className="login-modal-cancel" onClick={handleCancel}>cancel</button>
                             <button type="submit" className="login-modal-submit" disabled={loading}>
                                 {loading ? "checking..." : "log in"}
                             </button>
