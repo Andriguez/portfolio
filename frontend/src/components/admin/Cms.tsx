@@ -4,6 +4,9 @@ import "./cms.css";
 import {useNavigate} from "react-router-dom";
 import {DeleteIcon, EditIcon} from "lucide-react";
 
+// TO-DO
+// Have to figure out why when creating a node in the root folder it defaults to null and breaks navigation
+// Should be careful when adding new nodes
 type CMSNode = {
     id: number;
     parent_id: number | null;
