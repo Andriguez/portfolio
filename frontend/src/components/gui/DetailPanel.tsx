@@ -1,5 +1,6 @@
 import type {VfsFile} from "../../types/vfs";
 import { X } from "lucide-react";
+import {SafeHtml} from "../SafeHtml.tsx";
 
 export function DetailPanel({ file, onClose }: { file: VfsFile; onClose: () => void }) {
     return (
@@ -14,7 +15,7 @@ export function DetailPanel({ file, onClose }: { file: VfsFile; onClose: () => v
                 {file?.content?.image && (
                     <img src={file.content.image} alt={file?.content?.title} className="detail-panel-image" />
                 )}
-                <div className="detail-panel-text">{file?.content?.body}</div>
+                <SafeHtml html={file?.content?.body} />
             </div>
         </div>
     );
