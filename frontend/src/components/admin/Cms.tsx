@@ -57,7 +57,12 @@ export function CMS(){
         const res = await fetch("http://localhost:8000/api/uploads", { method: "POST", credentials: "include", body: formData });
         if (!res.ok) { setError("image upload failed"); return; }
         const { url } = await res.json();
-        setEditing((prev) => (prev ? { ...prev, image: url } : prev));
+
+        const imageUrl = url.startsWith("http")
+            ? url
+            : `http://localhost:8000${url}`;
+
+        setEditing((prev) => (prev ? { ...prev, image: imageUrl } : prev));
     }
 
     async function handleDelete(id: number) {
