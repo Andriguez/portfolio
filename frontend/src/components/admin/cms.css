@@ -1,0 +1,240 @@
+/* src/components/admin/admin-panel.css */
+
+.admin-panel {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--cli-green);
+}
+
+.admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.2rem;
+}
+
+.admin-header h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--cli-green);
+}
+
+.admin-header button {
+    background: var(--cli-panel);
+    border: 1px solid var(--cli-green);
+    color: var(--cli-green);
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.admin-header button:hover {
+    background: var(--cli-green);
+    color: var(--cli-bg);
+}
+
+.admin-error {
+    background: rgba(201, 44, 58, 0.12);
+    border: 1px solid var(--cli-info);
+    color: var(--cli-info);
+    border-radius: 4px;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.82rem;
+    margin-bottom: 1rem;
+}
+
+/* --- table --- */
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    overflow-x: auto;
+    display: block;
+}
+
+.admin-table thead, .admin-table tbody {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.admin-table th {
+    text-align: left;
+    color: var(--cli-green-dim);
+    font-weight: 500;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.6rem 0.7rem;
+    border-bottom: 1px solid white;
+}
+
+.admin-table td {
+    padding: 0.6rem 0.7rem;
+    border-bottom: 1px solid rgba(183, 242, 163, 0.08);
+    color: var(--cli-green);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.admin-table td button {
+    background: transparent;
+    border: 1px solid var(--cli-green-dim);
+    color: var(--cli-green-dim);
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+    font-family: inherit;
+    cursor: pointer;
+    margin-right: 0.4rem;
+}
+.admin-table td button:last-child { margin-right: 0; }
+.admin-table td button:hover {
+    color: var(--cli-green);
+    border-color: var(--cli-green);
+}
+.admin-table td button:last-child:hover {
+    color: var(--cli-info);
+    border-color: var(--cli-info);
+}
+
+/* --- modal form --- */
+
+.admin-form-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 1rem;
+}
+
+.admin-form {
+    background: #3b3d47;
+    border: 1px solid white;
+    border-radius: 6px;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 640px;
+    max-height: 85vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.admin-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    color: var(--cli-green-dim);
+}
+
+.admin-form input[type="text"],
+.admin-form input:not([type]),
+.admin-form input[type="file"],
+.admin-form select,
+.admin-form textarea {
+    background: var(--cli-bg);
+    border: 1px solid white;
+    border-radius: 4px;
+    padding: 0.5rem 0.7rem;
+    color: var(--cli-green);
+    font-family: inherit;
+    font-size: 0.85rem;
+}
+
+.admin-form input:focus,
+.admin-form select:focus,
+.admin-form textarea:focus {
+    outline: none;
+    border-color: var(--cli-green);
+}
+
+.admin-form textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.5;
+}
+
+.admin-image-preview {
+    max-width: 100%;
+    max-height: 160px;
+    border-radius: 4px;
+    border: 1px solid white;
+    object-fit: contain;
+    align-self: flex-start;
+}
+
+.admin-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+    border-top: 1px solid white;
+    padding-top: 1rem;
+}
+
+.admin-form-actions button {
+    border-radius: 4px;
+    padding: 0.5rem 1.1rem;
+    font-family: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+
+.admin-form-actions button:first-child {
+    background: transparent;
+    border: 1px solid var(--cli-green-dim);
+    color: var(--cli-green-dim);
+}
+.admin-form-actions button:first-child:hover {
+    color: var(--cli-green);
+    border-color: var(--cli-green);
+}
+
+.admin-form-actions button:last-child {
+    background: var(--cli-green);
+    border: 1px solid var(--cli-green);
+    color: var(--cli-bg);
+    font-weight: 600;
+}
+.admin-form-actions button:last-child:hover {
+    opacity: 0.85;
+}
+
+/* --- live HTML preview --- */
+
+.admin-preview {
+    border: 1px solid white;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.admin-preview-label {
+    background: var(--cli-bg);
+    color: var(--cli-green-dim);
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.7rem;
+    border-bottom: 1px solid white;
+}
+
+.admin-preview-frame {
+    padding: 0.8rem 0.9rem;
+    max-height: 240px;
+    overflow-y: auto;
+    font-size: 0.85rem;
+    color: var(--cli-green-dim);
+}
