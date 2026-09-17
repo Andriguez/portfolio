@@ -124,7 +124,7 @@ export function GridColumn({
     return (
         <div className="grid-column themed-scrollbar">
             <div key={vfs.currentPath} className="grid-items grid-items--transition">
-                {items.map((item) => (
+                {items?.map((item) => (
                     <ExplorerItem
                         key={item.slug}
                         item={item}

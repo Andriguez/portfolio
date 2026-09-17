@@ -1,4 +1,4 @@
-import type { VfsFile } from "../../types/vfs";
+import type {VfsFile} from "../../types/vfs";
 import { X } from "lucide-react";
 
 export function DetailPanel({ file, onClose }: { file: VfsFile; onClose: () => void }) {

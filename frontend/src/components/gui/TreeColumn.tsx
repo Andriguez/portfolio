@@ -1,6 +1,5 @@
 import { useState } from "react";
 import type { VfsFolder } from "../../types/vfs";
-import { root } from "../../data/vfs";
 import type { useVfs } from "../../hooks/useVfs";
 import {ChevronRight, ChevronDown, Folder, ComputerIcon, House, Trash2, KeyRound} from "lucide-react";
 
@@ -15,7 +14,7 @@ function TreeNode({
     const nodePath = pathSoFar ? `${pathSoFar}/${node.slug}` : node.slug;
     const isExpanded = expandedPaths.has(nodePath);
     const isActive = vfs.currentPath === `/${nodePath}`;
-    const childFolders = node.children.filter((c) => c.type === "folder") as VfsFolder[];
+    const childFolders = node.children?.filter((c) => c.type === "folder") as VfsFolder[];
 
     function toggleExpand(e: React.MouseEvent) {
         e.stopPropagation(); // don't also navigate when just expanding
@@ -57,7 +56,7 @@ export function TreeColumn({
 }) {
     const [pcExpanded, setPcExpanded] = useState(true);
 
-    const rootFolder = root as VfsFolder;
+    const rootFolder = vfs.root
     return (
         <div className="tree-column themed-scrollbar">
             <div className="tree-row tree-row--pcn" onClick={() => setPcExpanded((v) => !v)}>
@@ -72,7 +71,7 @@ export function TreeColumn({
                         <House className="tree-folder-icon" size={15} />
                         <span className="tree-label">home</span>
                     </div>
-                    {rootFolder.children.filter((c) => c.type === "folder").map((child) => (
+                    {rootFolder?.children?.filter((c) => c.type === "folder").map((child) => (
                         <TreeNode key={child.slug} node={child as VfsFolder} pathSoFar="" depth={1}
                                   vfs={vfs} expandedPaths={expandedPaths} setExpandedPaths={setExpandedPaths} />
                     ))}

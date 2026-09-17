@@ -57,6 +57,20 @@ export function Home() {
         return `${h}:${m}:${s}`;
     }
 
+    const [glitchStyle, setGlitchStyle] = useState({
+        top: "20%",
+        animationDuration: "200ms",
+    });
+
+    useEffect(() => {
+        if (!booted) return;
+
+        setGlitchStyle({
+            top: `${17.89 + Math.random() * 60}%`,
+            animationDuration: `${180 + Math.random() * 200}ms`,
+        });
+    }, [booted, glitchKey]);
+
     return(
         <div className="screen">
 
@@ -96,14 +110,12 @@ export function Home() {
                 />
             </div>
 
-            { booted && <div key={glitchKey}
+            { booted && <div key={`glitch-${glitchKey}`}
                              className="glitch"
-                             style={{
-                                 top: `${ 17.89 + Math.random() * 60}%`,
-                                 animationDuration: `${180 + Math.random() * 200}ms` }}
+                             style={glitchStyle}
             /> }
 
-            <div key={scanKey} className={`scanline ${scanReverse ? "scanline--reverse" : ""}`} />
+            <div key={`scan-${scanKey}`} className={`scanline ${scanReverse ? "scanline--reverse" : ""}`} />
             <svg className="grain" width="100%" height="100%">
                 <filter id="grain">
                     <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"

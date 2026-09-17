@@ -49,7 +49,14 @@ export function useVfs() {
     }, []);
 
     const pathParts = location.pathname.split("/").filter(Boolean);
-    const currentFolder = root ? ((findNode(root, pathParts) ?? root) as VfsFolder) : null;
+    const resolvedNode = root ? findNode(root, pathParts) : null;
+
+    const currentFolder =
+        resolvedNode?.type === "folder"
+            ? resolvedNode
+            : pathParts.length === 0
+                ? root
+                : null;
 
     function resolveFile(target: string) {
         if (!currentFolder) return null;

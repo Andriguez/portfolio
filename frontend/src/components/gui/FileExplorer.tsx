@@ -6,7 +6,7 @@ import { ExplorerButtons } from './ExplorerButtons';
 import { TreeColumn } from "./TreeColumn";
 import { GridColumn } from "./GridColumn";
 import { DetailPanel } from "./DetailPanel";
-import type {VfsFile, VfsNode} from "../../types/vfs.ts";
+import type {VfsFile, VfsFolder, VfsNode} from "../../types/vfs.ts";
 import {ThemeToggle} from "./ThemeToggle.tsx";
 import {useTheme} from "../../hooks/useTheme.ts";
 import {DesktopIcons} from "./DesktopIcons.tsx";
@@ -16,7 +16,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
     const openSlug = searchParams.get("open");
-    const openFile: VfsFile | VfsNode | null = openSlug ? vfs.resolveFile(openSlug) : null;
+    const openFile: VfsFile | VfsFolder | null = openSlug ? vfs.resolveFile(openSlug) : null;
 
     const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
 
@@ -42,7 +42,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
 
     useEffect(() => {
         if (!openFile) return;
-        function handleKey(e: KeyboardEvent) {
+         function handleKey(e: KeyboardEvent) {
             if (e.key === "Escape") handleCloseFile();
         }
         window.addEventListener("keydown", handleKey);
@@ -174,7 +174,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                     {openFile && (
                         <div className="detail-overlay-wrap">
                         <div className="detail-backdrop" onClick={handleCloseFile} />
-                            <DetailPanel file={openFile} onClose={handleCloseFile} />
+                            <DetailPanel file={openFile as VfsFile} onClose={handleCloseFile} />
                         </div>
                     )}
                 </div>

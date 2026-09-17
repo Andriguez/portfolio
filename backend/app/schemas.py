@@ -21,6 +21,7 @@ class VfsNodeUpdate(BaseModel):
     title: Optional[str] = None
     body: Optional[str] = None
     image: Optional[str] = None
+    parent_id: Optional[int] = None
 
 class VfsNodeOut(VfsNodeBase):
     id: int

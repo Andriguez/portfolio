@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, Enum, DateTime
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy.sql import func
 from .database import Base
 import enum
@@ -23,4 +23,4 @@ class VfsNode(Base):
     image = Column(String(255), nullable=True)
 
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
-    children = relationship("VfsNode", backref="parent", remote_side=[id])
+    children = relationship("VfsNode", backref=backref("parent", remote_side=[id]))
