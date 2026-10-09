@@ -105,7 +105,7 @@ export function GridColumn({
                         </span>
 
                         <span className="list-row-date">
-                            {item.updatedAt ?? "—"}
+                            { item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : "—" }
                         </span>
                     </div>
                 ))}
