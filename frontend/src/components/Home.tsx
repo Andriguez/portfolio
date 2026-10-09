@@ -1,13 +1,20 @@
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Switch } from "radix-ui"
 import { Terminal, Eye } from "lucide-react"
 import { useVfs } from "../hooks/useVfs"
 import { CliView } from "./cli/CliView"
 import { GuiView } from "./gui/GuiView"
 
+type Mode = "cli" | "gui";
+
 export function Home() {
     const vfs = useVfs();
-    const [mode, setMode] = useState<"cli" | "gui">("cli");
+    const [searchParams] = useSearchParams();
+    const [mode, setMode] = useState<Mode>(() => {
+        const modeParam = searchParams.get("mode");
+        return modeParam === "gui" ? "gui" : "cli";
+    });
 
     const [ booted, setBooted ] = useState<boolean>(false);
     const [ shuttingDown, setShuttingDown ] = useState<boolean>(false);
