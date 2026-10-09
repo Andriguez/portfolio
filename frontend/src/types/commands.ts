@@ -35,13 +35,9 @@ export const commands: CommandDefinition[] = [
         show: false,
         description: "list everything(?) you can do here.",
         run: (_args) => {
-
-            let showExtra = false;
-            if (_args[0] === "--extra") showExtra = true;
-
                 return {
                     type: "help",
-                    extra: showExtra,
+                    extra: _args[0] === "--extra" || _args[0] === "—extra" ? true : false,
                     color: "cli-green"
                 }
         },
@@ -198,17 +194,6 @@ export const commands: CommandDefinition[] = [
         })
     },
     {
-        name: "sudo",
-        usage: "sudo",
-        show: false,
-        description: "try it.. i dare you..",
-        run: () => ({
-            type: "error",
-            value: "lool nice try.. you don't have root on someone else's portfolio..",
-            color: "cli-info"
-        })
-    },
-    {
         name: "secret",
         usage: "secret",
         show: false,
@@ -269,7 +254,7 @@ export const commands: CommandDefinition[] = [
     },
     {
         name: "login",
-        alias: "admin",
+        alias: "sudo",
         show: false,
         usage: "...",
         description: "...",
