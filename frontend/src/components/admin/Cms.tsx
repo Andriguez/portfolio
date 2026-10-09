@@ -3,7 +3,9 @@ import {SafeHtml} from "../SafeHtml.tsx";
 import type { UploadedFile } from "../../types/UploadedFile.ts";
 import "./cms.css";
 import {useNavigate} from "react-router-dom";
-import {CopyIcon, DeleteIcon, EditIcon, FileIcon, FolderIcon} from "lucide-react";
+import { CopyIcon, DeleteIcon, EditIcon } from "lucide-react";
+import { API_URL, apiFetch, assertApiUrl } from "../../api/client.ts";
+
 
 // TO-DO
 // Have to figure out why when creating a node in the root folder it defaults to null and breaks navigation
@@ -28,7 +30,7 @@ export function CMS(){
     const navigate = useNavigate();
 
     async function loadNodes() {
-        const res = await fetch("http://localhost:8000/api/vfs", { credentials: "include"});
+        const res = await apiFetch("/api/vfs");
         setNodes(await res.json());
     }
 
@@ -40,10 +42,9 @@ export function CMS(){
         if (!editing) return;
         setError(null);
         const isNew = !editing.id;
-        const res = await fetch(isNew ? "http://localhost:8000/api/vfs" : `http://localhost:8000/api/vfs/${editing.id}`, {
+        const res = await apiFetch(isNew ? "/api/vfs" : `/api/vfs/${editing.id}`, {
             method: isNew ? "POST" : "PATCH",
             headers: { "Content-Type": "application/json" },
-            credentials: "include",
             body: JSON.stringify(editing),
         });
         if (!res.ok) { setError("save failed — check you're still logged in"); return; }
@@ -56,14 +57,12 @@ export function CMS(){
         if (!file) return;
         const formData = new FormData();
         formData.append("file", file);
-        const res = await fetch("http://localhost:8000/api/uploads", { method: "POST", credentials: "include", body: formData });
+        const res = await apiFetch("/api/uploads", { method: "POST", body: formData });
         if (!res.ok) { setError("image upload failed"); return; }
         const { url } = await res.json();
 
         if (source === "node_edit") {
-            const imageUrl = url.startsWith("http")
-                ? url
-                : `http://localhost:8000${url}`;
+            const imageUrl = assertApiUrl(url);
 
             setEditing((prev) => (prev ? { ...prev, image: imageUrl } : prev));
         } else if (source === "upload_manager") {
@@ -75,13 +74,13 @@ export function CMS(){
 
     async function handleNodeDelete(id: number) {
         if (!confirm("delete this node? this can't be undone.")) return;
-        const res = await fetch(`http://localhost:8000/api/vfs/${id}`, { method: "DELETE", credentials: "include" });
+        const res = await apiFetch(`/api/vfs/${id}`, { method: "DELETE" });
         if (!res.ok) { setError("delete failed — does it still have children?"); return; }
         loadNodes();
     }
 
     async function handleLogout() {
-        const res = await fetch("http://localhost:8000/api/logout", { method: "POST", credentials: "include" });
+        const res = await apiFetch("/api/logout", { method: "POST" });
         if (!res.ok) { setError("logout failed"); return; }
         else {navigate("/")}
     }
@@ -90,7 +89,7 @@ export function CMS(){
     const [files, setFiles] = useState<UploadedFile[]>([]);
 
     async function loadFiles() {
-        const res = await fetch("http://localhost:8000/api/uploads", { credentials: "include" });
+        const res = await apiFetch("/api/uploads");
         if (!res.ok) { setError("failed to load uploads"); return; }
     
         setFiles(await res.json());
@@ -109,8 +108,8 @@ export function CMS(){
 
         setError(null);
 
-        const res = await fetch(`http://localhost:8000/api/uploads/${encodeURIComponent(file.name)}`, { 
-            method: "DELETE", credentials: "include" 
+        const res = await apiFetch(`/api/uploads/${encodeURIComponent(file.name)}`, { 
+            method: "DELETE"
         });
 
         if (!res.ok) { setError("delete failed"); return; }
@@ -221,7 +220,7 @@ export function CMS(){
                     <tbody>
                         {files.map((f) => (
                             <tr key={f.name}>
-                                <td><img src={`http://localhost:8000${f.url}`} alt={f.name} className="admin-thumb" /></td>
+                                <td><img src={assertApiUrl(f.url)} alt={f.name} className="admin-thumb" /></td>
                                 <td>{formatSize(f.size)}</td>
                                 <td>{f.used_by.length > 0 ? f.used_by.join(", ") : "—"}</td>
                                 <td>
@@ -240,7 +239,7 @@ export function CMS(){
 function useIsAuthed() {
     const [authed, setAuthed] = useState<boolean | null>(null);
     useEffect(() => {
-        fetch("http://localhost:8000/api/me", { credentials: "include" })
+        apiFetch("/api/me")
             .then((res) => setAuthed(res.ok))
             .catch(() => setAuthed(false));
     }, []);
