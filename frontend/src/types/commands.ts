@@ -244,12 +244,26 @@ export const commands: CommandDefinition[] = [
         description: "wipe the screen.",
         run: () => "CLEAR",
     },
+     {
+        name: "theme",
+        usage: "theme <name>",
+        show: true,
+        options: ["dark", "light"],
+        description: "change the theme of the terminal.",
+        run: (args) => {
+            if (!args[0]) return { type: "error", value: "usage: theme <name>", color: "cli-info" };
+
+            if (args[0] !== "dark" && args[0] !== "light") return { type: "error", value: `theme: no such theme: ${args[0]}`, color: "cli-info" };
+            document.documentElement.setAttribute("data-theme", args[0]);
+            return { type: "text", value: `Theme changed to ${args[0]}`, color: "cli-green" };
+        }
+    },
     {
         name: "exit",
         alias: "bye",
         show: true,
         usage: "exit",
-        description: "when you're ready to leave.. just say it",
+        description: "when you're ready to leave.. just say it.",
         run: () => "EXIT"
     },
     {
