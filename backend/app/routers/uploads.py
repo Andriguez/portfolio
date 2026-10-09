@@ -1,6 +1,11 @@
 import os
 import uuid
+from datetime import datetime
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from sqlalchemy import or_
+from sqlalchemy.orm import Session
+from .. import models
+from ..database import get_db
 from ..auth import require_admin
 
 router = APIRouter(prefix="/api/uploads", tags=["uploads"])
@@ -30,3 +35,43 @@ async def upload_image(file: UploadFile = File(...)):
         f.write(contents)
 
     return {"url": f"/uploads/{safe_name}"}
+
+@router.get("", dependencies=[Depends(require_admin)])
+def list_uploads(db: Session = Depends(get_db)):
+    files = []
+    for filename in os.listdir(UPLOAD_DIR):
+        file_path = os.path.join(UPLOAD_DIR, filename)
+        if not os.path.isfile(file_path):
+            continue
+
+        url = f"/uploads/{filename}"
+        file_stat = os.stat(file_path)
+
+        used_by =(
+            db.query(models.VfsNode)
+            .filter(or_(models.VfsNode.image.contains(url), models.VfsNode.body.contains(url)))
+            .all()
+        )
+
+        files.append({
+            "name": filename,
+            "url": url,
+            "size": file_stat.st_size,
+            "created_at": datetime.fromtimestamp(file_stat.st_mtime).isoformat(),
+            "used_by": [n.name for n in used_by]
+        })
+
+    files.sort(key=lambda x: x["created_at"], reverse=True)
+    return files
+
+@router.delete("/{filename}", dependencies=[Depends(require_admin)])
+def delete_upload(filename: str):
+    if os.path.basename(filename) != filename:
+        raise HTTPException(status_code=400, detail="invalid filename")
+
+    path = os.path.join(UPLOAD_DIR, filename)
+    if not os.path.isfile(path):
+        raise HTTPException(status_code=404, detail="file not found")
+
+    os.remove(path)
+    return {"ok": True}
