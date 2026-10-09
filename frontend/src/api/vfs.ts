@@ -1,4 +1,5 @@
 import type { VfsNode, VfsFolder } from "../types/vfs";
+import { apiFetch } from "./client";
 
 type FlatNode = {
     id: number; parent_id: number | null; type: "folder" | "file";
@@ -8,7 +9,7 @@ type FlatNode = {
 };
 
 export async function fetchVfsTree(): Promise<VfsFolder> {
-    const res = await fetch("http://localhost:8000/api/vfs", { credentials: "include" });
+    const res = await apiFetch("/api/vfs");
     if (!res.ok) throw new Error("failed to load site content");
     const flat: FlatNode[] = await res.json();
 

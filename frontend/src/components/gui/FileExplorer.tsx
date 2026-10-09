@@ -36,7 +36,13 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
         })
     }, [vfs.currentPath, vfs.pathParts]);
 
-    function handleOpenFile(slug: string) { setSearchParams({ open: slug }); }
+    function handleOpenFile(slug: string) { 
+        setSearchParams((prev) => {
+            const next = new URLSearchParams(prev);
+            next.set("open", slug);
+            return next;
+        });
+    }
 
     function handleCloseFile() { navigate(-1); }
 
