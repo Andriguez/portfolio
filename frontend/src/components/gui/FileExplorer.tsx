@@ -193,12 +193,16 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                     <rect width="100%" height="100%" filter="url(#grain2)"></rect>
                 </svg>
             </div>
-            { windowState === "minimized" && (
-                <div>
-                <DesktopIcons onRestore={handleRestoreWindow} onLoginClick={() => setLoginOpen(true)} />
-                <div title="Start" className="gui-taskbar-pill" onClick={handleRestoreWindow} />
+            { windowState === "open" && (
+               <div className="gui-desktop-overlay" >
                 </div>
             )}
+            { windowState === "minimized" && (
+                    <div title="Start" className="gui-taskbar-pill" onClick={handleRestoreWindow} />
+            )}
+             <div>
+                <DesktopIcons onRestore={handleRestoreWindow} onLoginClick={() => setLoginOpen(true)} />
+                </div>
             <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
         </div>
     )

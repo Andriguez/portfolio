@@ -14,6 +14,8 @@
     --gui-border: #333B44;
     --gui-text: #E7E3D8;
     --gui-btn:  #0C100D;
+    --gui-desktop-overlay: #0C100D;
+
 }
 
 :root[data-theme='light'] {
@@ -29,6 +31,8 @@
     --gui-border: #1d2023;
     --gui-text: #252424;
     --gui-btn: #5d6465;
+
+    --gui-desktop-overlay: #bbb9b531;
 }
 
 body {
@@ -44,14 +48,14 @@ body {
     color: var(--cli-info);
     opacity: 0.7;
     pointer-events: none;
-    z-index: 5;
+    z-index: 999;
 }
 
 .interface-switch {
     position: absolute;
     top: 0.5rem;
     left: 0.75rem;
-    z-index: 5;
+    z-index: 999;
 }
 
 .SwitchRoot {
