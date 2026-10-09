@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import {SafeHtml} from "../SafeHtml.tsx";
+import type { UploadedFile } from "../../types/UploadedFile.ts";
 import "./cms.css";
 import {useNavigate} from "react-router-dom";
-import {DeleteIcon, EditIcon} from "lucide-react";
+import {CopyIcon, DeleteIcon, EditIcon, FileIcon, FolderIcon} from "lucide-react";
 
 // TO-DO
 // Have to figure out why when creating a node in the root folder it defaults to null and breaks navigation
@@ -20,6 +21,7 @@ type CMSNode = {
 }
 export function CMS(){
 
+    // content manager
     const [nodes, setNodes] = useState<CMSNode[]>([]);
     const [editing, setEditing] = useState<Partial<CMSNode> | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -49,7 +51,7 @@ export function CMS(){
         loadNodes();
     }
 
-    async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>, source: string) {
         const file = e.target.files?.[0];
         if (!file) return;
         const formData = new FormData();
@@ -58,14 +60,20 @@ export function CMS(){
         if (!res.ok) { setError("image upload failed"); return; }
         const { url } = await res.json();
 
-        const imageUrl = url.startsWith("http")
-            ? url
-            : `http://localhost:8000${url}`;
+        if (source === "node_edit") {
+            const imageUrl = url.startsWith("http")
+                ? url
+                : `http://localhost:8000${url}`;
 
-        setEditing((prev) => (prev ? { ...prev, image: imageUrl } : prev));
+            setEditing((prev) => (prev ? { ...prev, image: imageUrl } : prev));
+        } else if (source === "upload_manager") {
+            loadFiles();
+            alert("image uploaded successfully!");
+            e.target.value = "";
+        }
     }
 
-    async function handleDelete(id: number) {
+    async function handleNodeDelete(id: number) {
         if (!confirm("delete this node? this can't be undone.")) return;
         const res = await fetch(`http://localhost:8000/api/vfs/${id}`, { method: "DELETE", credentials: "include" });
         if (!res.ok) { setError("delete failed — does it still have children?"); return; }
@@ -78,6 +86,42 @@ export function CMS(){
         else {navigate("/")}
     }
 
+    // uploads manager
+    const [files, setFiles] = useState<UploadedFile[]>([]);
+
+    async function loadFiles() {
+        const res = await fetch("http://localhost:8000/api/uploads", { credentials: "include" });
+        if (!res.ok) { setError("failed to load uploads"); return; }
+    
+        setFiles(await res.json());
+    }
+
+    useEffect(() => {
+        loadFiles();
+    }, []);
+
+    async function handleUploadDelete(file: UploadedFile) {
+        const warning = file.used_by.length > 0 
+            ? `this file is used by: ${file.used_by.join(", ")}. `
+            : `Delete "${file.name}"? `;
+
+        if (!confirm(warning)) return;
+
+        setError(null);
+
+        const res = await fetch(`http://localhost:8000/api/uploads/${encodeURIComponent(file.name)}`, { 
+            method: "DELETE", credentials: "include" 
+        });
+
+        if (!res.ok) { setError("delete failed"); return; }
+        loadFiles();
+    }
+
+    function handleCopyUrl(url: string) {
+        navigator.clipboard.writeText(url);
+        alert(`URL: "${url}" copied to clipboard!`);
+    }
+
     return(
         useIsAuthed() && <div className="admin-panel">
             <div className="admin-header">
@@ -86,14 +130,17 @@ export function CMS(){
                 <button className="logout-btn" onClick={handleLogout}>Log Out</button>
             </div>
             <table className="admin-table">
-                <thead><tr><th>name</th><th>type</th><th>slug</th><th>parent</th><th /></tr></thead>
+                <thead><tr><th>id</th><th>name</th><th>type</th><th>slug</th><th>parent Id</th><th>actions</th></tr></thead>
                 <tbody>
                 {nodes.map((n) => (
                     <tr key={n.id}>
-                        <td>{n.name}</td><td>{n.type}</td><td>{n.slug}</td><td>{n.parent_id ?? "—"}</td>
+                        <td>{n.id}</td>
+                        <td>{n.name}</td>
+                        <td>{n.type}</td>
+                        <td>{n.slug}</td><td>{n.parent_id ?? "—"}</td>
                         <td>
                             <button onClick={() => setEditing(n)}><EditIcon size="12px"/></button>
-                            <button onClick={() => handleDelete(n.id)}><DeleteIcon size="12px" /></button>
+                            <button onClick={() => handleNodeDelete(n.id)}><DeleteIcon size="12px" /></button>
                         </td>
                     </tr>
                 ))}
@@ -136,7 +183,7 @@ export function CMS(){
                                     <SafeHtml html={editing.body ?? ""} className="admin-preview-frame" />
                                 </div>
                                 <label>upload image
-                                    <input type="file" accept="image/*" onChange={handleImageUpload} />
+                                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, "node_edit")} />
                                 </label>
                                 {editing.image && <img src={editing.image} alt="preview" className="admin-image-preview" />}
                                 <label>or paste an image URL
@@ -152,6 +199,40 @@ export function CMS(){
                     </div>
                 </div>
             )}
+            <div className="admin-header" style={{ marginTop: "2rem" }}>
+                <h2>IMAGE UPLOADS</h2>
+
+                <span className="admin-count">{files.length} file(s)</span>
+            </div>
+            <div className="admin-upload">
+                <label >upload image: 
+                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, "upload_manager")} />
+                </label>
+            </div>
+            {error && <div className="admin-error">{error}</div>}
+
+            {files.length === 0 ? (
+                <div className="admin-empty">no uploads yet.</div>
+            ) : (
+                <table className="image-table">
+                    <thead>
+                        <tr><th>preview</th><th>size</th><th>used by</th><th>actions</th></tr>
+                    </thead>
+                    <tbody>
+                        {files.map((f) => (
+                            <tr key={f.name}>
+                                <td><img src={`http://localhost:8000${f.url}`} alt={f.name} className="admin-thumb" /></td>
+                                <td>{formatSize(f.size)}</td>
+                                <td>{f.used_by.length > 0 ? f.used_by.join(", ") : "—"}</td>
+                                <td>
+                                    <button onClick={() => handleCopyUrl(f.url)}><CopyIcon size="12px" /></button>
+                                    <button onClick={() => handleUploadDelete(f)}><DeleteIcon size="12px" /></button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )}
         </div>
     );
 }
@@ -164,4 +245,11 @@ function useIsAuthed() {
             .catch(() => setAuthed(false));
     }, []);
     return authed;
+}
+
+function formatSize(size: number): string {
+    if (size < 1024) return `${size} B`;
+    if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 }
