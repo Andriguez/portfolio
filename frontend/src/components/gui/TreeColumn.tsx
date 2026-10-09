@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { VfsFolder } from "../../types/vfs";
 import type { useVfs } from "../../hooks/useVfs";
-import {ChevronRight, ChevronDown, Folder, ComputerIcon, House, Trash2, KeyRound} from "lucide-react";
+import {ChevronRight, ChevronDown, Folder, ComputerIcon, House, Trash2, KeyRound, FileUser} from "lucide-react";
 
 type TreeVfs = ReturnType<typeof useVfs>;
 
@@ -77,6 +77,10 @@ export function TreeColumn({
                     ))}
                 </div>
             )}
+            <div className="tree-row tree-row--pcn" onClick={() => setPcExpanded((v) => !v)}>
+                <FileUser size={15} />
+                <span className="tree-label">My CV</span>
+            </div>
             <div className="tree-row tree-row--pcn">
                 <Trash2 size={15} />
                 <span className="tree-label">Trash</span>

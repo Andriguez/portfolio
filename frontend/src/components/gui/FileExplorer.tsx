@@ -152,7 +152,10 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                                 <div className="menu-item">
                                     <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
                                 </div>
-                                <div className="menu-item" onClick={() => setMenuOpen(false)}>about andi.sys</div>
+                                <div className="menu-item" onClick={() => setMenuOpen(false)}>about andy.sis</div>
+                                <div className="menu-item" onClick={() => setMenuOpen(false)}>read changelog.md</div>
+                                <div className="menu-item" onClick={() => setMenuOpen(false)}>go to linkedin</div>
+                                <div className="menu-item" onClick={() => setMenuOpen(false)}>go to github</div>
                             </div>
                         )}
                     </div>
