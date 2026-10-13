@@ -1,16 +1,21 @@
 import type { VfsFolder, VfsFile } from "./vfs";
 import type { CommandOutput } from "./CommandOutput";
+import type { SiteData } from "../hooks/useSiteData";
+import type { Place } from "../hooks/useVfs";
 
 type CommandContext = {
     currentFolder: VfsFolder;
     cd: (target: string) => VfsFolder;
     resolveFile: (target: string) => VfsFile | null;
+    site: SiteData;
+    place: Place | null;
+    goToPlace: (p: Place) => void;
 };
 
 export type CommandDefinition = {
     name: string;
     alias?: string;
-    options?: string[];
+    options?: string[] | ((site: SiteData) => string[]);
     usage: string;
     show: boolean;
     description: string;
@@ -23,11 +28,15 @@ export const commands: CommandDefinition[] = [
         usage: "hello",
         description: "read the welcome message.",
         show: true,
-        run: () => ({
-            type: "text",
-            value: "Hello world type message... but on a terminal. [implement]",
-            color: "cli-dim"
-        })
+        run: (_args, ctx) => {
+            const hello_msg = ctx.site.staticContent.hello_message;
+            
+            return {
+                type: "text",
+                value: hello_msg,
+                color: "cli-dim"
+            };
+        }
     },
     {
         name: "help",
@@ -75,8 +84,17 @@ export const commands: CommandDefinition[] = [
         run: (args, ctx) => {
             if (!args[0]) return { type: "error", value: "usage: cd <folder>", color: "cli-info" };
 
-            if (ctx.cd(args[0]) === null)
-                return { type: "error", value: `cd: no such folder: ${args[0]}`, color: "cli-info" };
+            const clean = args[0].replace(/^~?\/+/, "").replace(/\/+$/, "").toLowerCase();
+            if (clean === "cv") {
+                if (ctx.site.cvs.length === 0)
+                    return { type: "error", value: "cd: no cv available just yet..", color: "cli-info"}
+
+                ctx.goToPlace("cv");
+                return { type: "none", color: "cli-green" };
+            }
+
+            if (!ctx.cd(args[0])) return { type: "error", value: `cd: no such folder: ${args[0]}`, color: "cli-info" };
+
             return { type: "none", color: "cli-green" };
         },
     },
@@ -87,45 +105,69 @@ export const commands: CommandDefinition[] = [
         show: true,
         description: "open and read a page's entry.",
         run: (args, ctx) => {
-            if (!args[0]) return { type: "error", value: "usage: cat <file>", color: "cli-info" };
+            if (!args[0]) {
+                if (ctx.place === "cv" && ctx.site.cvs.length > 0)
+                    return { type: "cv-list", cvs: ctx.site.cvs, color: "cli-green" }
+
+                return { type: "error", value: "usage: cat <file>", color: "cli-info" };
+            }
 
             const file = ctx.resolveFile(args[0] ?? "");
+            if (!file) return { type: "error", value: `cat: no such file: ${args[0]}`, color: "cli-info"}
 
-            return file
-                ? { type: "markdown", file, color: "cli-green" }
-                : { type: "error", value: `cat: no such file: ${args[0]}`, color: "cli-info" };
+            if (file.cv)
+            return { type: "cv-list", cvs: [{ type: file.cv.type, name: file.cv.filename, size: file.cv.size }], color: "cli-green" };
+
+            return { type: "markdown", file, color: "cli-green" }
         },
     },
     {
         name: "links",
         usage: "links <media>",
         show: true,
-        options: [" github ", " linkedin "],
         description: "let's get friendly :).",
-        run: (args) => {
-            if (!args[0]) return { type: "error", value: "usage: links <media>", color: "cli-info" };
+        options: (site) => site.links.map((l) => l.name.toLowerCase()),
+        run: (_args, ctx) => {
+            const links = ctx.site.links;
+            if (links.length === 0)
+                return { type: "error", value: "no links yet, check back soon.", color: "cli-info" };
 
-            let link = "";
-            let media = args[0];
+            const [name] = _args;
+            if (!name) return { type: "link-list", links, color: "cli-green" };
 
-            if (media === "linkedin") {
-                link = "https://www.linkedin.com/in/andriguez-905581159/"
-            } else if (media === "github") {
-                link = "https://github.com/andriguez"
-            }
+            const match = links.find((l) => l.name.toLowerCase() === name.toLowerCase());
+            if (!match)
+                return {
+                    type: "error",
+                    value: `no link named "${name}". available: ${links.map((l) => l.name.toLowerCase()).join(", ")}`,
+                    color: "cli-info",
+                };
 
-            return { type: "link", value: `>Go to my ${media} profile clicking here<`, url: link, color: "cli-green" }
+            return { type: "link-list", links: [match], color: "cli-green" };
         },
     },
     {
-        name: "download-cv",
-        usage: "download-cv <type>",
+        name: "cv",
+        alias: "resume",
+        usage: "cv <type>",
         show: true,
-        options: ["webdev", "cybersec", "general"],
-        description: "get a copy of my cv. [implement]",
-        run: () => ({
-            type: "text", value: "downloading cv...", color: "cli-green"
-        })
+        options: (site) => site.cvs.map((l) => l.type.toLowerCase()),
+        description: "get a copy of my cv.",
+        run: (args, ctx) => {
+            const cvs = ctx.site.cvs;
+            if (cvs.length === 0) return { type: "error", value: "no cv available right now.", color: "cli-info" };
+            if (!args[0]) return { type: "cv-list", cvs, color: "cli-green" };
+
+            const cv = cvs.find((c) => c.type === args[0].toLowerCase());
+
+            if (!cv) return { 
+                type: "error", 
+                value: `no cv version "${args[0]}". available: ${cvs.map((c) => c.type).join(", ")}`,
+                color: "cli-info" 
+            };
+
+            return { type: "cv-list", cvs: [cv], color: "cli-green" };
+        }
     },
     {
         name: "contact",
@@ -154,9 +196,15 @@ export const commands: CommandDefinition[] = [
         usage: "stack",
         show: false,
         description: "lists the technology used for this portfolio. [implement]",
-        run: () => ({
-            type: "text", value: "...", color: "cli-green"
-        })
+        run: (_args, ctx) => {
+           const stack_msg = ctx.site.staticContent.stack_info;
+
+           return {
+                type: "text",
+                value: stack_msg,
+                color: "cli-dim"
+           }
+        }
     },
     {
         name: "echo",
@@ -279,3 +327,8 @@ export const commands: CommandDefinition[] = [
 const randomThoughts = ["fact 1", "fact 2", "fact 3", "fact 4"];
 const fortunes = ["fortune 1", "fortune 2", "fortune 3", "fortune 4"];
 const ballAnswers = ["yass", "i don't think so", "let that sink in..", "i guess", "hmmm..", "girl.. call your therapist.", "yes babes", "nope", "let me get back to you on that..", "sure!", "ugh"]
+
+export function getOptions(cmd: CommandDefinition, site: SiteData): string[] {
+    const raw = typeof cmd.options === "function" ? cmd.options(site) : (cmd.options ?? []);
+    return raw.map((o) => o.trim());   // drops the padding spaces in " github "
+}

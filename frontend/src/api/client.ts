@@ -12,3 +12,8 @@ export function assertApiUrl(path: string | null | undefined) {
 
     return path.startsWith("http") ? path : `${API_URL}${path}`;
 }
+
+export function absoluteUrl(path: string) {
+    return new URL(`${API_URL}${path}`, window.location.origin).href;
+}
+

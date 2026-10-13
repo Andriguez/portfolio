@@ -1,28 +1,48 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+import changelog from "../../../CHANGELOG.md?raw";
 
  import { useVfs, searchVfs } from "../../hooks/useVfs"
 import { ExplorerButtons } from './ExplorerButtons';
 import { TreeColumn } from "./TreeColumn";
 import { GridColumn } from "./GridColumn";
 import { DetailPanel } from "./DetailPanel";
-import type {VfsFile, VfsFolder, VfsNode} from "../../types/vfs.ts";
+import { ExternalLink } from "lucide-react";
+import { useSite } from "../../context/SiteDataContext.tsx";
+import { cvToNode } from "../../helpers/cvNodes.ts";
+import type {VfsFile, VfsNode} from "../../types/vfs.ts";
 import {ThemeToggle} from "./ThemeToggle.tsx";
 import {useTheme} from "../../hooks/useTheme.ts";
 import {DesktopIcons} from "./DesktopIcons.tsx";
 import {LoginModal} from "./LoginModal.tsx";
+import { InfoDialog } from "./InfoDialog.tsx";
 
 export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
-    const openSlug = searchParams.get("open");
-    const openFile: VfsFile | VfsFolder | null = openSlug ? vfs.resolveFile(openSlug) : null;
-
+    
     const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
 
     const {theme, toggleTheme} = useTheme();
 
     const [loginOpen, setLoginOpen] = useState(false);
+
+    const { data: site } = useSite();
+    
+    const inCv = vfs.place === "cv";
+    const cvNodes = useMemo(() => site.cvs.map(cvToNode), [site.cvs]);
+
+    const openSlug = searchParams.get("open");
+    const openFile = openSlug
+        ? ((inCv ? cvNodes.find((n) => n.slug === openSlug) : vfs.resolveFile(openSlug)) ?? null)
+        : null;
+
+    const items: VfsNode[] = inCv ? cvNodes : (vfs.currentFolder?.children ?? []);
+    const hasCv = site.cvs.length > 0;
+
+    const [aboutOpen, setAboutOpen] = useState(false);
+    const [changelogOpen, setChangelogOpen] = useState(false);
 
     useEffect(() => {
         setExpandedPaths((prev) => {
@@ -44,7 +64,15 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
         });
     }
 
-    function handleCloseFile() { navigate(-1); }
+    function handleCloseFile() {
+        setSearchParams((prev) => {
+            const next = new URLSearchParams(prev);
+            next.delete("open");
+            return next;
+        }, { replace: true });
+    }
+
+    function handleCvIcon() { vfs.goToPlace("cv"); handleRestoreWindow(); }
 
     useEffect(() => {
         if (!openFile) return;
@@ -74,7 +102,6 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
         setTimeout(() => window.close(), 500);
     }
 
-    const items = vfs.currentFolder?.children;
     const folderCount = items?.filter((i) => i.type === "folder").length;
     const fileCount = items?.filter((i) => i.type === "file").length;
 
@@ -123,13 +150,19 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                     <button title="forward" className="toolbar-btn nav-btn" onClick={() => navigate(1)} aria-label="forward">›</button>
 
                     <div className="address-field themed-scrollbar">
-                        <span className="crumb-pill" onClick={() => vfs.goToPath([])}>home</span>
-                        {vfs.pathParts.map((part, i) => (
-                            <span key={i}>
-                            <span className="crumb-sep">{">"}</span>
-                            <span className="crumb-pill" onClick={() => vfs.goToPath(vfs.pathParts.slice(0, i + 1))}>{part}</span>
-                             </span>
-                        ))}
+                        {inCv ? (
+                            <span className="crumb-pill">My CV</span>
+                        ) : (
+                            <>
+                                <span className="crumb-pill" onClick={() => vfs.goToPath([])}>home</span>
+                                {vfs.pathParts.map((part, i) => (
+                                    <span key={i}>
+                                        <span className="crumb-sep">{">"}</span>
+                                        <span className="crumb-pill" onClick={() => vfs.goToPath(vfs.pathParts.slice(0, i + 1))}>{part}</span>
+                                    </span>
+                                ))}
+                            </>
+                        )}
                     </div>
 
                     <input
@@ -152,10 +185,19 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                                 <div className="menu-item">
                                     <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
                                 </div>
-                                <div className="menu-item" onClick={() => setMenuOpen(false)}>about andy.sis</div>
-                                <div className="menu-item" onClick={() => setMenuOpen(false)}>read changelog.md</div>
-                                <div className="menu-item" onClick={() => setMenuOpen(false)}>go to linkedin</div>
-                                <div className="menu-item" onClick={() => setMenuOpen(false)}>go to github</div>
+                                <div className="menu-item" onClick={() => { setAboutOpen(true); setMenuOpen(false); }}>about andi.sys</div>
+                                <div className="menu-item" onClick={() => { setChangelogOpen(true); setMenuOpen(false); }}>read changelog.md</div>
+
+                                {hasCv && (
+                                    <div className="menu-item menu-item--mobile-only" onClick={() => { vfs.goToPlace("cv"); setMenuOpen(false); }}>my cv</div>
+                                )}
+                                <div className="menu-item menu-item--mobile-only" onClick={() => { setLoginOpen(true); setMenuOpen(false); }}>login</div>
+                                {site.links.length > 0 && <div className="menu-divider" />}
+                                {site.links.map((l) => (
+                                    <a key={l.id} className="menu-item menu-item--link" href={l.url} target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>
+                                        go to {l.name.toLowerCase()} <ExternalLink size={11} />
+                                    </a>
+                                ))}
                             </div>
                         )}
                     </div>
@@ -210,9 +252,15 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                     <div title="Start" className="gui-taskbar-pill" onClick={handleRestoreWindow} />
             )}
              <div>
-                <DesktopIcons onRestore={handleRestoreWindow} onLoginClick={() => setLoginOpen(true)} />
+                <DesktopIcons onRestore={handleRestoreWindow} onLoginClick={() => setLoginOpen(true)} onCvClick={() => { if (hasCv) handleCvIcon(); }} />
                 </div>
             <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
+            <InfoDialog open={aboutOpen} onOpenChange={setAboutOpen} title="about andi.sys">
+                <p className="info-text">{site.staticContent.stack_info || "nothing written here yet."}</p>
+            </InfoDialog>
+            <InfoDialog open={changelogOpen} onOpenChange={setChangelogOpen} title="changelog.md">
+                <div className="info-markdown"><ReactMarkdown>{changelog}</ReactMarkdown></div>
+            </InfoDialog>
         </div>
     )
 }

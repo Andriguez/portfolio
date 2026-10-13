@@ -2,8 +2,9 @@ export type VfsBase = {
     name: string;
     slug: string;
     description?: string;
-    id: number;
-    parentId: number | null;
+    id?: number;
+    parentId?: number | null;
+    cv?: { type: string; size: number; filename: string; uploaded_at: string;}
 }
 
 export type VfsFile = VfsBase & {

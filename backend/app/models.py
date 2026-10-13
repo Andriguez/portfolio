@@ -24,3 +24,28 @@ class VfsNode(Base):
 
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
     children = relationship("VfsNode", backref=backref("parent", remote_side=[id]))
+
+class StaticContent(Base):
+    __tablename__ = "static_content"
+
+    key = Column(String(100), primary_key=True)
+    value = Column(Text, nullable=True)
+
+class CvFile(Base):
+    __tablename__ = "cv_files"
+
+    id = Column(Integer, primary_key=True, index=True)
+    type = Column(String(30), nullable=False, unique=True)
+    stored_filename = Column(String(100), nullable=False, unique=True)
+    filename = Column(String(255), nullable=False)
+    size = Column(Integer, nullable=False)
+    download_count = Column(Integer, default=0, server_default="0")
+    uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+class SocialLink(Base):
+    __tablename__ = "social_links"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    url = Column(String(255), nullable=False)

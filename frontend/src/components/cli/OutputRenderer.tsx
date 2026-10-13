@@ -3,6 +3,8 @@ import { DirectoryList } from "./DirectoryList";
 import { TypewriterText } from "./TypeWriterText";
 import { HelpList } from "./HelpList";
 import { FileContentCard } from "./FileContentCard";
+import { CvList } from "./CvList";
+import { LinkList } from "./LinkList";
 
 export function OutputRenderer({ output, runCommand }: { output: CommandOutput, runCommand: ((cmd: string) => void) }) {
     if (output.type === "none") return null;
@@ -16,5 +18,8 @@ export function OutputRenderer({ output, runCommand }: { output: CommandOutput, 
     if (output.type === "markdown") return <FileContentCard file={output.file} />
 
     if (output.type === "link") return <a href={output.url} target="_blank" rel="noopener noreferrer">{output.value}</a>
+
+    if (output.type === "cv-list") return <CvList cvs={output.cvs} />
+    if (output.type === "link-list") return <LinkList links={output.links} />
     return null;
 }

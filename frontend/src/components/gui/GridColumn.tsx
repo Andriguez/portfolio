@@ -1,3 +1,4 @@
+import { FileUser } from "lucide-react";
 import type { useVfs } from "../../hooks/useVfs";
 import type { VfsNode } from "../../types/vfs";
 import { ExplorerItem } from "./ExplorerItem.tsx";
@@ -97,7 +98,7 @@ export function GridColumn({
                         onTouchEnd={handleTouchEnd}
                     >
                         <span className="list-row-icon">
-                            {item.type === "folder" ? "📁" : "📄"}
+                            {item.type === "folder" ? "📁" : item.cv ? <FileUser size="16" /> : "📄"}
                         </span>
 
                         <span className="list-row-name">
@@ -105,7 +106,11 @@ export function GridColumn({
                         </span>
 
                         <span className="list-row-date">
-                            { item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : "—" }
+                            { 
+                                item.updatedAt ? new Date(item.updatedAt).toLocaleDateString()
+                                : item.cv != null ? item.cv.uploaded_at
+                                    : "—"
+                            }
                         </span>
                     </div>
                 ))}
