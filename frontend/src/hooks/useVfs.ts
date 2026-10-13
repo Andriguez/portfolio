@@ -1,7 +1,10 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import type { VfsNode, VfsFolder, VfsFile } from "../types/vfs";
+import type { VfsNode, VfsFolder } from "../types/vfs";
 import { fetchVfsTree } from "../api/vfs.ts";
 import { useEffect, useState } from "react";
+
+export type Place = "cv";
+const PLACES: Place[] = ["cv"];
 
 function findNode(current: VfsFolder, pathParts: string[]): VfsNode | null {
     if (pathParts.length === 0) return current;
@@ -13,8 +16,8 @@ function findNode(current: VfsFolder, pathParts: string[]): VfsNode | null {
 }
 
 function resolvePath(root: VfsFolder, base: string[], target: string): string[] | null {
-    const isAbsolute = target.startsWith("/") || target.startsWith("~");
-    const segments = target.split("/").filter((s) => s.length > 0 && s !== "~");
+    const isAbsolute = target.startsWith("/") || target.startsWith("~") || target.startsWith("home");
+    const segments = target.split("/").filter((s) => s.length > 0 && s !== "~" && s!= "home");
     let working = isAbsolute ? [] : [...base];
 
     for (const seg of segments) {
@@ -48,15 +51,11 @@ export function useVfs() {
         return () => { cancelled = true; };
     }, []);
 
-    const pathParts = location.pathname.split("/").filter(Boolean);
-    const resolvedNode = root ? findNode(root, pathParts) : null;
+    const rawParts = location.pathname.split("/").filter(Boolean);
+    const place = PLACES.find((p) => p === rawParts[0]) ?? null;
+    const pathParts = place ? [] : rawParts;
 
-    const currentFolder =
-        resolvedNode?.type === "folder"
-            ? resolvedNode
-            : pathParts.length === 0
-                ? root
-                : null;
+    const currentFolder = root ? ((findNode(root, pathParts) ?? root) as VfsFolder) : null
 
     function resolveFile(target: string) {
         if (!currentFolder) return null;
@@ -79,11 +78,17 @@ export function useVfs() {
         return folder;
     }
 
-    function goToPath(parts: string[]) {
-        navigate("/" + parts.join("/"));
-    }
+    function goToPath(parts: string[]) { navigate("/" + parts.join("/")); }
+    function goToPlace(p: Place) { navigate("/" + p); }
 
-    return { root, loading, error, currentFolder, currentPath: "/" + pathParts.join("/"), pathParts, cd, goToPath, resolveFile, getFolder };
+
+    return { 
+        root, loading, error,
+        currentFolder, currentPath: "/" + pathParts.join("/"),
+        pathParts, place, cd, goToPath, 
+        goToPlace, resolveFile, getFolder,
+        displayPath: place ? "/" + place : "/" + pathParts.join("/")
+    };
 }
 
 export function searchVfs(root: VfsFolder, query: string): { node: VfsNode; path: string[] }[] {

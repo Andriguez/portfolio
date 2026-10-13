@@ -2,8 +2,8 @@ import { useState } from "react";
 import { ComputerIcon, Trash2, KeyRound, Sparkles, FileUser, Camera } from "lucide-react";
 
 export function DesktopIcons({
-                                 onRestore, onLoginClick,
-                             }: { onRestore: () => void; onLoginClick: () => void }) {
+                                 onRestore, onLoginClick, onCvClick
+                             }: { onRestore: () => void; onLoginClick: () => void; onCvClick: () => void | undefined; }) {
     const [trashOpen, setTrashOpen] = useState(false);
 
     return (
@@ -16,10 +16,12 @@ export function DesktopIcons({
                 <ComputerIcon size={30} />
                 <span>ANDRIGUEZ</span>
             </div>
-            <div className="desktop-icon" onClick={onRestore}>
-                <FileUser size={30} />
-                <span>My CV</span>
-            </div>
+            { onCvClick !== undefined && 
+                (<div className="desktop-icon" onClick={onCvClick}>
+                    <FileUser size={30} />
+                    <span>My CV</span>
+                </div>)
+            }
             <div className="desktop-icon" onClick={onLoginClick}>
                 <KeyRound size={30} />
                 <span>Login</span>

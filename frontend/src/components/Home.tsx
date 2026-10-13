@@ -1,20 +1,30 @@
-import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { Switch } from "radix-ui"
-import { Terminal, Eye } from "lucide-react"
-import { useVfs } from "../hooks/useVfs"
-import { CliView } from "./cli/CliView"
-import { GuiView } from "./gui/GuiView"
+import { useState, useEffect } from 'react';
+import { useSearchParams, useLocation } from 'react-router-dom';
+import { Switch } from "radix-ui";
+import { Terminal, Eye } from "lucide-react";
+import { useVfs } from "../hooks/useVfs";
+import { CliView } from "./cli/CliView";
+import { GuiView } from "./gui/GuiView";
 
 type Mode = "cli" | "gui";
 
 export function Home() {
     const vfs = useVfs();
     const [searchParams] = useSearchParams();
-    const [mode, setMode] = useState<Mode>(() => {
-        const modeParam = searchParams.get("mode");
-        return modeParam === "gui" ? "gui" : "cli";
+    const location = useLocation();
+
+    const [initial] = useState(() => {
+        const mode : Mode = searchParams.get("mode") === "gui" ? "gui" : "cli";
+        const open = searchParams.get("open");
+        let command: string | null = null;
+
+        if (open) command = `cat "${open.replace(/"/g, "")}"`;
+        else if (location.pathname.startsWith("/cv")) command = "cat";
+
+        return {mode, command: mode === "cli" ? command: null}
     });
+    
+    const [mode, setMode] = useState<Mode>((initial.mode));
 
     const [ booted, setBooted ] = useState<boolean>(false);
     const [ shuttingDown, setShuttingDown ] = useState<boolean>(false);
@@ -109,6 +119,7 @@ export function Home() {
                     setBooted={setBooted}
                     shuttingDown={shuttingDown}
                     setShuttingDown={setShuttingDown}
+                    initialCommand={initial.command}
                 />
             </div>
             <div style={{ display: mode === "gui" ? "block" : "none" }}>

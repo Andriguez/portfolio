@@ -3,8 +3,11 @@ import {SafeHtml} from "../SafeHtml.tsx";
 import type { UploadedFile } from "../../types/UploadedFile.ts";
 import "./cms.css";
 import {useNavigate} from "react-router-dom";
-import { CopyIcon, DeleteIcon, EditIcon } from "lucide-react";
+import { CopyIcon, DeleteIcon, EditIcon, Save } from "lucide-react";
 import { API_URL, apiFetch, assertApiUrl } from "../../api/client.ts";
+import { StaticContentEditor } from './StaticContentEditor.tsx';
+import { SocialLinksManager } from './SocialLinksManager.tsx';
+import { CvManager } from './CvManager.tsx';
 
 
 // TO-DO
@@ -121,6 +124,21 @@ export function CMS(){
         alert(`URL: "${url}" copied to clipboard!`);
     }
 
+    function handleCVUpload(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("file", file);
+        apiFetch("/api/cv", { method: "POST", body: formData })
+            .then((res) => {
+                if (!res.ok) { setError("CV upload failed"); return; }
+                alert("CV uploaded successfully!");
+                e.target.value = "";
+            })
+            .catch(() => setError("CV upload failed"));
+    }
+
     return(
         useIsAuthed() && <div className="admin-panel">
             <div className="admin-header">
@@ -201,7 +219,7 @@ export function CMS(){
             <div className="admin-header" style={{ marginTop: "2rem" }}>
                 <h2>IMAGE UPLOADS</h2>
 
-                <span className="admin-count">{files.length} file(s)</span>
+                <span className="file-count">{files.length} file(s)</span>
             </div>
             <div className="admin-upload">
                 <label >upload image: 
@@ -232,6 +250,11 @@ export function CMS(){
                     </tbody>
                 </table>
             )}
+
+            <StaticContentEditor contentKey='hello_message' title='Edit Hello Message' />
+            <StaticContentEditor contentKey='stack_info' title='Edit Stack Info' />
+            <SocialLinksManager />
+            <CvManager />
         </div>
     );
 }

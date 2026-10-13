@@ -24,7 +24,9 @@ services:
       - "8000:8000"
     volumes:
       - uploads_data:/app/uploads
+      - cv_data:/app/cv_files
 
 volumes:
   db_data:
   uploads_data:
+  cv_data:

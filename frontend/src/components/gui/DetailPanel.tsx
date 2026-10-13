@@ -1,9 +1,11 @@
 import type {VfsFile} from "../../types/vfs";
 import { X } from "lucide-react";
 import {SafeHtml} from "../SafeHtml.tsx";
+import { CvViewer } from "./CvViewer.tsx";
 
 export function DetailPanel({ file, onClose }: { file: VfsFile; onClose: () => void }) {
     return (
+    file.cv ? (<CvViewer cv={file.cv} /> ) : (
         <div className="detail-panel themed-scrollbar">
             <div className="detail-panel-header">
                 <span className="detail-panel-title">{file?.content?.title}</span>
@@ -17,6 +19,6 @@ export function DetailPanel({ file, onClose }: { file: VfsFile; onClose: () => v
                 )}
                 <SafeHtml html={file?.content?.body} />
             </div>
-        </div>
+        </div>)
     );
 }

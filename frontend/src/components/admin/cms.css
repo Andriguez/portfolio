@@ -1,7 +1,6 @@
 /* src/components/admin/admin-panel.css */
 
 .admin-panel {
-    max-width: 900px;
     max-height: 95vh;
     margin: 2rem auto;
     padding: 1.5rem;
@@ -48,6 +47,10 @@
     padding: 0.6rem 0.9rem;
     font-size: 0.82rem;
     margin-bottom: 1rem;
+}
+
+.admin-section {
+    padding-top: 2rem;
 }
 
 /* --- table --- */
@@ -194,9 +197,9 @@
 
 .admin-form-actions button {
     border-radius: 4px;
-    padding: 0.5rem 1.1rem;
+    padding: 0.5rem 1rem;
     font-family: inherit;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     cursor: pointer;
 }
 
@@ -273,4 +276,63 @@
         color: var(--cli-bg);
         cursor: pointer;
     }
+}
+
+.admin-textarea-input {
+    width: 100%;
+    background: var(--cli-bg);
+    border: 1px solid white;
+    border-radius: 4px;
+    padding: 0.5rem 0.7rem;
+    color: var(--cli-green);
+    font-family: inherit;
+    font-size: 0.85rem;
+    resize: vertical;
+    min-height: 80px;
+}
+
+.admin-textarea-input:focus {
+    outline: none;
+    border-color: var(--cli-green);
+}
+
+.admin-save-btn {
+    background: transparent;
+    border: 1px solid var(--cli-green-dim);
+    color: var(--cli-green-dim);
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-family: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-top: 0.5rem;
+}
+
+.admin-save-btn:hover {
+    color: var(--cli-green);
+    border-color: var(--cli-green);
+}
+
+.admin-inline-form { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.admin-inline-form input {
+    background: var(--cli-bg);
+    border: 1px solid var(--cli-border);
+    border-radius: 4px;
+    padding: 0.45rem 0.7rem;
+    color: var(--cli-green);
+    font-family: inherit;
+    font-size: 0.85rem; flex: 1;
+    min-width: 140px;
+}
+
+button {
+        background: transparent;
+        border: 1px solid var(--cli-green-dim);
+        color: var(--cli-green-dim);
+        border-radius: 4px;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+        font-family: inherit;
+        cursor: pointer;
+        margin-right: 0.4rem;
 }

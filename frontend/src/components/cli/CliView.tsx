@@ -1,25 +1,34 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { useSite } from "../../context/SiteDataContext.tsx";
 import { useVfs } from "../../hooks/useVfs"
 import type { LogEntry } from "../../types/LogEntry"
 import type { CommandOutput } from "../../types/CommandOutput"
 import { LogLine } from "./LogLine"
-import { commands } from "../../types/commands"
+import { commands, getOptions } from "../../types/commands"
 import { tokenize } from "../../helpers/tokenize"
 import { BootSequence } from "./BootSequence"
 import { isTouchDevice } from "../../helpers/is-touch-device"
 import {LoginModal} from "../gui/LoginModal.tsx";
+import { cvToNode } from "../../helpers/cvNodes.ts";
+import type { VfsFolder, VfsFile } from "../../types/vfs.ts";
 import "./cli-view.css"
+
+const EMPTY_FOLDER: VfsFolder = { type: "folder", name: "", slug: "", children: [] };
 
 export type CliViewProps = {
     vfs: ReturnType<typeof useVfs>,
     booted: boolean,
     setBooted: (booted: boolean) => void,
     shuttingDown: boolean,
-    setShuttingDown: (shuttingDown: boolean) => void
-}
+    setShuttingDown: (shuttingDown: boolean) => void,
+    initialCommand: string | null;
+};
 
-export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown }: CliViewProps ) {
-    const { currentFolder, currentPath, cd, resolveFile } = vfs;
+export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown, initialCommand }: CliViewProps ) {
+    const { data: site } = useSite();
+
+    const { cd, goToPlace, place, currentFolder } = vfs;
+    const currentPath = vfs.displayPath;
 
     const [ booting, setBooting ] = useState<boolean>(true);
 
@@ -32,20 +41,42 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown 
 
     const [ pulseKey, setPulseKey ] = useState(0);
 
+    const cvFolder = useMemo<VfsFolder>(() => ({
+        type: "folder", name: "My CV",
+        slug: "cv", description: "all my cvs per focus area.",
+        children: site.cvs.map(cvToNode),
+    }), [site.cvs]);
+
+    const activeFolder = place === "cv" ? cvFolder : (currentFolder ?? EMPTY_FOLDER);
+
+
     function getSuggestion(value: string): string | null {
         if (!value) return null;
         const parts = value.split(" ");
+
         if (parts.length === 1) {
-            const match = commands.find((c) => c.name.startsWith(parts[0]) && c.name !== parts[0]);
-            return match ? match.name : null;
+            const names = commands.flatMap((c) => [c.name, c.alias]).filter((n): n is string => !!n);
+            return names.find((n) => n.startsWith(parts[0]) && n !== parts[0]) ?? null;
         }
+
         const lastWord = parts[parts.length - 1];
         if (!lastWord) return null;
-        const match = currentFolder?.children.find(
-            (c) => c.slug.startsWith(lastWord) && c.slug !== lastWord
-        );
-        return match ? [...parts.slice(0, -1), match.slug].join(" ") : null;
-    }
+
+        const typed = parts[0];
+        const cmd = commands.find((c) => c.name === typed || c.alias === typed);
+        const opts = cmd ? getOptions(cmd, site) : [];
+
+        const candidates: string[] = opts.length > 0
+            ? opts
+            : (Array.isArray(activeFolder?.children) ? activeFolder.children : [])
+                .map((c) => c.slug)
+                .filter((s): s is string => typeof s === "string");
+
+        const word = lastWord.toLowerCase();
+        const match = candidates.find((s) => s.toLowerCase().startsWith(word) && s.toLowerCase() !== word);
+
+        return match ? [...parts.slice(0, -1), match].join(" ") : null;
+    };
 
     const suggestion = getSuggestion(input);
     const suggestionTail = suggestion ? suggestion.slice(input.length) : "";
@@ -78,7 +109,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown 
                 color: "cli-info"
             };
         } else {
-            const result = command.run(args, { currentFolder, cd, resolveFile });
+            const result = command.run(args, { currentFolder: activeFolder, cd, resolveFile, site, place, goToPlace });
             if (result === "CLEAR") {
                 setLog([]);
                 setHistory((prev) => [...prev, raw]);
@@ -166,6 +197,17 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown 
         }, 180);
         return () => clearTimeout(t);
     }, []);
+
+    function resolveFile(target: string): VfsFile | null {
+        return activeFolder.children.find((c): c is VfsFile => c.type === "file" && c.slug === target) ?? null
+    }
+
+    const ranInitial = useRef(false);
+    useEffect(() => {
+        if (!booted || !initialCommand || ranInitial.current) return;
+        ranInitial.current = true;
+        runCommand(initialCommand);
+    }, [booted]);
 
     return (
         <div

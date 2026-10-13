@@ -5,7 +5,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from .limiter import limiter
 from .database import Base, engine
-from .routers import vfs, auth, uploads
+from .routers import vfs, auth, uploads, content, cv, social_links
 
 Base.metadata.create_all(bind=engine)
 
@@ -28,3 +28,6 @@ app.mount("/uploads", StaticFiles(directory="/app/uploads"), name="uploads")
 app.include_router(vfs.router)
 app.include_router(auth.router)
 app.include_router(uploads.router)
+app.include_router(content.router)
+app.include_router(cv.router)
+app.include_router(social_links.router)
