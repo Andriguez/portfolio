@@ -82,7 +82,7 @@ export function TreeColumn({
             )}
             
             {site.cvs.length > 0 && (
-                <div className={`tree-row tree-row--pcn ${vfs.place === "my-cv" ? "tree-row--active" : ""}`} onClick={() => vfs.goToPlace("my-cv")}>
+                <div className={`tree-row tree-row--pcn ${vfs.place === "my_cv" ? "tree-row--active" : ""}`} onClick={() => vfs.goToPlace("my_cv")}>
                     <FileUser size={15} />
                     <span className="tree-label">My CV</span>
                 </div>

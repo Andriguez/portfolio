@@ -107,7 +107,7 @@ export const commands: CommandDefinition[] = [
         description: "open and read a page's entry.",
         run: (args, ctx) => {
             if (!args[0]) {
-                if (ctx.place === "cv" && ctx.site.cvs.length > 0)
+                if (ctx.place === "my_cv" && ctx.site.cvs.length > 0)
                     return { type: "cv-list", cvs: ctx.site.cvs, color: "cli-green" }
 
                 return { type: "error", value: "usage: cat <file>", color: "cli-info" };
@@ -117,7 +117,7 @@ export const commands: CommandDefinition[] = [
             if (!file) return { type: "error", value: `cat: no such file: ${args[0]}`, color: "cli-info"}
 
             if (file.cv)
-            return { type: "cv-list", cvs: [{ type: file.cv.type, name: file.cv.filename, size: file.cv.size }], color: "cli-green" };
+            return { type: "cv-view", cv: file.cv, color: "cli-green" };
 
             return { type: "markdown", file, color: "cli-green" }
         },
@@ -156,11 +156,14 @@ export const commands: CommandDefinition[] = [
         description: "get a copy of my cv.",
         run: (args, ctx) => {
             const cvs = ctx.site.cvs;
+            ctx.goToPlace("my_cv");
+
             if (cvs.length === 0) return { type: "error", value: "no cv available right now.", color: "cli-info" };
             if (!args[0]) return { type: "cv-list", cvs, color: "cli-green" };
 
             const cv = cvs.find((c) => c.type === args[0].toLowerCase());
-
+            if (cv)return {type: "cv-view", cv: cv, color: "cli-green"}
+            
             if (!cv) return { 
                 type: "error", 
                 value: `no cv version "${args[0]}". available: ${cvs.map((c) => c.type).join(", ")}`,

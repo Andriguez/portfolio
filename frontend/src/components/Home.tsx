@@ -18,8 +18,8 @@ export function Home() {
         const open = searchParams.get("open");
         let command: string | null = null;
 
-        if (open) command = `cat "${open.replace(/"/g, "")}"`;
-        else if (location.pathname.startsWith("/my-cv")) command = "cv";
+        if (open) command = `cat ${open.replace(/"/g, "")}`;
+        else if (location.pathname.startsWith("/my_cv")) command = "cv";
 
         return {mode, command: mode === "cli" ? command: null}
     });
