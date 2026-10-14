@@ -98,7 +98,7 @@ export function GridColumn({
                         onTouchEnd={handleTouchEnd}
                     >
                         <span className="list-row-icon">
-                            {item.type === "folder" ? "📁" : item.cv ? <FileUser size="16" /> : "📄"}
+                            {item.type === "folder" ? "📁" : item.cv ? "📃" : "📄"}
                         </span>
 
                         <span className="list-row-name">
@@ -106,11 +106,7 @@ export function GridColumn({
                         </span>
 
                         <span className="list-row-date">
-                            { 
-                                item.updatedAt ? new Date(item.updatedAt).toLocaleDateString()
-                                : item.cv != null ? item.cv.uploaded_at
-                                    : "—"
-                            }
+                            { item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : "—" }
                         </span>
                     </div>
                 ))}

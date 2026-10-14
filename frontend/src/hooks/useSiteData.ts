@@ -7,9 +7,9 @@ export type SiteData = {
     cvs: { 
         id: number;
         type: string;
-        name: string;
+        filename: string;
         size: number;
-        downloads: number;
+        download_count: number;
         uploaded_at: string;
     }[];
 };

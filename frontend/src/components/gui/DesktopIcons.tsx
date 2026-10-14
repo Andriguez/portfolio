@@ -8,10 +8,10 @@ export function DesktopIcons({
 
     return (
         <div className="desktop-icons">
-              <div className="desktop-icon">
+              {/* <div className="desktop-icon">
                 <Camera size={30} />
                 <span>Smile :{`)`}</span>
-            </div>
+            </div> */}
             <div className="desktop-icon" onClick={onRestore}>
                 <ComputerIcon size={30} />
                 <span>ANDRIGUEZ</span>

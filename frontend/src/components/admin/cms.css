@@ -7,6 +7,19 @@
     font-family: 'IBM Plex Mono', monospace;
     color: var(--cli-green);
     overflow-y: auto;
+
+    button {
+        background: transparent;
+        border: 1px solid var(--cli-green-dim);
+        color: var(--cli-green-dim);
+        border-radius: 4px;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+        font-family: inherit;
+        cursor: pointer;
+        margin-right: 0.4rem;
+    }
+
 }
 
 .admin-header {
@@ -323,16 +336,4 @@
     font-family: inherit;
     font-size: 0.85rem; flex: 1;
     min-width: 140px;
-}
-
-button {
-        background: transparent;
-        border: 1px solid var(--cli-green-dim);
-        color: var(--cli-green-dim);
-        border-radius: 4px;
-        padding: 0.3rem 0.6rem;
-        font-size: 0.75rem;
-        font-family: inherit;
-        cursor: pointer;
-        margin-right: 0.4rem;
 }
