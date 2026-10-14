@@ -30,7 +30,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
 
     const { data: site } = useSite();
     
-    const inCv = vfs.place === "my-cv";
+    const inCv = vfs.place === "my_cv";
     const cvNodes = useMemo(() => site.cvs.map(cvToNode), [site.cvs]);
 
     const openSlug = searchParams.get("open");
@@ -72,7 +72,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
         }, { replace: true });
     }
 
-    function handleCvIcon() { vfs.goToPlace("my-cv"); handleRestoreWindow(); }
+    function handleCvIcon() { vfs.goToPlace("my_cv"); handleRestoreWindow(); }
 
     useEffect(() => {
         if (!openFile) return;
@@ -189,7 +189,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                                 <div className="menu-item" onClick={() => { setChangelogOpen(true); setMenuOpen(false); }}>read changelog.md</div>
 
                                 {hasCv && (
-                                    <div className="menu-item menu-item--mobile-only" onClick={() => { vfs.goToPlace("my-cv"); setMenuOpen(false); }}>my cv</div>
+                                    <div className="menu-item menu-item--mobile-only" onClick={() => { vfs.goToPlace("my_cv"); setMenuOpen(false); }}>my cv</div>
                                 )}
                                 <div className="menu-item menu-item--mobile-only" onClick={() => { setLoginOpen(true); setMenuOpen(false); }}>login</div>
                                 {site.links.length > 0 && <div className="menu-divider" />}
