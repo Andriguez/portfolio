@@ -2,6 +2,7 @@ import type { VfsFolder, VfsFile } from "./vfs";
 import type { CommandOutput } from "./CommandOutput";
 import type { SiteData } from "../hooks/useSiteData";
 import type { Place } from "../hooks/useVfs";
+import changelog from "../../CHANGELOG.md?raw";
 
 type CommandContext = {
     currentFolder: VfsFolder;
@@ -279,9 +280,10 @@ export const commands: CommandDefinition[] = [
         name: "changelog",
         usage: "changelog",
         show: false,
-        description: "check what i have been doing in here. [implement]",
+        description: "check what i have been doing in here.",
+
         run: () => ({
-            type: "text", value: "...", color: "cli-green"
+            type: "changelog", file: changelog ,color: "cli-green"
         })
     },
     {

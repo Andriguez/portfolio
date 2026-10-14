@@ -14,10 +14,10 @@ function TreeNode({
 }) {
     const nodePath = pathSoFar ? `${pathSoFar}/${node.slug}` : node.slug;
     const isExpanded = expandedPaths.has(nodePath);
-    const childFolders = node.children?.filter((c) => c.type === "folder") as VfsFolder[];
+    const childFolders = (node.children ?? []).filter((c): c is VfsFolder => c.type === "folder");
 
     function toggleExpand(e: React.MouseEvent) {
-        e.stopPropagation(); // don't also navigate when just expanding
+        e.stopPropagation();
         setExpandedPaths((prev) => {
             const next = new Set(prev);
             next.has(nodePath) ? next.delete(nodePath) : next.add(nodePath);
@@ -25,12 +25,14 @@ function TreeNode({
         });
     }
 
+    const isActive = vfs.currentPath === `/${nodePath}`;
+
     return (
         <div>
             <div
-                className={`tree-row ${vfs.currentPath === "/" && !vfs.place ? "tree-row--active" : ""}`}
+                className={`tree-row ${isActive ? "tree-row--active" : ""}`}
                 style={{ paddingLeft: `${depth * 1.1}rem` }}
-                onClick={() => vfs.goToPath([])}
+                onClick={() => vfs.goToPath(nodePath.split("/"))}
             >
                 <span className="tree-disclosure" onClick={toggleExpand}>
                     {childFolders.length > 0
@@ -67,7 +69,7 @@ export function TreeColumn({
             </div>
             {pcExpanded && (
                 <div className="tree-pc-contents">
-                    <div className={`tree-row ${vfs.currentPath === "/" ? "tree-row--active" : ""}`} onClick={() => vfs.goToPath([])}>
+                    <div className={`tree-row ${vfs.currentPath === "/" && !vfs.place ? "tree-row--active" : ""}`} onClick={() => vfs.goToPath([])}>
                         <span className="tree-disclosure" />
                         <House className="tree-folder-icon" size={15} />
                         <span className="tree-label">home</span>
@@ -80,7 +82,7 @@ export function TreeColumn({
             )}
             
             {site.cvs.length > 0 && (
-                <div className={`tree-row tree-row--pcn ${vfs.place === "cv" ? "tree-row--active" : ""}`} onClick={() => vfs.goToPlace("cv")}>
+                <div className={`tree-row tree-row--pcn ${vfs.place === "my-cv" ? "tree-row--active" : ""}`} onClick={() => vfs.goToPlace("my-cv")}>
                     <FileUser size={15} />
                     <span className="tree-label">My CV</span>
                 </div>

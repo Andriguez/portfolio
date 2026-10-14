@@ -19,7 +19,7 @@ export function Home() {
         let command: string | null = null;
 
         if (open) command = `cat "${open.replace(/"/g, "")}"`;
-        else if (location.pathname.startsWith("/cv")) command = "cv";
+        else if (location.pathname.startsWith("/my-cv")) command = "cv";
 
         return {mode, command: mode === "cli" ? command: null}
     });

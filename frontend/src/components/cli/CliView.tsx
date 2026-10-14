@@ -47,7 +47,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
         children: site.cvs.map(cvToNode),
     }), [site.cvs]);
 
-    const activeFolder = place === "cv" ? cvFolder : (currentFolder ?? EMPTY_FOLDER);
+    const activeFolder = place === "my-cv" ? cvFolder : (currentFolder ?? EMPTY_FOLDER);
 
 
     function getSuggestion(value: string): string | null {

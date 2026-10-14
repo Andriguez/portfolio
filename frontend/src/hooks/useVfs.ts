@@ -3,8 +3,8 @@ import type { VfsNode, VfsFolder } from "../types/vfs";
 import { fetchVfsTree } from "../api/vfs.ts";
 import { useEffect, useState } from "react";
 
-export type Place = "cv";
-const PLACES: Place[] = ["cv"];
+export type Place = "my-cv";
+const PLACES: Place[] = ["my-cv"];
 
 function findNode(current: VfsFolder, pathParts: string[]): VfsNode | null {
     if (pathParts.length === 0) return current;
@@ -70,7 +70,7 @@ export function useVfs() {
 
     function cd(target: string): VfsFolder | null {
         if (!root) return null;
-        const resolved = resolvePath(root, pathParts, target); // <- root passed explicitly
+        const resolved = resolvePath(root, pathParts, target);
         if (!resolved) return null;
         const folder = getFolder(resolved);
         if (!folder) return null;
