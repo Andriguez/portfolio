@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
 from .. import models, schemas
-from ..database import get_db
 from ..auth import require_admin
+from ..database import DbSession
 
 router = APIRouter(prefix="/api/vfs", tags=["vfs"])
 
@@ -17,11 +18,11 @@ def check_reserved(db: Session, parent_id: int | None, slug: str):
         raise HTTPException(status_code=400, detail=f'"{slug}" is reserved for site routing.')
 
 @router.get("", response_model=list[schemas.VfsNodeOut])
-def list_nodes(db: Session = Depends(get_db)):
+def list_nodes(db: DbSession):
     return db.query(models.VfsNode).all()
 
 @router.post("", response_model=schemas.VfsNodeOut, dependencies=[Depends(require_admin)])
-def create_node(payload: schemas.VfsNodeCreate, db: Session = Depends(get_db)):
+def create_node(payload: schemas.VfsNodeCreate, db: DbSession):
     check_reserved(db, payload.parent_id, payload.slug)
 
     node = models.VfsNode(**payload.model_dump())
@@ -31,7 +32,7 @@ def create_node(payload: schemas.VfsNodeCreate, db: Session = Depends(get_db)):
     return node
 
 @router.patch("/{node_id}", response_model=schemas.VfsNodeOut, dependencies=[Depends(require_admin)])
-def update_node(node_id: int, payload: schemas.VfsNodeUpdate, db: Session = Depends(get_db)):
+def update_node(node_id: int, payload: schemas.VfsNodeUpdate, db: DbSession):
     node = db.get(models.VfsNode, node_id)
     if not node:
         raise HTTPException(status_code=404, detail="node not found")
@@ -46,7 +47,7 @@ def update_node(node_id: int, payload: schemas.VfsNodeUpdate, db: Session = Depe
     return node
 
 @router.delete("/{node_id}", dependencies=[Depends(require_admin)])
-def delete_node(node_id: int, db: Session = Depends(get_db)):
+def delete_node(node_id: int, db: DbSession):
     node = db.get(models.VfsNode, node_id)
     if not node:
         raise HTTPException(status_code=404, detail="node not found")

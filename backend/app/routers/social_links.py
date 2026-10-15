@@ -1,10 +1,11 @@
 from urllib.parse import urlparse
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, field_validator
-from sqlalchemy.orm import Session
+
 from .. import models
-from ..database import get_db
 from ..auth import require_admin
+from ..database import DbSession
 
 router = APIRouter(prefix="/api/links", tags=["links"])
 
@@ -25,11 +26,11 @@ def serialize(link: models.SocialLink):
     return {"id": link.id, "name": link.name, "url": link.url}
 
 @router.get("")
-def list_links(db: Session = Depends(get_db)):
+def list_links(db: DbSession):
     return [serialize(l) for l in db.query(models.SocialLink).order_by(models.SocialLink.id).all()]
 
 @router.post("", dependencies=[Depends(require_admin)])
-def create_linkn(payload: SocialLinkIn, db: Session = Depends(get_db)):
+def create_linkn(payload: SocialLinkIn, db: DbSession):
     link = models.SocialLink(**payload.model_dump())
     db.add(link)
     db.commit()
@@ -37,7 +38,7 @@ def create_linkn(payload: SocialLinkIn, db: Session = Depends(get_db)):
     return serialize(link)
 
 @router.put("/{link_id}", dependencies=[Depends(require_admin)])
-def update_link(link_id: int, payload: SocialLinkIn, db: Session = Depends(get_db)):
+def update_link(link_id: int, payload: SocialLinkIn, db: DbSession):
     link = db.get(models.SocialLink, link_id)
     if not link:
         raise HTTPException(status_code=404, detail="social link not found")
@@ -46,7 +47,7 @@ def update_link(link_id: int, payload: SocialLinkIn, db: Session = Depends(get_d
     return serialize(link)
 
 @router.delete("/{link_id}", dependencies=[Depends(require_admin)])
-def delete_link(link_id: int, db: Session = Depends(get_db)):
+def delete_link(link_id: int, db: DbSession):
     link = db.get(models.SocialLink, link_id)
     if not link:
         raise HTTPException(status_code=404, detail="link not found")

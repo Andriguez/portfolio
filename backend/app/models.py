@@ -1,8 +1,21 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, Enum, DateTime, Boolean, BigInteger
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy.sql import func
-from .database import Base
 import enum
+
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
+from sqlalchemy.orm import backref, relationship
+from sqlalchemy.sql import func
+
+from .database import Base
+
 
 class NodeType(str, enum.Enum):
     folder = "folder"

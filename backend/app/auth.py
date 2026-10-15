@@ -1,9 +1,9 @@
 import os
-from datetime import datetime, timedelta, timezone
-from jose import jwt, JWTError
-from passlib.context import CryptContext
+from datetime import UTC, datetime, timedelta
+
 from fastapi import HTTPException, Request
-from typing_extensions import deprecated
+from jose import JWTError, jwt
+from passlib.context import CryptContext
 
 JWT_SECRET = os.environ["JWT_SECRET"]
 ALGORITHM = "HS256"
@@ -16,7 +16,7 @@ def verify_password(password: str) -> bool:
     return pwd_context.verify(password, ADMIN_PASSWORD_HASH)
 
 def create_access_token() -> str:
-    expire = datetime.now(timezone.utc) + timedelta(hours=2)
+    expire = datetime.now(UTC) + timedelta(hours=2)
     return jwt.encode({"sub": "admin", "exp": expire}, JWT_SECRET, algorithm=ALGORITHM)
 
 def require_admin(request: Request):
@@ -33,7 +33,7 @@ def require_admin(request: Request):
 
 
 def create_pending_token() -> str:
-    expire = datetime.now(timezone.utc) + timedelta(minutes=5)
+    expire = datetime.now(UTC) + timedelta(minutes=5)
     return jwt.encode({"sub": "admin", "purpose": "2fa", "exp": expire}, JWT_SECRET, algorithm=ALGORITHM)
 
 def require_pending(request: Request):

@@ -1,15 +1,27 @@
-import os, time, hmac, secrets
+import hmac
+import os
+import secrets
+import time
+
 import pyotp
-from fastapi import APIRouter, Depends, HTTPException, Response, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
+
 from .. import models
-from ..database import get_db
-from ..schemas import LoginRequest
-from ..auth import (verify_password, create_access_token, create_pending_token,
-                    require_admin, require_pending, pwd_context, PENDING_COOKIE)
-from ..security import encrypt, decrypt
+from ..auth import (
+    PENDING_COOKIE,
+    create_access_token,
+    create_pending_token,
+    pwd_context,
+    require_admin,
+    require_pending,
+    verify_password,
+)
+from ..database import DbSession
 from ..limiter import limiter
+from ..schemas import LoginRequest
+from ..security import decrypt, encrypt
 
 router = APIRouter(prefix="/api", tags=["auth"])
 COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "true").lower() == "true"
@@ -41,7 +53,7 @@ def use_recovery_code(db: Session, code: str) -> bool:
 # if you ever put this behind a reverse proxy or CDN, it'll see the proxy's IP instead of the real visitor's unless you configure trusted-proxy headers.
 @router.post("/login")
 @limiter.limit("5/minute")
-def login(request: Request, payload: LoginRequest, response: Response, db: Session = Depends(get_db)):
+def login(request: Request, payload: LoginRequest, response: Response, db: DbSession):
     if not verify_password(payload.password):
         raise HTTPException(status_code=401, detail="incorrect password")
 
@@ -55,7 +67,7 @@ def login(request: Request, payload: LoginRequest, response: Response, db: Sessi
 
 @router.post("/login/totp")
 @limiter.limit("5/minute")
-def login_totp(request: Request, payload: TotpRequest, response: Response, db: Session = Depends(get_db)):
+def login_totp(request: Request, payload: TotpRequest, response: Response, db: DbSession):
     require_pending(request)
     sec = db.get(models.AdminSecurity, 1)
     if not sec or not sec.totp_enabled:
@@ -90,13 +102,13 @@ def me(_: None = Depends(require_admin)):
     return {"ok": True}
 
 @router.get("/2fa/status", dependencies=[Depends(require_admin)])
-def status(db: Session = Depends(get_db)):
+def status(db: DbSession):
     sec = db.get(models.AdminSecurity, 1)
     left = db.query(models.RecoveryCode).filter(models.RecoveryCode.used.is_(False)).count()
     return {"enabled": bool(sec and sec.totp_enabled), "recovery_left": left}
 
 @router.post("/2fa/setup", dependencies=[Depends(require_admin)])
-def setup_2fa(db: Session = Depends(get_db)):
+def setup_2fa(db: DbSession):
     sec = get_security(db)
     if sec.totp_enabled:
         raise HTTPException(status_code=400, detail="2fa is already enabled")
@@ -107,7 +119,7 @@ def setup_2fa(db: Session = Depends(get_db)):
 
 @router.post("/2fa/enable", dependencies=[Depends(require_admin)])
 @limiter.limit("5/minute")
-def enable_2fa(request: Request, payload: TotpRequest, db: Session = Depends(get_db)):
+def enable_2fa(request: Request, payload: TotpRequest, db: DbSession):
     sec = get_security(db)
 
     if sec.totp_enabled or not sec.totp_secret_enc:

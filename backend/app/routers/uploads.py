@@ -1,12 +1,15 @@
+import asyncio
 import os
 import uuid
 from datetime import datetime
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from pathlib import Path
+
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import or_
-from sqlalchemy.orm import Session
+
 from .. import models
-from ..database import get_db
 from ..auth import require_admin
+from ..database import DbSession, UploadFileAn
 
 router = APIRouter(prefix="/api/uploads", tags=["uploads"])
 
@@ -18,7 +21,7 @@ MAX_SIZE = 5 * 1024 * 1024 # 5MB
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @router.post("", dependencies=[Depends(require_admin)])
-async def upload_image(file: UploadFile = File(...)):
+async def upload_image(file: UploadFileAn):
     if file.content_type not in ALLOWED_TYPES:
         raise HTTPException(status_code=400, detail="unsupported image type")
 
@@ -31,13 +34,12 @@ async def upload_image(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="unsupported file extension")
 
     safe_name = f"{uuid.uuid4().hex}{ext}"
-    with open(os.path.join(UPLOAD_DIR, safe_name), "wb") as f:
-        f.write(contents)
+    await asyncio.to_thread(Path(UPLOAD_DIR, safe_name).write_bytes, contents)
 
     return {"url": f"/uploads/{safe_name}"}
 
 @router.get("", dependencies=[Depends(require_admin)])
-def list_uploads(db: Session = Depends(get_db)):
+def list_uploads(db: DbSession):
     files = []
     for filename in os.listdir(UPLOAD_DIR):
         file_path = os.path.join(UPLOAD_DIR, filename)

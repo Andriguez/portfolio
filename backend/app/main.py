@@ -3,9 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from .limiter import limiter
+
 from .database import Base, engine
-from .routers import vfs, auth, uploads, content, cv, social_links
+from .limiter import limiter
+from .routers import auth, content, cv, social_links, uploads, vfs
 
 Base.metadata.create_all(bind=engine)
 
