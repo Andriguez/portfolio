@@ -8,7 +8,7 @@ import { ExplorerButtons } from './ExplorerButtons';
 import { TreeColumn } from "./TreeColumn";
 import { GridColumn } from "./GridColumn";
 import { DetailPanel } from "./DetailPanel";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Mail } from "lucide-react";
 import { useSite } from "../../context/SiteDataContext.tsx";
 import { cvToNode } from "../../helpers/cvNodes.ts";
 import type {VfsFile, VfsNode} from "../../types/vfs.ts";
@@ -184,17 +184,19 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                                 </div>
                                 <div className="menu-item" onClick={() => { setAboutOpen(true); setMenuOpen(false); }}>about andi.sys</div>
                                 <div className="menu-item" onClick={() => { setChangelogOpen(true); setMenuOpen(false); }}>read changelog.md</div>
-
                                 {hasCv && (
-                                    <div className="menu-item menu-item--mobile-only" onClick={() => { vfs.goToPlace(CV_PLACE); setMenuOpen(false); }}>my cv</div>
+                                    <div className="menu-item menu-item--mobile-only" onClick={() => { vfs.goToPlace(CV_PLACE); setMenuOpen(false); }}>check my CV</div>
                                 )}
-                                <div className="menu-item menu-item--mobile-only" onClick={() => { setLoginOpen(true); setMenuOpen(false); }}>login</div>
+
                                 {site.links.length > 0 && <div className="menu-divider" />}
                                 {site.links.map((l) => (
                                     <a key={l.id} className="menu-item menu-item--link" href={l.url} target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>
                                         go to {l.name.toLowerCase()} <ExternalLink size={11} />
                                     </a>
                                 ))}
+                                <a key={"email"} className="menu-item menu-item--link" href="mailto:andhriguez@oulook.com" onClick={() => setMenuOpen(false)}>
+                                    send me an email <Mail size={11} />
+                                </a>
                             </div>
                         )}
                     </div>

@@ -89,7 +89,6 @@ export function Home() {
 
     return(
         <div className="screen">
-
             {
                 booted && (
                     <div className="status-line">

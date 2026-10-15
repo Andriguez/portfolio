@@ -8,6 +8,7 @@ from typing_extensions import deprecated
 JWT_SECRET = os.environ["JWT_SECRET"]
 ALGORITHM = "HS256"
 ADMIN_PASSWORD_HASH = os.environ["ADMIN_PASSWORD_HASH"]
+PENDING_COOKIE = "pending_2fa"
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -24,6 +25,23 @@ def require_admin(request: Request):
         raise HTTPException(status_code=401, detail="not authenticated")
 
     try:
-        jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
     except JWTError:
         raise HTTPException(status_code=401, detail="invalid or expired session")
+    if payload.get("purpose"):
+        raise HTTPException(status_code=401, detail="invalid session")
+
+
+def create_pending_token() -> str:
+    expire = datetime.now(timezone.utc) + timedelta(minutes=5)
+    return jwt.encode({"sub": "admin", "purpose": "2fa", "exp": expire}, JWT_SECRET, algorithm=ALGORITHM)
+
+def require_pending(request: Request):
+    token = request.cookies.get(PENDING_COOKIE)
+
+    try:
+        payload = jwt.decode(token or "", JWT_SECRET, algorithms=[ALGORITHM])
+    except JWTError:
+        raise HTTPException(status_code=401, detail="login expired")
+    if payload.get("purpose") != "2fa":
+        raise HTTPException(status_code=401, detail="login expired")
