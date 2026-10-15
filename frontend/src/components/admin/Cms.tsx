@@ -3,11 +3,12 @@ import {SafeHtml} from "../SafeHtml.tsx";
 import type { UploadedFile } from "../../types/UploadedFile.ts";
 import "./cms.css";
 import {useNavigate} from "react-router-dom";
-import { CopyIcon, DeleteIcon, EditIcon, Save } from "lucide-react";
-import { API_URL, apiFetch, assertApiUrl } from "../../api/client.ts";
+import { CopyIcon, DeleteIcon, EditIcon } from "lucide-react";
+import { apiFetch, assertApiUrl } from "../../api/client.ts";
 import { StaticContentEditor } from './StaticContentEditor.tsx';
 import { SocialLinksManager } from './SocialLinksManager.tsx';
 import { CvManager } from './CvManager.tsx';
+import { SecurityPanel } from './SecurityPanel.tsx';
 
 
 // TO-DO
@@ -255,6 +256,7 @@ export function CMS(){
             <StaticContentEditor contentKey='stack_info' title='Edit Stack Info' />
             <SocialLinksManager />
             <CvManager />
+            <SecurityPanel />
         </div>
     );
 }

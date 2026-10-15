@@ -7,6 +7,8 @@ export function LoginModal({ open, onOpenChange }: { open: boolean; onOpenChange
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [step, setStep] = useState<"password" | "code">("password");
+    const [code, setCode] = useState("");
 
     const navigate = useNavigate();
 
@@ -15,18 +17,31 @@ export function LoginModal({ open, onOpenChange }: { open: boolean; onOpenChange
         setLoading(true);
         setError(null);
 
-        const res = await apiFetch("/api/login", {
+        const isCode = step === "code"
+
+        const res = await apiFetch(isCode ? "/api/login/totp" : "/api/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ password }),
+            body: JSON.stringify(isCode ? { code } : { password }),
         });
-        if (!res.ok) {
-            setError("incorrect password.");
-        } else {
-            onOpenChange(false);
-            navigate("/admin");
-        }
         setLoading(false);
+
+        if (!res.ok) {
+            if (res.status === 429) setError("too many attempts!");
+            else setError(isCode ? "wrong code." : "incorrect password.");
+
+            if(isCode && res.status === 401) { setStep("password"); setCode(""); }
+            return;
+        }
+
+        const data = await res.json();
+        if (data.needs_totp) { 
+            setPassword("");
+            setStep("code");
+            return;
+        }
+        onOpenChange(false);
+        navigate("/admin");
     }
 
     function handleCancel() {
@@ -43,14 +58,29 @@ export function LoginModal({ open, onOpenChange }: { open: boolean; onOpenChange
                 <Dialog.Content className="login-modal-content">
                     <form onSubmit={handleSubmit}>
                         <div>
-                            <input
-                            type="password"
-                            autoFocus
-                            className="login-modal-input"
-                            placeholder="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
+                            { 
+                                step === "code" && (
+                                    <input
+                                    type="numeric"
+                                    autoFocus
+                                    autoComplete="one-time-code"
+                                    className="login-modal-input"
+                                    placeholder="code"
+                                    value={code}
+                                    onChange={(e) => setCode(e.target.value)}
+                                    />
+                                )}
+                            {
+                                step !== "code" && (
+                                <input
+                                    type="password"
+                                    autoFocus
+                                    className="login-modal-input"
+                                    placeholder="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                            )}
                         </div>
                         <div className="login-modal-actions">
                             <button type="button" className="login-modal-cancel" onClick={handleCancel}>cancel</button>

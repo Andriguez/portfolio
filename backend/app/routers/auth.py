@@ -89,8 +89,13 @@ def logout(response: Response):
 def me(_: None = Depends(require_admin)):
     return {"ok": True}
 
+@router.get("/2fa/status", dependencies=[Depends(require_admin)])
+def status(db: Session = Depends(get_db)):
+    sec = db.get(models.AdminSecurity, 1)
+    left = db.query(models.RecoveryCode).filter(models.RecoveryCode.used.is_(False)).count()
+    return {"enabled": bool(sec and sec.totp_enabled), "recovery_left": left}
 
-@router.get("/2fa/setup", dependencies=[Depends(require_admin)])
+@router.post("/2fa/setup", dependencies=[Depends(require_admin)])
 def setup_2fa(db: Session = Depends(get_db)):
     sec = get_security(db)
     if sec.totp_enabled:
