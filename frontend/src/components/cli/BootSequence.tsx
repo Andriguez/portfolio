@@ -12,7 +12,7 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
         }
         const t = setTimeout(() => setVisibleCount((c) => c + 1), 1200);
         return () => clearTimeout(t);
-    }, [visibleCount]);
+    });
 
     return (
         <div className="cli-boot">

@@ -1,4 +1,4 @@
-import type { VfsNode, VfsFolder } from "../types/vfs";
+import type { VfsFolder, VfsNode } from "../types/vfs";
 import { apiFetch } from "./client";
 
 type FlatNode = {
@@ -11,22 +11,46 @@ type FlatNode = {
 export async function fetchVfsTree(): Promise<VfsFolder> {
     const res = await apiFetch("/api/vfs");
     if (!res.ok) throw new Error("failed to load site content");
+
     const flat: FlatNode[] = await res.json();
 
-    const byId = new Map<number, any>();
+    const entries = new Map<number, { node: VfsNode; parentId: number | null }>();
+
     for (const n of flat) {
-        byId.set(n.id, n.type === "folder"
-            ? { type: "folder", name: n.name, slug: n.slug, description: n.description ?? undefined, children: [], _id: n.id, _parentId: n.parent_id }
-            : { type: "file", name: n.name, slug: n.slug, description: n.description ?? undefined,
-                content: { title: n.title ?? n.name, body: n.body ?? "", image: n.image ?? undefined },
-                updatedAt: n.updated_at ?? undefined, _id: n.id, _parentId: n.parent_id });
+        const node: VfsNode =
+            n.type === "folder" 
+            ? { 
+                type: "folder", name: n.name, slug: n.slug,
+                description: n.description ?? undefined, children: [], 
+            }
+            : { 
+                type: "file", name: n.name, 
+                slug: n.slug, description: n.description ?? undefined,
+                updatedAt: n.updated_at ?? undefined,
+                content: { 
+                    title: n.title ?? n.name, 
+                    body: n.body ?? "", 
+                    image: n.image ?? undefined 
+                },
+            };
+            
+        entries.set(n.id, { node, parentId: n.parent_id})
     }
 
-    let root: VfsFolder | null = null;
-    for (const node of byId.values()) {
-        if (node._parentId === null) root = node;
-        else byId.get(node._parentId)?.children.push(node);
+    const roots: VfsFolder[] = [];
+
+    for (const { node, parentId } of entries.values()) {
+        if (parentId === null) {
+            if (node.type === "folder") roots.push(node);
+            continue;
+        }
+        const parent = entries.get(parentId)?.node;
+
+        if (parent?.type === "folder") parent.children.push(node);
     }
-    if (!root) throw new Error("no root node found");
-    return root as VfsFolder;
+
+
+    if (roots.length !== 1) throw new Error(`expected exactly one root folder, found ${roots.length}`);
+
+    return roots[0];
 }

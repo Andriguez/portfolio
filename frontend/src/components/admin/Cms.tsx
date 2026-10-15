@@ -32,15 +32,18 @@ export function CMS(){
     const [editing, setEditing] = useState<Partial<CMSNode> | null>(null);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
-
-    async function loadNodes() {
-        const res = await apiFetch("/api/vfs");
-        setNodes(await res.json());
-    }
+    const [reloadKey, setReloadKey] = useState(0);
+    const reload = () => setReloadKey((k) => k + 1);
 
     useEffect(() => {
-        loadNodes();
-    }, []);
+        let cancelled = false;
+        apiFetch("/api/vfs")
+        .then((res) => (res.ok ? res.json() : Promise.reject(new Error(String(res.status)))))
+        .then((data: CMSNode[]) => {if (!cancelled) setNodes(data); })
+            .catch(() => { if (!cancelled) setError("couldn't load content."); });
+        return () => { cancelled = true; };
+    }, [reloadKey]);
+
 
     async function handleSave() {
         if (!editing) return;
@@ -53,7 +56,7 @@ export function CMS(){
         });
         if (!res.ok) { setError("save failed — check you're still logged in"); return; }
         setEditing(null);
-        loadNodes();
+        reload();
     }
 
     async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>, source: string) {
@@ -80,7 +83,7 @@ export function CMS(){
         if (!confirm("delete this node? this can't be undone.")) return;
         const res = await apiFetch(`/api/vfs/${id}`, { method: "DELETE" });
         if (!res.ok) { setError("delete failed — does it still have children?"); return; }
-        loadNodes();
+        reload();
     }
 
     async function handleLogout() {
@@ -123,21 +126,6 @@ export function CMS(){
     function handleCopyUrl(url: string) {
         navigator.clipboard.writeText(url);
         alert(`URL: "${url}" copied to clipboard!`);
-    }
-
-    function handleCVUpload(e: React.ChangeEvent<HTMLInputElement>) {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        const formData = new FormData();
-        formData.append("file", file);
-        apiFetch("/api/cv", { method: "POST", body: formData })
-            .then((res) => {
-                if (!res.ok) { setError("CV upload failed"); return; }
-                alert("CV uploaded successfully!");
-                e.target.value = "";
-            })
-            .catch(() => setError("CV upload failed"));
     }
 
     return(

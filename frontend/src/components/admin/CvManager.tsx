@@ -8,11 +8,18 @@ export function CvManager() {
     const [type, setType] = useState("");
     const [error, setError] = useState<string | null>(null);
 
-    async function load() {
-        const res = await apiFetch("/api/cv/admin");
-        if (res.ok) setCvs(await res.json());
-    }
-    useEffect(() => { load(); }, [])
+    const [reloadKey, setReloadKey] = useState(0);
+    const reload = () => setReloadKey((k) => k + 1);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        apiFetch("/api/cv/admin")
+        .then((res) => res.ok ? res.json() : Promise.reject(new Error(String(res.status))))
+        .then((data: Cv[]) => { if (!cancelled) setCvs(data); })
+            .catch(() => { if (!cancelled) setError("couldn't load cvs info.") });
+        return () => { cancelled = true };
+    }, [reloadKey])
 
     async function handleCvUpload(e:React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
@@ -41,7 +48,7 @@ export function CvManager() {
             const detail = (await res.json().catch(() => null))?.detail;
             setError(detail ?? "uplload failed")
         } else {
-            load();
+            reload();
         }
 
         e.target.value = "";
@@ -52,7 +59,7 @@ export function CvManager() {
         if (!confirm(`Delete "${cv.filename}" of type "${cv.type}"?`)) return;
         const res = await apiFetch(`/api/cv/${cv.type}`, { method: "DELETE" });
         if (!res.ok) { setError("delete failed"); return; }
-        load();
+        reload();
     }
 
     const shareLink = (t: string) => `${window.location.origin}/cv?open=${t}&mode=gui`;

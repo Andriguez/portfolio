@@ -20,7 +20,10 @@ function TreeNode({
         e.stopPropagation();
         setExpandedPaths((prev) => {
             const next = new Set(prev);
-            next.has(nodePath) ? next.delete(nodePath) : next.add(nodePath);
+            
+            if (next.has(nodePath)) next.delete(nodePath)
+            else next.add(nodePath);
+
             return next;
         });
     }

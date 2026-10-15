@@ -1,4 +1,3 @@
-import { FileUser } from "lucide-react";
 import type { useVfs } from "../../hooks/useVfs";
 import type { VfsNode } from "../../types/vfs";
 import { ExplorerItem } from "./ExplorerItem.tsx";
@@ -87,7 +86,7 @@ export function GridColumn({
                     <span>last updated</span>
                 </div>
 
-                {items.map((item) => (
+                {items?.map((item) => (
                     <div
                         key={item.slug}
                         className="list-row"

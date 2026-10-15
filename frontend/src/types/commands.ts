@@ -92,7 +92,7 @@ export const commands: CommandDefinition[] = [
                 if (ctx.site.cvs.length === 0)
                     return { type: "error", value: "cd: no cv available just yet..", color: "cli-info"}
 
-                ctx.goToPlace("cv");
+                ctx.goToPlace(CV_PLACE);
                 return { type: "none", color: "cli-green" };
             }
 
@@ -242,7 +242,7 @@ export const commands: CommandDefinition[] = [
         alias: "where",
         show: false,
         description: "wanna know where you at?",
-        run: ([], ctx: CommandContext) => ({
+        run: (args, ctx: CommandContext) => ({
             type: "text",
             value: ctx.currentFolder.name,
             color: "cli-green"

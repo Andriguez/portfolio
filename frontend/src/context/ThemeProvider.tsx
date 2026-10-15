@@ -1,19 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-
-type Theme = "dark" | "light";
-const KEY = "theme";
-
-function readInitial(): Theme {
-    try {
-        const saved = localStorage.getItem(KEY);
-        if (saved === "light" || saved === "dark") return saved;
-    } catch { /*ignore */ }
-
-    return "dark";
-}
-
-type ThemeValue = { theme: Theme; setTheme: (t: Theme) => void; toggleTheme: () => void}
-const ThemeContext = createContext<ThemeValue | null >(null);
+import { useEffect, useCallback, useMemo, useState, type ReactNode } from "react";
+import { readInitial, type Theme, KEY, ThemeContext } from "./ThemeContext";
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
     const [theme, setTheme] = useState<Theme>(readInitial);
@@ -37,10 +23,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const value = useMemo(() => ({ theme, setTheme, toggleTheme }), [theme, toggleTheme]);
 
     return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
-}
-
-export function useTheme() {
-    const ctx = useContext(ThemeContext);
-    if (!ctx) throw new Error("useTheme must be inside ThemeProvider");
-    return ctx;
 }

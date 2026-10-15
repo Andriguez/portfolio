@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ComputerIcon, Trash2, KeyRound, Sparkles, FileUser, Camera } from "lucide-react";
+import { ComputerIcon, Trash2, KeyRound, Sparkles, FileUser } from "lucide-react";
 
 export function DesktopIcons({
                                  onRestore, onLoginClick, onCvClick
