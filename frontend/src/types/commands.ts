@@ -13,6 +13,7 @@ type CommandContext = {
     goToPlace: (p: Place) => void;
     theme: "dark" | "light";
     setTheme: (t: "dark" | "light") => void;
+    resolveFolder: (target: string) => VfsFolder | null;
 };
 
 export type CommandDefinition = {
@@ -61,11 +62,15 @@ export const commands: CommandDefinition[] = [
         show: true,
         description: "check what's in here.",
         run: (_args, ctx) => {
-            const folder = _args[0] ? ctx.cd(_args[0]) : ctx.currentFolder;
+            const folder = _args[0] ? ctx.resolveFolder(_args[0]) : ctx.currentFolder;
+
+            if (!folder) {
+                return { type: "error", value: `ls: no such page ${_args[0]}.`, color: "cli-info"}
+            }
 
             return ({
                 type: "list",
-                items: folder.children?.map((c) => ({
+                items: (folder.children ?? []).map((c) => ({
                     name: c.name,
                     slug: c.slug,
                     isFolder: c.type === "folder",
@@ -242,7 +247,7 @@ export const commands: CommandDefinition[] = [
         alias: "where",
         show: false,
         description: "wanna know where you at?",
-        run: (args, ctx: CommandContext) => ({
+        run: (_args, ctx: CommandContext) => ({
             type: "text",
             value: ctx.currentFolder.name,
             color: "cli-green"

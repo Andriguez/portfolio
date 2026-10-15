@@ -73,14 +73,26 @@ export function useVfs() {
         return node?.type === "folder" ? node : null;
     }
 
-    function cd(target: string): VfsFolder | null {
+    function resolveTarget(target: string): { parts: string[]; folder: VfsFolder } | null {
         if (!root) return null;
-        const resolved = resolvePath(root, pathParts, target);
+
+        const parts = resolvePath(root, pathParts, target);
+        if (!parts) return null;
+
+        const folder = getFolder(parts);
+        return folder ? { parts, folder } : null;
+    }
+
+    function resolveFolder(target: string): VfsFolder | null {
+        return resolveTarget(target)?.folder ?? null;
+    }
+
+    function cd(target: string): VfsFolder | null {
+        const resolved = resolveTarget(target);
         if (!resolved) return null;
-        const folder = getFolder(resolved);
-        if (!folder) return null;
-        navigate("/" + resolved.join("/"));
-        return folder;
+
+        navigate("/" + resolved.parts.join("/"));
+        return resolved.folder;
     }
 
     function goToPath(parts: string[]) { navigate("/" + parts.join("/")); }
@@ -97,7 +109,7 @@ export function useVfs() {
         root, loading, error,
         currentFolder, currentPath: "/" + pathParts.join("/"),
         displayPath: place ? "/" + place : "/" + pathParts.join("/"),
-        pathParts, place, cd, goToPath, 
+        resolveFolder, pathParts, place, cd, goToPath, 
         goToPlace, resolveFile, getFolder,
     };
 }
