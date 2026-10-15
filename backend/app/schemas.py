@@ -12,8 +12,10 @@ class VfsNodeBase(BaseModel):
     body: str | None = None
     image: str | None = None
 
+
 class VfsNodeCreate(VfsNodeBase):
     parent_id: int | None = None
+
 
 class VfsNodeUpdate(BaseModel):
     name: str | None = None
@@ -24,12 +26,15 @@ class VfsNodeUpdate(BaseModel):
     image: str | None = None
     parent_id: int | None = None
 
+
 class VfsNodeOut(VfsNodeBase):
     id: int
     parent_id: int | None
     updated_at: datetime | None
+
     class Config:
         from_attributes = True
+
 
 class LoginRequest(BaseModel):
     password: str

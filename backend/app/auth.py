@@ -12,12 +12,15 @@ PENDING_COOKIE = "pending_2fa"
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
 def verify_password(password: str) -> bool:
     return pwd_context.verify(password, ADMIN_PASSWORD_HASH)
+
 
 def create_access_token() -> str:
     expire = datetime.now(UTC) + timedelta(hours=2)
     return jwt.encode({"sub": "admin", "exp": expire}, JWT_SECRET, algorithm=ALGORITHM)
+
 
 def require_admin(request: Request):
     token = request.cookies.get("access_token")
@@ -34,7 +37,12 @@ def require_admin(request: Request):
 
 def create_pending_token() -> str:
     expire = datetime.now(UTC) + timedelta(minutes=5)
-    return jwt.encode({"sub": "admin", "purpose": "2fa", "exp": expire}, JWT_SECRET, algorithm=ALGORITHM)
+    return jwt.encode(
+        {"sub": "admin", "purpose": "2fa", "exp": expire},
+        JWT_SECRET,
+        algorithm=ALGORITHM,
+    )
+
 
 def require_pending(request: Request):
     token = request.cookies.get(PENDING_COOKIE)

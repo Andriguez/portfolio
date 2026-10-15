@@ -8,8 +8,10 @@ from ..models import StaticContent
 router = APIRouter(prefix="/api/static_content", tags=["static_content"])
 ALLOWED_KEYS = {"hello_message", "stack_info"}
 
+
 class StaticContentUpdate(BaseModel):
     value: str = Field(..., min_length=1, max_length=5000)
+
 
 @router.get("")
 def get_static_content(db: DbSession):
@@ -18,6 +20,7 @@ def get_static_content(db: DbSession):
         if row.key in ALLOWED_KEYS:
             result[row.key] = row.value
     return result
+
 
 @router.put("/{key}", dependencies=[Depends(require_admin)])
 def update_static_content(key: str, content: StaticContentUpdate, db: DbSession):

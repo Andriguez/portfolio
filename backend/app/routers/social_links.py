@@ -9,6 +9,7 @@ from ..database import DbSession
 
 router = APIRouter(prefix="/api/links", tags=["links"])
 
+
 class SocialLinkIn(BaseModel):
     name: str = Field(min_length=1, max_length=50)
     url: str = Field(max_length=500)
@@ -22,12 +23,18 @@ class SocialLinkIn(BaseModel):
             raise ValueError("url must start with http:// or https://")
         return v
 
+
 def serialize(link: models.SocialLink):
     return {"id": link.id, "name": link.name, "url": link.url}
 
+
 @router.get("")
 def list_links(db: DbSession):
-    return [serialize(l) for l in db.query(models.SocialLink).order_by(models.SocialLink.id).all()]
+    return [
+        serialize(l)
+        for l in db.query(models.SocialLink).order_by(models.SocialLink.id).all()
+    ]
+
 
 @router.post("", dependencies=[Depends(require_admin)])
 def create_linkn(payload: SocialLinkIn, db: DbSession):
@@ -37,6 +44,7 @@ def create_linkn(payload: SocialLinkIn, db: DbSession):
     db.refresh(link)
     return serialize(link)
 
+
 @router.put("/{link_id}", dependencies=[Depends(require_admin)])
 def update_link(link_id: int, payload: SocialLinkIn, db: DbSession):
     link = db.get(models.SocialLink, link_id)
@@ -45,6 +53,7 @@ def update_link(link_id: int, payload: SocialLinkIn, db: DbSession):
     link.name, link.url = payload.name, payload.url
     db.commit()
     return serialize(link)
+
 
 @router.delete("/{link_id}", dependencies=[Depends(require_admin)])
 def delete_link(link_id: int, db: DbSession):
