@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, useLocation } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { Switch } from "radix-ui";
 import { Terminal, Eye } from "lucide-react";
 import { useVfs } from "../hooks/useVfs";
@@ -11,7 +11,6 @@ type Mode = "cli" | "gui";
 export function Home() {
     const vfs = useVfs();
     const [searchParams] = useSearchParams();
-    const location = useLocation();
 
     const [initial] = useState(() => {
         const mode : Mode = searchParams.get("mode") === "gui" ? "gui" : "cli";
@@ -19,7 +18,7 @@ export function Home() {
         let command: string | null = null;
 
         if (open) command = `cat ${open.replace(/"/g, "")}`;
-        else if (location.pathname.startsWith("/my_cv")) command = "cv";
+        else if (vfs.place) command = "cv";
 
         return {mode, command: mode === "cli" ? command: null}
     });

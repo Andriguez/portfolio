@@ -3,8 +3,10 @@ import type { VfsNode, VfsFolder } from "../types/vfs";
 import { fetchVfsTree } from "../api/vfs.ts";
 import { useEffect, useState } from "react";
 
-export type Place = "my_cv";
-const PLACES: Place[] = ["my_cv"];
+export const CV_PLACE = "my_cv";
+const PLACES = [CV_PLACE] as const;
+export type Place = (typeof PLACES)[number];
+
 
 function findNode(current: VfsFolder, pathParts: string[]): VfsNode | null {
     if (pathParts.length === 0) return current;
@@ -52,10 +54,13 @@ export function useVfs() {
     }, []);
 
     const rawParts = location.pathname.split("/").filter(Boolean);
-    const place = PLACES.find((p) => p === rawParts[0]) ?? null;
+    const place = rawParts.length === 1 ? (PLACES.find((p) => p === rawParts[0]) ?? null) : null
     const pathParts = place ? [] : rawParts;
 
-    const currentFolder = root ? ((findNode(root, pathParts) ?? root) as VfsFolder) : null
+    const found = root && !place ? findNode(root, pathParts) : null
+    const pathIsValid = found?.type === "folder";
+    const currentFolder = root ? (pathIsValid ? (found as VfsFolder): root) : null;
+    const unknownLocation = !!root && !place && !pathIsValid;
 
     function resolveFile(target: string) {
         if (!currentFolder) return null;
@@ -81,13 +86,19 @@ export function useVfs() {
     function goToPath(parts: string[]) { navigate("/" + parts.join("/")); }
     function goToPlace(p: Place) { navigate("/" + p); }
 
+    useEffect(() => {
+        if (unknownLocation) {
+            navigate({ pathname: "/", search: location.search}, { replace: true });
+        }
+    }, [unknownLocation]);
+
 
     return { 
         root, loading, error,
         currentFolder, currentPath: "/" + pathParts.join("/"),
+        displayPath: place ? "/" + place : "/" + pathParts.join("/"),
         pathParts, place, cd, goToPath, 
         goToPlace, resolveFile, getFolder,
-        displayPath: place ? "/" + place : "/" + pathParts.join("/")
     };
 }
 
