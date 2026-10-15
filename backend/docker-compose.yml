@@ -18,6 +18,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH}
       COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      TOTP_ENC_KEY: ${TOTP_ENC_KEY}
     depends_on:
       - db
     ports:

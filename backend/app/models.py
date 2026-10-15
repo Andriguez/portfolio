@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, Enum, DateTime
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, Enum, DateTime, Boolean, BigInteger
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.sql import func
 from .database import Base
@@ -49,3 +49,17 @@ class SocialLink(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
     url = Column(String(255), nullable=False)
+
+
+class AdminSecurity(Base):
+    __tablename__ = "admin_security"
+    id = Column(Integer, primary_key=True)
+    totp_secret_enc = Column(String(255), nullable=True)
+    totp_enabled = Column(Boolean, nullable=False, default=False, server_default="0")
+    last_totp_step = Column(BigInteger, nullable=False, default=0, server_default="0")
+
+class RecoveryCode(Base):
+    __tablename__ = "recovery_codes"
+    id = Column(Integer, primary_key=True)
+    code_hash = Column(String(255), nullable=False)
+    used = Column(Boolean, nullable=False, default=False, server_default="0")

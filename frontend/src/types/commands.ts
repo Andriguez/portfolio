@@ -155,7 +155,7 @@ export const commands: CommandDefinition[] = [
         usage: "cv <type>",
         show: true,
         options: (site) => site.cvs.map((l) => l.type.toLowerCase()),
-        description: "get a copy of my cv.",
+        description: "view or get a copy of my cv.",
         run: (args, ctx) => {
             const cvs = ctx.site.cvs;
             ctx.goToPlace(CV_PLACE);
@@ -179,12 +179,13 @@ export const commands: CommandDefinition[] = [
         name: "contact",
         alias: "email",
         show: true,
-        usage: "contact <msg>",
-        options: ["message"],
-        description: "come on.. send me an email. [implement]",
+        usage: "contact",
+        options: [],
+        description: "come on.. send me an email.",
         run: () => ({
-            type: "text",
-            value: "message sent...",
+            type: "link",
+            value: `>> send me an email to andhriguez@outlook.com <<`,
+            url: "mailto:andhriguez@outlook.com",
             color: "cli-green"
         })
     },
@@ -301,7 +302,7 @@ export const commands: CommandDefinition[] = [
     },
      {
         name: "theme",
-        usage: "theme <dark|light>",
+        usage: "theme <mode>",
         show: true,
         options: ["dark", "light"],
         description: "change the theme of the terminal or leave empty to switch.",
