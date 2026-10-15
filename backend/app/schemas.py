@@ -1,32 +1,33 @@
-from pydantic import BaseModel
-from typing import Optional
 from datetime import datetime
+
+from pydantic import BaseModel
+
 
 class VfsNodeBase(BaseModel):
     type: str
     name: str
     slug: str
-    description: Optional[str] = None
-    title: Optional[str] = None
-    body: Optional[str] = None
-    image: Optional[str] = None
+    description: str | None = None
+    title: str | None = None
+    body: str | None = None
+    image: str | None = None
 
 class VfsNodeCreate(VfsNodeBase):
-    parent_id: Optional[int] = None
+    parent_id: int | None = None
 
 class VfsNodeUpdate(BaseModel):
-    name: Optional[str] = None
-    slug: Optional[str] = None
-    description: Optional[str] = None
-    title: Optional[str] = None
-    body: Optional[str] = None
-    image: Optional[str] = None
-    parent_id: Optional[int] = None
+    name: str | None = None
+    slug: str | None = None
+    description: str | None = None
+    title: str | None = None
+    body: str | None = None
+    image: str | None = None
+    parent_id: int | None = None
 
 class VfsNodeOut(VfsNodeBase):
     id: int
-    parent_id: Optional[int]
-    updated_at: Optional[datetime]
+    parent_id: int | None
+    updated_at: datetime | None
     class Config:
         from_attributes = True
 

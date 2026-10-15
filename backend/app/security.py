@@ -1,4 +1,5 @@
 import os
+
 from cryptography.fernet import Fernet
 
 _fernet = Fernet(os.environ["TOTP_ENC_KEY"].encode())

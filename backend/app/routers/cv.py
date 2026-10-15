@@ -1,13 +1,17 @@
+import asyncio
 import os
 import re
 import uuid
-from fastapi import APIRouter, Depends, File, Form, UploadFile, HTTPException, Request
+from pathlib import Path
+
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import FileResponse
+from sqlalchemy import func, update
 from sqlalchemy.orm import Session
-from sqlalchemy import update, func
+
 from .. import models
-from ..database import get_db
 from ..auth import require_admin
+from ..database import DbSession, UploadFileAn
 from ..limiter import limiter
 
 CV_DIR = "/app/cv_files"
@@ -44,13 +48,13 @@ def get_cv_file(db: Session, cv_type: str) -> models.CvFile:
     return cv_file
 
 @router.get("")
-def list_cvs(db: Session = Depends(get_db)):
+def list_cvs(db: DbSession):
     cv_files = db.query(models.CvFile).order_by(models.CvFile.uploaded_at.desc()).all()
     return [serialize(cv_file) for cv_file in cv_files]
 
 @router.get("/{cv_type}/download")
 @limiter.limit("30/minute")
-def download_cv(request: Request, cv_type: str, db: Session = Depends(get_db)):
+def download_cv(request: Request, cv_type: str, db: DbSession):
     cv_file = get_cv_file(db, cv_type)
 
     file_path = os.path.join(CV_DIR, cv_file.stored_filename)
@@ -73,7 +77,7 @@ def download_cv(request: Request, cv_type: str, db: Session = Depends(get_db)):
     )
 
 @router.get("/{cv_type}/view")
-def view_cv(cv_type: str, db: Session = Depends(get_db)):
+def view_cv(cv_type: str, db: DbSession):
     cv = get_cv_file(db, cv_type)
 
     file_path = os.path.join(CV_DIR, cv.stored_filename)
@@ -88,12 +92,12 @@ def view_cv(cv_type: str, db: Session = Depends(get_db)):
     )
 
 @router.get("/admin", dependencies=[Depends(require_admin)])
-def list_cvs_admin(db: Session = Depends(get_db)):
+def list_cvs_admin(db: DbSession):
     cvs = db.query(models.CvFile).order_by(models.CvFile.uploaded_at.desc()).all()
     return [serialize(c, admin=True) for c in cvs]
 
 @router.post("", dependencies=[Depends(require_admin)])
-async def upload_cv(cv_type:str = Form(..., alias="type"), file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def upload_cv( db: DbSession, file: UploadFileAn, cv_type: str = Form(..., alias="type")):
     cv_type = clean_type(cv_type)
     
     ext = os.path.splitext(file.filename or "")[1].lower()
@@ -107,9 +111,8 @@ async def upload_cv(cv_type:str = Form(..., alias="type"), file: UploadFile = Fi
         raise HTTPException(status_code=400, detail="file is not real PDF")
 
     stored_name = f"{uuid.uuid4().hex}.pdf"
-    with open(os.path.join(CV_DIR, stored_name), "wb") as f:
-        f.write(contents)
-
+    await asyncio.to_thread(Path(CV_DIR, stored_name).write_bytes , contents)
+    
     filename = os.path.basename(file.filename or "cv.pdf")
     existing = db.query(models.CvFile).filter(models.CvFile.type == cv_type).first()
     old_file = None
@@ -136,7 +139,7 @@ async def upload_cv(cv_type:str = Form(..., alias="type"), file: UploadFile = Fi
     return serialize(cv, admin=True)
 
 @router.delete("/{cv_type}", dependencies=[Depends(require_admin)])
-def delete_cv(cv_type: str, db: Session = Depends(get_db)):
+def delete_cv(cv_type: str, db: DbSession):
     cv = get_cv_file(db, cv_type)
     path = os.path.join(CV_DIR, cv.stored_filename)
     db.delete(cv)
