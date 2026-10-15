@@ -8,7 +8,7 @@ export type CommandOutput =
     | { type: "markdown", file: VfsFile , color: string }
     | { type: "help", extra: boolean, color: string}
     | { type: "link", value: string, url: string, color: string }
-    | { type: "cv-list"; cvs: {type: string; name: string; size: number}[]; color: string}
+    | { type: "cv-list"; cvs: Cv[]; color: string}
     | { type: "cv-view"; cv: Cv; color: string}
     | { type: "link-list"; links: { id: number; name: string; url: string }[]; color: string }
     | { type: "changelog"; file: string; color: string};

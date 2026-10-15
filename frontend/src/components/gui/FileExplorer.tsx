@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import changelog from "../../../CHANGELOG.md?raw";
 
-import { useVfs, searchVfs } from "../../hooks/useVfs"
+import { useVfs, searchVfs, CV_PLACE } from "../../hooks/useVfs"
 import { ExplorerButtons } from './ExplorerButtons';
 import { TreeColumn } from "./TreeColumn";
 import { GridColumn } from "./GridColumn";
@@ -13,7 +13,6 @@ import { useSite } from "../../context/SiteDataContext.tsx";
 import { cvToNode } from "../../helpers/cvNodes.ts";
 import type {VfsFile, VfsNode} from "../../types/vfs.ts";
 import {ThemeToggle} from "./ThemeToggle.tsx";
-import {useTheme} from "../../hooks/useTheme.ts";
 import {DesktopIcons} from "./DesktopIcons.tsx";
 import {LoginModal} from "./LoginModal.tsx";
 import { InfoDialog } from "./InfoDialog.tsx";
@@ -24,13 +23,11 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
     
     const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
 
-    const {theme, toggleTheme} = useTheme();
-
     const [loginOpen, setLoginOpen] = useState(false);
 
     const { data: site } = useSite();
     
-    const inCv = vfs.place === "my_cv";
+    const inCv = vfs.place === CV_PLACE;
     const cvNodes = useMemo(() => site.cvs.map(cvToNode), [site.cvs]);
 
     const openSlug = searchParams.get("open");
@@ -72,7 +69,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
         }, { replace: true });
     }
 
-    function handleCvIcon() { vfs.goToPlace("my_cv"); handleRestoreWindow(); }
+    function handleCvIcon() { vfs.goToPlace(CV_PLACE); handleRestoreWindow(); }
 
     useEffect(() => {
         if (!openFile) return;
@@ -183,13 +180,13 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                         {menuOpen && (
                             <div className="toolbar-menu-dropdown">
                                 <div className="menu-item">
-                                    <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+                                    <ThemeToggle />
                                 </div>
                                 <div className="menu-item" onClick={() => { setAboutOpen(true); setMenuOpen(false); }}>about andi.sys</div>
                                 <div className="menu-item" onClick={() => { setChangelogOpen(true); setMenuOpen(false); }}>read changelog.md</div>
 
                                 {hasCv && (
-                                    <div className="menu-item menu-item--mobile-only" onClick={() => { vfs.goToPlace("my_cv"); setMenuOpen(false); }}>my cv</div>
+                                    <div className="menu-item menu-item--mobile-only" onClick={() => { vfs.goToPlace(CV_PLACE); setMenuOpen(false); }}>my cv</div>
                                 )}
                                 <div className="menu-item menu-item--mobile-only" onClick={() => { setLoginOpen(true); setMenuOpen(false); }}>login</div>
                                 {site.links.length > 0 && <div className="menu-divider" />}

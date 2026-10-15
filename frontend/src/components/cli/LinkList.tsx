@@ -1,5 +1,8 @@
-// src/components/cli/LinkList.tsx
+import { useState, type CSSProperties } from "react";
+
 type LinkItem = { id: number; name: string; url: string };
+
+const DEFAULT_HINT = "tap or click a button to open it in a new tab";
 
 function displayUrl(url: string) {
     try {
@@ -19,24 +22,34 @@ function isWebUrl(url: string) {
 }
 
 export function LinkList({ links }: { links: LinkItem[] }) {
+    const [active, setActive] = useState<string | null>(null);
+    const safeLinks = links.filter((l) => isWebUrl(l.url));
+
     return (
-        <div className="link-list">
-            {links.filter((l) => isWebUrl(l.url)).map((l, i) => (
-                <a
-                    key={l.id}
-                    className="link-row"
-                    href={l.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ animationDelay: `${i * 80}ms` }}
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <span className="link-row-name">{l.name.toLowerCase()}</span>
-                    <span className="link-row-url">{displayUrl(l.url)}</span>
-                    <span className="link-row-arrow">↗</span>
-                </a>
-            ))}
-            <div className="link-list-hint">tap a row to open it in a new tab</div>
+        <div className="link-keys">
+            <div className="link-keys-row">
+                {safeLinks.map((l, i) => (
+                    <a
+                        key={l.id}
+                        className="link-key"
+                        href={l.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={l.url}
+                        style={{ "--i": i } as CSSProperties}
+                        onMouseEnter={() => setActive(l.url)}
+                        onMouseLeave={() => setActive(null)}
+                        onFocus={() => setActive(l.url)}
+                        onBlur={() => setActive(null)}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {l.name.toLowerCase()} <span className="link-key-arrow">↗</span>
+                    </a>
+                ))}
+            </div>
+            <div className="link-keys-hint">
+                {active ? `↳ ${displayUrl(active)}` : DEFAULT_HINT}
+            </div>
         </div>
     );
 }

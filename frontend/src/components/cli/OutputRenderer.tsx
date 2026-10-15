@@ -25,7 +25,7 @@ export function OutputRenderer({ output, runCommand }: { output: CommandOutput, 
 
     if (output.type === "cv-list") return <CvList cvs={output.cvs} runCommand={runCommand} />
 
-    if (output.type === "cv-view") return <CvViewer cv={output.cv} onClose={() => {}} />
+    if (output.type === "cv-view") return <div className="content-card"><p>{output.cv.filename}</p><CvViewer cv={output.cv} onClose={() => {runCommand("clear")}} /></div>
 
     if (output.type === "link-list") return <LinkList links={output.links} />
     return null;

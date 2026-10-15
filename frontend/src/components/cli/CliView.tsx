@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useSite } from "../../context/SiteDataContext.tsx";
-import { useVfs } from "../../hooks/useVfs"
+import { CV_PLACE, useVfs } from "../../hooks/useVfs"
 import type { LogEntry } from "../../types/LogEntry"
 import type { CommandOutput } from "../../types/CommandOutput"
 import { LogLine } from "./LogLine"
@@ -11,6 +11,7 @@ import { isTouchDevice } from "../../helpers/is-touch-device"
 import {LoginModal} from "../gui/LoginModal.tsx";
 import { cvToNode } from "../../helpers/cvNodes.ts";
 import type { VfsFolder, VfsFile } from "../../types/vfs.ts";
+import { useTheme } from "../../context/ThemeContext.tsx";
 import "./cli-view.css"
 
 const EMPTY_FOLDER: VfsFolder = { type: "folder", name: "", slug: "", children: [] };
@@ -40,6 +41,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
     const [ draft, setDraft ] = useState("");
 
     const [ pulseKey, setPulseKey ] = useState(0);
+    const { theme, setTheme } = useTheme();
 
     const cvFolder = useMemo<VfsFolder>(() => ({
         type: "folder", name: "My CV",
@@ -47,8 +49,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
         children: site.cvs.map(cvToNode),
     }), [site.cvs]);
 
-    const activeFolder = place === "my_cv" ? cvFolder : (currentFolder ?? EMPTY_FOLDER);
-
+    const activeFolder = place === CV_PLACE ? cvFolder : (currentFolder ?? EMPTY_FOLDER);
 
     function getSuggestion(value: string): string | null {
         if (!value) return null;
@@ -94,7 +95,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
 
     function runCommand(raw: string) {
         const promptPath = currentPath;
-        const [cmdName, ...args] = tokenize(raw)
+        const [cmdName, ...args] = tokenize(raw.toLowerCase())
         if (!cmdName) return;
 
         const command = commands.find((c) => c.name === cmdName || c.alias === cmdName);
@@ -109,7 +110,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
                 color: "cli-info"
             };
         } else {
-            const result = command.run(args, { currentFolder: activeFolder, cd, resolveFile, site, place, goToPlace });
+            const result = command.run(args, { currentFolder: activeFolder, cd, resolveFile, site, place, goToPlace, theme, setTheme });
             if (result === "CLEAR") {
                 setLog([]);
                 setHistory((prev) => [...prev, raw]);

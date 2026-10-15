@@ -1,7 +1,7 @@
 import type { VfsFolder, VfsFile } from "./vfs";
 import type { CommandOutput } from "./CommandOutput";
 import type { SiteData } from "../hooks/useSiteData";
-import type { Place } from "../hooks/useVfs";
+import { CV_PLACE, type Place } from "../hooks/useVfs";
 import changelog from "../../CHANGELOG.md?raw";
 
 type CommandContext = {
@@ -11,6 +11,8 @@ type CommandContext = {
     site: SiteData;
     place: Place | null;
     goToPlace: (p: Place) => void;
+    theme: "dark" | "light";
+    setTheme: (t: "dark" | "light") => void;
 };
 
 export type CommandDefinition = {
@@ -107,7 +109,7 @@ export const commands: CommandDefinition[] = [
         description: "open and read a page's entry.",
         run: (args, ctx) => {
             if (!args[0]) {
-                if (ctx.place === "my_cv" && ctx.site.cvs.length > 0)
+                if (ctx.place === CV_PLACE && ctx.site.cvs.length > 0)
                     return { type: "cv-list", cvs: ctx.site.cvs, color: "cli-green" }
 
                 return { type: "error", value: "usage: cat <file>", color: "cli-info" };
@@ -156,7 +158,7 @@ export const commands: CommandDefinition[] = [
         description: "get a copy of my cv.",
         run: (args, ctx) => {
             const cvs = ctx.site.cvs;
-            ctx.goToPlace("my_cv");
+            ctx.goToPlace(CV_PLACE);
 
             if (cvs.length === 0) return { type: "error", value: "no cv available right now.", color: "cli-info" };
             if (!args[0]) return { type: "cv-list", cvs, color: "cli-green" };
@@ -299,16 +301,24 @@ export const commands: CommandDefinition[] = [
     },
      {
         name: "theme",
-        usage: "theme <name>",
+        usage: "theme <dark|light>",
         show: true,
         options: ["dark", "light"],
-        description: "change the theme of the terminal.",
-        run: (args) => {
-            if (!args[0]) return { type: "error", value: "usage: theme <name>", color: "cli-info" };
+        description: "change the theme of the terminal or leave empty to switch.",
+        run: (args, ctx) => {
+            if (!args[0]) {
+                const next = ctx.theme === "dark" ? "light" : "dark";
+                ctx.setTheme(next);
+                return { type: "text", value:  `Theme changed to ${next}`, color: "cli-green"};
+            }
 
-            if (args[0] !== "dark" && args[0] !== "light") return { type: "error", value: `theme: no such theme: ${args[0]}`, color: "cli-info" };
-            document.documentElement.setAttribute("data-theme", args[0]);
-            return { type: "text", value: `Theme changed to ${args[0]}`, color: "cli-green" };
+            const name = args[0].toLowerCase();
+
+            if (name !== "dark" && name !== "light") return { type: "error", value: `theme: no such theme: ${args[0]}`, color: "cli-info" };
+
+            ctx.setTheme(name)
+
+            return { type: "text", value: `Theme changed to ${name}`, color: "cli-green" };
         }
     },
     {

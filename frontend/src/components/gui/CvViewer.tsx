@@ -1,12 +1,13 @@
 import { CopyIcon, Download, ExternalLink, Link2, X } from "lucide-react";
 import { API_URL } from "../../api/client";
+import { CV_PLACE } from "../../hooks/useVfs";
 
 export function CvViewer({ cv, onClose }: { cv: { type: string; size: number; filename: string;}, onClose: () => void }) {
     const viewUrl = `${API_URL}/api/cv/${cv.type}/view`;
     const embedUrl = `${viewUrl}#toolbar=0&navpanes=0&view=FitH` //allows iframe to open without a toolbar (chrome and edge for now)
 
     const downloadUrl = `${API_URL}/api/cv/${cv.type}/download`;
-    const shareUrl = `${window.location.origin}/cv?open=${cv.type}&mode=gui`;
+    const shareUrl = `${window.location.origin}/${CV_PLACE}?open=${cv.type}&mode=gui`;
 
     async function copyLink() {
         await navigator.clipboard.writeText(shareUrl);
