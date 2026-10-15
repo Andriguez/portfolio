@@ -1,8 +1,8 @@
 export type Cv = {
-    id: number;
+    id?: number;
     type: string;
     filename: string;
     size: number;
-    download_count: number;
+    download_count?: number;
     uploaded_at: string;
 }

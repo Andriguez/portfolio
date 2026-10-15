@@ -7,7 +7,7 @@ export function DirectoryList({ items, onSelect }: {
         isFolder: boolean;
         description? : string
         itemCount?: number;
-        updatedAt: string;
+        updatedAt?: string;
     }[];
         onSelect: (cmd: string) => void;
 }) {

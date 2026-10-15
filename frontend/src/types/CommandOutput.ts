@@ -2,7 +2,7 @@ import type { Cv } from "./cv";
 import type { VfsFile } from "./vfs"
 export type CommandOutput =
     | { type: "text"; value: string, color: string }
-    | { type: "list"; items: { name: string, slug: string, isFolder: boolean, description: string, itemCount: number, updatedAt: string }[], color: string }
+    | { type: "list"; items: { name: string, slug: string, isFolder: boolean, description?: string, itemCount?: number, updatedAt?: string }[], color: string }
     | { type: "error"; value: string, color: string }
     | { type: "none", color: string}
     | { type: "markdown", file: VfsFile , color: string }

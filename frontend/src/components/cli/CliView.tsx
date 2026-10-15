@@ -28,7 +28,8 @@ export type CliViewProps = {
 export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown, initialCommand }: CliViewProps ) {
     const { data: site } = useSite();
 
-    const { cd, goToPlace, place, currentFolder } = vfs;
+    const { cd, goToPlace, place, currentFolder, resolveFolder } = vfs;
+    
     const currentPath = vfs.displayPath;
 
     const [ booting, setBooting ] = useState<boolean>(true);
@@ -110,7 +111,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
                 color: "cli-info"
             };
         } else {
-            const result = command.run(args, { currentFolder: activeFolder, cd: (target) => cd(target)!, resolveFile, site, place, goToPlace, theme, setTheme });
+            const result = command.run(args, { currentFolder: activeFolder, cd: (target) => cd(target)!, resolveFile, resolveFolder, site, place, goToPlace, theme, setTheme });
             if (result === "CLEAR") {
                 setLog([]);
                 setHistory((prev) => [...prev, raw]);
