@@ -21,6 +21,7 @@ class NodeType(str, enum.Enum):
     folder = "folder"
     file = "file"
 
+
 class VfsNode(Base):
     __tablename__ = "vfs_nodes"
 
@@ -35,14 +36,18 @@ class VfsNode(Base):
     body = Column(Text, nullable=True)
     image = Column(String(255), nullable=True)
 
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), onupdate=func.now(), server_default=func.now()
+    )
     children = relationship("VfsNode", backref=backref("parent", remote_side=[id]))
+
 
 class StaticContent(Base):
     __tablename__ = "static_content"
 
     key = Column(String(100), primary_key=True)
     value = Column(Text, nullable=True)
+
 
 class CvFile(Base):
     __tablename__ = "cv_files"
@@ -54,7 +59,10 @@ class CvFile(Base):
     size = Column(Integer, nullable=False)
     download_count = Column(Integer, default=0, server_default="0")
     uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
 
 class SocialLink(Base):
     __tablename__ = "social_links"
@@ -70,6 +78,7 @@ class AdminSecurity(Base):
     totp_secret_enc = Column(String(255), nullable=True)
     totp_enabled = Column(Boolean, nullable=False, default=False, server_default="0")
     last_totp_step = Column(BigInteger, nullable=False, default=0, server_default="0")
+
 
 class RecoveryCode(Base):
     __tablename__ = "recovery_codes"

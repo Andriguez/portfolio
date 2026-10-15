@@ -16,9 +16,10 @@ router = APIRouter(prefix="/api/uploads", tags=["uploads"])
 UPLOAD_DIR = "/app/uploads"
 ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif", "image/jfif"}
 ALLOWED_EXT = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".jfif"}
-MAX_SIZE = 5 * 1024 * 1024 # 5MB
+MAX_SIZE = 5 * 1024 * 1024  # 5MB
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
 
 @router.post("", dependencies=[Depends(require_admin)])
 async def upload_image(file: UploadFileAn):
@@ -38,6 +39,7 @@ async def upload_image(file: UploadFileAn):
 
     return {"url": f"/uploads/{safe_name}"}
 
+
 @router.get("", dependencies=[Depends(require_admin)])
 def list_uploads(db: DbSession):
     files = []
@@ -49,22 +51,30 @@ def list_uploads(db: DbSession):
         url = f"/uploads/{filename}"
         file_stat = os.stat(file_path)
 
-        used_by =(
+        used_by = (
             db.query(models.VfsNode)
-            .filter(or_(models.VfsNode.image.contains(url), models.VfsNode.body.contains(url)))
+            .filter(
+                or_(
+                    models.VfsNode.image.contains(url),
+                    models.VfsNode.body.contains(url),
+                )
+            )
             .all()
         )
 
-        files.append({
-            "name": filename,
-            "url": url,
-            "size": file_stat.st_size,
-            "created_at": datetime.fromtimestamp(file_stat.st_mtime).isoformat(),
-            "used_by": [n.name for n in used_by]
-        })
+        files.append(
+            {
+                "name": filename,
+                "url": url,
+                "size": file_stat.st_size,
+                "created_at": datetime.fromtimestamp(file_stat.st_mtime).isoformat(),
+                "used_by": [n.name for n in used_by],
+            }
+        )
 
     files.sort(key=lambda x: x["created_at"], reverse=True)
     return files
+
 
 @router.delete("/{filename}", dependencies=[Depends(require_admin)])
 def delete_upload(filename: str):
