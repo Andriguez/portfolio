@@ -9,14 +9,18 @@ export function TypewriterText({
     color: string
     speed?: number;
 }) {
-    const [revealed, setRevealed] = useState("");
+    const [progress, setProgress] = useState({ text, count: 0});
+
+    const count = progress.text === text ? progress.count : 0;
+    const revealed = text.slice(0, count);
 
     useEffect(() => {
-        setRevealed("");
+        if (text.length === 0) return;
+
         let i = 0;
         const interval = setInterval(() => {
             i++;
-            setRevealed(text.slice(0, i));
+            setProgress({ text, count: i });
             if (i >= text.length) clearInterval(interval);
         }, speed);
         return () => clearInterval(interval);

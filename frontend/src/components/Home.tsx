@@ -28,20 +28,6 @@ export function Home() {
     const [ booted, setBooted ] = useState<boolean>(false);
     const [ shuttingDown, setShuttingDown ] = useState<boolean>(false);
 
-    const [ glitchKey, setGlitchKey ] = useState(0);
-
-    useEffect(() => {
-        function scheduleGlitch() {
-            const delay = 15000 + Math.random() * 30000; // 15–45s, never the same twice
-            return setTimeout(() => {
-                setGlitchKey((k) => k + 1);
-                scheduleGlitch();
-            }, delay);
-        }
-        const timeout = scheduleGlitch();
-        return () => clearTimeout(timeout);
-    }, []);
-
     const [ scanKey, setScanKey ] = useState(0);
     const [scanReverse, setScanReverse] = useState(false);
 
@@ -73,19 +59,31 @@ export function Home() {
         return `${h}:${m}:${s}`;
     }
 
-    const [glitchStyle, setGlitchStyle] = useState({
+    const [glitchStyle, setGlitch] = useState({
+        key: 0,
         top: "20%",
-        animationDuration: "200ms",
+        duration: "200ms",
     });
 
     useEffect(() => {
         if (!booted) return;
 
-        setGlitchStyle({
-            top: `${17.89 + Math.random() * 60}%`,
-            animationDuration: `${180 + Math.random() * 200}ms`,
-        });
-    }, [booted, glitchKey]);
+        let timeout: number;
+        function schedule() {
+            timeout = window.setTimeout(() => {
+                setGlitch((g) => ({
+                    key: g.key + 1,
+                    top: `${17 + Math.random() * 60}%`,
+                    duration: `${180 + Math.random() * 200}ms`
+                }));
+
+                schedule();
+            }, 15000 + Math.random() * 30000);
+        }
+        schedule();
+        return () => clearTimeout(timeout)
+
+    }, [booted]);
 
     return(
         <div className="screen">
@@ -126,10 +124,10 @@ export function Home() {
                 />
             </div>
 
-            { booted && <div key={`glitch-${glitchKey}`}
+            { glitchStyle.key > 0 && (<div key={`glitch-${glitchStyle.key}`}
                              className="glitch"
-                             style={glitchStyle}
-            /> }
+                             style={{top: glitchStyle.top, animationDuration: glitchStyle.duration}}
+            />) }
 
             <div key={`scan-${scanKey}`} className={`scanline ${scanReverse ? "scanline--reverse" : ""}`} />
             <svg className="grain" width="100%" height="100%">

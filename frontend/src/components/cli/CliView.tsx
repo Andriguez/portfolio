@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { useSite } from "../../context/SiteDataContext.tsx";
+import { useSite } from "../../context/SiteDataContext.ts";
 import { CV_PLACE, useVfs } from "../../hooks/useVfs"
 import type { LogEntry } from "../../types/LogEntry"
 import type { CommandOutput } from "../../types/CommandOutput"
@@ -11,7 +11,7 @@ import { isTouchDevice } from "../../helpers/is-touch-device"
 import {LoginModal} from "../gui/LoginModal.tsx";
 import { cvToNode } from "../../helpers/cvNodes.ts";
 import type { VfsFolder, VfsFile } from "../../types/vfs.ts";
-import { useTheme } from "../../context/ThemeContext.tsx";
+import { useTheme } from "../../context/ThemeContext.ts";
 import "./cli-view.css"
 
 const EMPTY_FOLDER: VfsFolder = { type: "folder", name: "", slug: "", children: [] };
@@ -110,7 +110,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
                 color: "cli-info"
             };
         } else {
-            const result = command.run(args, { currentFolder: activeFolder, cd, resolveFile, site, place, goToPlace, theme, setTheme });
+            const result = command.run(args, { currentFolder: activeFolder, cd: (target) => cd(target)!, resolveFile, site, place, goToPlace, theme, setTheme });
             if (result === "CLEAR") {
                 setLog([]);
                 setHistory((prev) => [...prev, raw]);

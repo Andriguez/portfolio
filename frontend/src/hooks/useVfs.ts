@@ -90,7 +90,7 @@ export function useVfs() {
         if (unknownLocation) {
             navigate({ pathname: "/", search: location.search}, { replace: true });
         }
-    }, [unknownLocation]);
+    });
 
 
     return { 

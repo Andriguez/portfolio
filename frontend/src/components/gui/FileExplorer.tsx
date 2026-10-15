@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import changelog from "../../../CHANGELOG.md?raw";
@@ -9,7 +9,7 @@ import { TreeColumn } from "./TreeColumn";
 import { GridColumn } from "./GridColumn";
 import { DetailPanel } from "./DetailPanel";
 import { ExternalLink, Mail } from "lucide-react";
-import { useSite } from "../../context/SiteDataContext.tsx";
+import { useSite } from "../../context/SiteDataContext.ts";
 import { cvToNode } from "../../helpers/cvNodes.ts";
 import type {VfsFile, VfsNode} from "../../types/vfs.ts";
 import {ThemeToggle} from "./ThemeToggle.tsx";
@@ -22,6 +22,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
     const navigate = useNavigate();
     
     const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
+    const [syncedPath, setSyncedPath] = useState(vfs.currentPath);
 
     const [loginOpen, setLoginOpen] = useState(false);
 
@@ -41,17 +42,19 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
     const [aboutOpen, setAboutOpen] = useState(false);
     const [changelogOpen, setChangelogOpen] = useState(false);
 
-    useEffect(() => {
+
+    if (syncedPath !== vfs.currentPath) {
+        setSyncedPath(vfs.currentPath);
         setExpandedPaths((prev) => {
             const next = new Set(prev);
             let acc = "";
             for (const part of vfs.pathParts) {
                 acc = acc ? `${acc}/${part}` : part;
-                next.add(acc)
+                next.add(acc);
             }
-            return next
-        })
-    }, [vfs.currentPath, vfs.pathParts]);
+            return next;
+        });
+    }
 
     function handleOpenFile(slug: string) { 
         setSearchParams((prev) => {
@@ -61,13 +64,13 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
         });
     }
 
-    function handleCloseFile() {
+    const handleCloseFile = useCallback(() => {
         setSearchParams((prev) => {
             const next = new URLSearchParams(prev);
             next.delete("open");
             return next;
         }, { replace: true });
-    }
+    }, [setSearchParams]);
 
     function handleCvIcon() { vfs.goToPlace(CV_PLACE); handleRestoreWindow(); }
 

@@ -8,12 +8,19 @@ export function SocialLinksManager() {
     const [links, setLinks] = useState<Link[]>([]);
     const [form, setForm] = useState<{ id?: number; name: string; url: string } | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [reloadKey, setReloadKey] = useState(0);
+    const reload = () => setReloadKey((k) => k + 1);
+    
+    useEffect(() => {
+        let cancelled = false;
+        
+        apiFetch("/api/links")
+        .then((res) => res.ok ? res.json() : Promise.reject(new Error(String(res.status))))
+        .then((data: Link[]) => { if (!cancelled) setLinks(data); })
+            .catch(() => { if (!cancelled) setError("couldn't load links data.") });
+        return () => { cancelled = true };
+    }, [reloadKey])
 
-    async function load() {
-        const res = await apiFetch("/api/links");
-        if (res.ok) setLinks(await res.json());
-    }
-    useEffect(() => { load(); }, []);
 
     async function handleSave() {
         if (!form) return;
@@ -29,13 +36,13 @@ export function SocialLinksManager() {
             return;
         }
         setForm(null);
-        load();
+        reload();
     }
 
     async function handleDelete(link: Link) {
         if (!confirm(`Delete "${link.name}"?`)) return;
         await apiFetch(`/api/links/${link.id}`, { method: "DELETE" });
-        load();
+        reload();
     }
 
     return (
