@@ -205,6 +205,9 @@ export function CMS(){
                     </div>
                 </div>
             )}
+
+            {error && <div className="admin-error">{error}</div>}
+
             <div className="admin-header" style={{ marginTop: "2rem" }}>
                 <h2>IMAGE UPLOADS</h2>
 
@@ -215,7 +218,6 @@ export function CMS(){
                     <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, "upload_manager")} />
                 </label>
             </div>
-            {error && <div className="admin-error">{error}</div>}
 
             {files.length === 0 ? (
                 <div className="admin-empty">no uploads yet.</div>
