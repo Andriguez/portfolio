@@ -1,29 +1,42 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Switch } from "radix-ui";
 import { Terminal, Eye } from "lucide-react";
 import { useVfs } from "../hooks/useVfs";
 import { CliView } from "./cli/CliView";
 import { GuiView } from "./gui/GuiView";
+import { TRASH_PLACE } from '../hooks/useVfs';
 
 type Mode = "cli" | "gui";
 
 export function Home() {
+    const navigate = useNavigate();
     const vfs = useVfs();
     const [searchParams] = useSearchParams();
 
     const [initial] = useState(() => {
-        const mode : Mode = searchParams.get("mode") === "gui" ? "gui" : "cli";
+        const requestedMode = searchParams.get("mode");
+        const onTrash = vfs.place === TRASH_PLACE;
+
+        const mode : Mode = requestedMode === "gui" || (onTrash && requestedMode !== "cli") ? "gui" : "cli";
         const open = searchParams.get("open");
         let command: string | null = null;
 
-        if (open) command = `cat ${open.replace(/"/g, "")}`;
-        else if (vfs.place) command = "cv";
+        if (!onTrash) {
+            if (open) command = `cat ${open.replace(/"/g, "")}`;
+            else if (vfs.place) command = "cv";
+        }
 
         return {mode, command: mode === "cli" ? command: null}
     });
     
     const [mode, setMode] = useState<Mode>((initial.mode));
+
+    useEffect(() => {
+        if (mode === "cli" && vfs.place === TRASH_PLACE) {
+            navigate("/", { replace: true });
+        }
+    }, [mode, vfs.place, navigate])
 
     const [ booted, setBooted ] = useState<boolean>(false);
     const [ shuttingDown, setShuttingDown ] = useState<boolean>(false);
