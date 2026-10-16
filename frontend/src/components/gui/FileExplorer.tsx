@@ -3,13 +3,15 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import changelog from "../../helpers/changelog.ts";
 
-import { useVfs, searchVfs, CV_PLACE } from "../../hooks/useVfs"
+import { useVfs, searchVfs, CV_PLACE, TRASH_PLACE } from "../../hooks/useVfs"
 import { ExplorerButtons } from './ExplorerButtons';
 import { TreeColumn } from "./TreeColumn";
 import { GridColumn } from "./GridColumn";
 import { DetailPanel } from "./DetailPanel";
 import { ExternalLink, Mail } from "lucide-react";
 import { useSite } from "../../context/SiteDataContext.ts";
+import { useTrash } from "../../hooks/useTrash.ts";
+import { trashToNode } from "../../helpers/trashNodes.ts";
 import { cvToNode } from "../../helpers/cvNodes.ts";
 import type {VfsFile, VfsNode} from "../../types/vfs.ts";
 import {ThemeToggle} from "./ThemeToggle.tsx";
@@ -30,14 +32,22 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
     
     const inCv = vfs.place === CV_PLACE;
     const cvNodes = useMemo(() => site.cvs.map(cvToNode), [site.cvs]);
+    const hasCv = site.cvs.length > 0;
+
+
+    const inTrash = vfs.place === TRASH_PLACE;
+    const { items: trashItems, source: trashSource } = useTrash(inTrash);
+    const trashNodes = useMemo(() => trashItems.map(trashToNode), [trashItems]);
+
+    const placeNodes = inCv ? cvNodes : inTrash ? trashNodes : null;
+    const placeLabel = inCv ? "My CV" : inTrash ? "Trash" : null;
 
     const openSlug = searchParams.get("open");
     const openFile = openSlug
-        ? ((inCv ? cvNodes.find((n) => n.slug === openSlug) : vfs.resolveFile(openSlug)) ?? null)
-        : null;
+    ? ((placeNodes ? placeNodes.find((n) => n.slug === openSlug) : vfs.resolveFile(openSlug)) ?? null)
+    : null;
+    const items: VfsNode[] = placeNodes ?? (vfs.currentFolder?.children ?? []);
 
-    const items: VfsNode[] = inCv ? cvNodes : (vfs.currentFolder?.children ?? []);
-    const hasCv = site.cvs.length > 0;
 
     const [aboutOpen, setAboutOpen] = useState(false);
     const [changelogOpen, setChangelogOpen] = useState(false);
@@ -131,6 +141,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
         else handleOpenFile(item.slug);
     }
 
+
         return (
         <div>
             <div className={`gui ${
@@ -150,8 +161,8 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                     <button title="forward" className="toolbar-btn nav-btn" onClick={() => navigate(1)} aria-label="forward">›</button>
 
                     <div className="address-field themed-scrollbar">
-                        {inCv ? (
-                            <span className="crumb-pill">My CV</span>
+                        {placeLabel ? (
+                            <span className="crumb-pill">{placeLabel}</span>
                         ) : (
                             <>
                                 <span className="crumb-pill" onClick={() => vfs.goToPath([])}>home</span>
@@ -232,7 +243,12 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                     )}
                 </div>
                 <div className="gui-statusbar">
-                        <span title="content summary" >{items?.length} items | { folderCount > 0 ? `${folderCount} folder(s)` : "" }  {fileCount > 0 ? `${fileCount} file(s)` : "" } | </span>
+                        <span title="content summary" >
+                            {items?.length} items | 
+                            { folderCount > 0 ? `${folderCount} folder(s)` : "" }  {fileCount > 0 ? `${fileCount} file(s)` : "" } | 
+                            {vfs.place === TRASH_PLACE ? ` $ git log --diff-filter=D · ${trashSource === "github" ? "from git history" : "from archives"}` : ""}
+
+                        </span>
                     <div className="view-toggle">
                         <button title="grid view" className={viewMode === "grid" ? "view-btn view-btn--active" : "view-btn"} onClick={() => setViewMode("grid")} aria-label="grid view">⊞</button>
                         <button title="list view" className={viewMode === "list" ? "view-btn view-btn--active" : "view-btn"} onClick={() => setViewMode("list")} aria-label="list view">☰</button>
@@ -254,7 +270,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                     <div title="Start" className="gui-taskbar-pill" onClick={handleRestoreWindow} />
             )}
              <div>
-                <DesktopIcons onRestore={handleRestoreWindow} onLoginClick={() => setLoginOpen(true)} onCvClick={() => { if (hasCv) handleCvIcon(); }} />
+                <DesktopIcons onRestore={handleRestoreWindow} onLoginClick={() => setLoginOpen(true)} onCvClick={() => { if (hasCv) handleCvIcon(); }} onTrashClick={() => {vfs.goToPlace(TRASH_PLACE); handleRestoreWindow(); }} />
                 </div>
             <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
             <InfoDialog open={aboutOpen} onOpenChange={setAboutOpen} title="about andi.sys">

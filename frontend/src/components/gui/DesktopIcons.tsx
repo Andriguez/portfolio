@@ -3,18 +3,12 @@ import { ComputerIcon, Trash2, KeyRound, Sparkles, FileUser } from "lucide-react
 import { EIGHT_BALL_ANSWERS } from "../../data/eightBall";
 
 export function DesktopIcons({
-                                 onRestore, onLoginClick, onCvClick
-                             }: { onRestore: () => void; onLoginClick: () => void; onCvClick: () => void | undefined; }) {
-    const [trashOpen, setTrashOpen] = useState(false);
+                                 onRestore, onLoginClick, onCvClick, onTrashClick
+                             }: { onRestore: () => void; onLoginClick: () => void; onCvClick: () => void | undefined; onTrashClick: () => void}) {
+                                
     const [answer, setAnswer] = useState<string | null>(null);
     const [shaking, setShaking] = useState(false);
     const timers = useRef<number[]>([]);
-
-    useEffect(() => {
-    if (!trashOpen) return;
-    const t = window.setTimeout(() => setTrashOpen(false), 3000);
-    return () => window.clearTimeout(t);
-    }, [trashOpen]);
 
     useEffect(() => {
         const pending = timers.current;
@@ -65,14 +59,9 @@ export function DesktopIcons({
                     </div>
                 )}
             </div>
-            <div className="desktop-icon" onClick={() => setTrashOpen((v) => !v)}>
+            <div className="desktop-icon" onClick={onTrashClick}>
                 <Trash2 size={30} />
                 <span>Trash</span>
-                {trashOpen && (
-                    <div className="desktop-icon-tooltip" onClick={(e) => e.stopPropagation()}>
-                        nothing to see here actually.
-                    </div>
-                )}
             </div>
     
         </div>

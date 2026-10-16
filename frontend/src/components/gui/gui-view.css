@@ -257,13 +257,13 @@ body {
 .grid-column { 
     flex: 1; 
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 0.5rem; 
     min-width: 160px;
     border-right: 0.1rem solid rgba(183, 242, 163, 0.3);
 }
 
 .grid-items {
-    flex: 1; overflow-y: auto;
     display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 1.25rem; align-content: start; user-select: none;
 }
@@ -271,7 +271,7 @@ body {
     display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
     padding: 0.6rem 0.3rem; border-radius: 4px; cursor: pointer; text-align: center;
     -webkit-touch-callout: none;
-    user-select: none;
+    user-select: none; min-width: 0;
 }
 
 .grid-item-active {
@@ -288,7 +288,7 @@ body {
     user-select: none;
 }
 
-.gui-item-label { font-size: 0.8rem; text-align: center; color: #C9C4B4; }
+.gui-item-label { font-size: 0.8rem; text-align: center; color: #C9C4B4; overflow-wrap: anywhere; }
 
 .list-column { flex: 1; overflow-y: auto; font-size: 0.82rem; }
 .list-header, .list-row {
@@ -349,15 +349,36 @@ body {
 
 
 @media (max-width: 900px) {
-    .detail-backdrop { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 20; }
+    .detail-backdrop { 
+        display: block; 
+        position: fixed;
+        inset: 0; 
+        background: rgba(0,0,0,0.6);
+        z-index: 20; 
+    }
+    
     .detail-panel { 
         position: fixed; 
-        inset: 0; 
+        inset: 0;
         z-index: 21;
         border-left: none; 
         width: auto;
         min-width: 0; 
         border-radius: 6px;
+    }
+
+    .trash-detail-panel {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: min(560px, 92vw);
+        min-width: 0;
+        max-height: 85dvh;
+         z-index: 21;
+        border: 1px solid var(--cli-border);
+        border-radius: 6px;
+        overflow-y: auto;
     }
 
     .cv-viewer .cv-viewer-actions {
@@ -518,7 +539,6 @@ body {
 .menu-item--mobile-only { display: none; }
 @media (max-width: 525px) { .menu-item--mobile-only { display: block; } }
 
-/* after the .login-modal-* rules, so it overrides the fixed 300px width */
 .info-modal-content { width: min(520px, 92vw); max-height: 80vh; display: flex; flex-direction: column; }
 .info-modal-header { display: flex; justify-content: space-between; align-items: flex-start; }
 .info-modal-close { background: transparent; border: none; color: var(--cli-green-dim); cursor: pointer; }
@@ -526,3 +546,29 @@ body {
 .info-text { white-space: pre-wrap; margin: 0; }
 .info-markdown h1, .info-markdown h2 { font-family: 'Space Grotesk', sans-serif; color: var(--cli-green); font-size: 1rem; margin: 1em 0 0.4em; }
 .info-markdown ul { padding-left: 1.2em; }
+
+.trash-diff {
+    margin: 0 0 0.5rem; padding: 0.5rem 0.7rem; font-size: 0.72rem; line-height: 1.5;
+    background: black; border: 1px solid var(--cli-green); overflow-x: auto; border-radius: 4px;
+}
+.diff-del { color: var(--cli-info); }
+.diff-add { color: var(--cli-green); }
+
+.trash-message {
+    padding: 0.5rem;
+    color: var(--cli-info);
+    font-size: 14px;
+}
+
+.trash-meta { display: grid; grid-template-columns: auto 1fr; gap: 0.2rem 0.8rem; margin: 0.6rem 0; font-size: 0.78rem; }
+.trash-meta dt { color: var(--cli-green-dim); }
+.trash-meta dd { margin: 0; color: var(--cli-green); overflow-wrap: anywhere; }
+
+.trash-detail-panel {
+    min-width: 300px;
+    max-width: 450px;
+    overflow-y: auto;
+    background: var(--gui-btn);
+    display: flex;
+    flex-direction: column;
+}
