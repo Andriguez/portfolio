@@ -23,11 +23,11 @@ SKIP_NAME = re.compile(
     r"(^|/)(\.env[^/]*|id_rsa[^/]*|package-lock\.json"
     r"|[^/]*\.(pem|key|p12|pfx|sqlite3?|db|sql|dump|lock)"
     r"|[^/]*(secret|credential|password|token)[^/]*)$",
-    re.I,
+    re.IGNORECASE,
 )
 
-SKIP_DIR = re.compile(r"(^|/)(node_modules|__pycache__|dist|build|\.venv)/", re.I)
-SECRETISH = re.compile(r"(secret|token|passw|api[_-]?key|private[_-]?key|BEGIN [A-Z ]*KEY)", re.I)
+SKIP_DIR = re.compile(r"(^|/)(node_modules|__pycache__|dist|build|\.venv)/", re.IGNORECASE)
+SECRETISH = re.compile(r"(secret|token|passw|api[_-]?key|private[_-]?key|BEGIN [A-Z ]*KEY)", re.IGNORECASE)
 
 RESTORE_ERRORS = [
     "refusing to restore: it was deleted for a reason.",
