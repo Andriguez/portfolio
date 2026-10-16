@@ -8,7 +8,7 @@ from pathlib import Path
 from urllib.parse import quote_plus
 
 local_url = os.environ.get("ALEMBIC_DATABASE_URL")
-if local_url:                      # only set on your PC, never passed to the container
+if local_url:
     os.environ["DATABASE_URL"] = local_url
 
 from sqlalchemy import engine_from_config

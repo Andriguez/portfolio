@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
-import changelog from "../../../CHANGELOG.md?raw";
+import changelog from "../../helpers/changelog.ts";
 
 import { useVfs, searchVfs, CV_PLACE } from "../../hooks/useVfs"
 import { ExplorerButtons } from './ExplorerButtons';

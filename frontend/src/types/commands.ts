@@ -2,7 +2,7 @@ import type { VfsFolder, VfsFile } from "./vfs";
 import type { CommandOutput } from "./CommandOutput";
 import type { SiteData } from "../hooks/useSiteData";
 import { CV_PLACE, type Place } from "../hooks/useVfs";
-import changelog from "../../CHANGELOG.md?raw";
+import changelog from "../helpers/changelog";
 
 type CommandContext = {
     currentFolder: VfsFolder;
