@@ -1,3 +1,3 @@
-import changelog from "../../CHANGELOG.md?raw";
+import changelog from "../../changelog.md?raw";
 
 export default changelog;
