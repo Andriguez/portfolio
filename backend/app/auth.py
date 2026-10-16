@@ -1,7 +1,7 @@
 import os
-import jwt
 from datetime import UTC, datetime, timedelta
 
+import jwt
 from fastapi import HTTPException, Request
 from jwt import PyJWTError
 from passlib.context import CryptContext

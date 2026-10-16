@@ -1,23 +1,19 @@
 import os
 
 from dotenv import load_dotenv
+
 load_dotenv("./.env")
 
 from logging.config import fileConfig
-from pathlib import Path
-from urllib.parse import quote_plus
 
 local_url = os.environ.get("ALEMBIC_DATABASE_URL")
 if local_url:
     os.environ["DATABASE_URL"] = local_url
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
+from sqlalchemy import engine_from_config, pool
 
 from app.database import Base
-from app import models
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -42,6 +38,7 @@ target_metadata = None
 config.set_main_option("sqlalchemy.url", os.environ["DATABASE_URL"].replace("%", "%%"))
 target_metadata = Base.metadata
 
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
@@ -60,7 +57,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        compare_type=True
+        compare_type=True,
     )
 
     with context.begin_transaction():
