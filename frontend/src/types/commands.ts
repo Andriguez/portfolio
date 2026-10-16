@@ -3,6 +3,7 @@ import type { CommandOutput } from "./CommandOutput";
 import type { SiteData } from "../hooks/useSiteData";
 import { CV_PLACE, type Place } from "../hooks/useVfs";
 import changelog from "../helpers/changelog";
+import { EIGHT_BALL_ANSWERS } from "../data/eightBall";
 
 type CommandContext = {
     currentFolder: VfsFolder;
@@ -200,7 +201,7 @@ export const commands: CommandDefinition[] = [
         show: false,
         description: "get the link to the public repo. [implement]",
         run: () => ({
-            type: "link", value: `>Go to my github repo clicking here<`, url: "", color: "cli-green"
+            type: "link", value: `>Go to my github repo clicking here<`, url: "https://github.com/Andriguez/portfolio", color: "cli-green"
         })
     },
     {
@@ -253,38 +254,38 @@ export const commands: CommandDefinition[] = [
             color: "cli-green"
         })
     },
-    {
-        name: "secret",
-        usage: "secret",
-        show: false,
-        description: "pick my brain! learn something random about me.[implement]",
-        run: () => ({
-            type: "text",
-            value: randomThoughts[Math.floor(Math.random() * randomThoughts.length)],
-            color: "cli-green"
-        })
-    },
-    {
-        name: "fortune",
-        usage: "fortune",
-        show: false,
-        description: "i'm a piscis, if i focus hard enough, i can basically predict your future.. [implement]",
-        run: () => ({
-            type: "text",
-            value: fortunes[Math.floor(Math.random() * fortunes.length)],
-            color: "cli-green"
-        })
-    },
+    // {
+    //     name: "secret",
+    //     usage: "secret",
+    //     show: false,
+    //     description: "pick my brain! learn something random about me.[implement]",
+    //     run: () => ({
+    //         type: "text",
+    //         value: randomThoughts[Math.floor(Math.random() * randomThoughts.length)],
+    //         color: "cli-green"
+    //     })
+    // },
+    // {
+    //     name: "fortune",
+    //     usage: "fortune",
+    //     show: false,
+    //     description: "i'm a piscis, if i focus hard enough, i can basically predict your future.. [implement]",
+    //     run: () => ({
+    //         type: "text",
+    //         value: fortunes[Math.floor(Math.random() * fortunes.length)],
+    //         color: "cli-green"
+    //     })
+    // },
     {
         name: "8ball",
         usage: "8ball <q>",
         show: false,
-        options: ["question"],
+        options: ["question", "?"],
         description: "you have doubts, i have answers.. let's go!",
         run: (args) => {
             if (!args[0]) return { type: "error", value: "ehh, what was the question?? <br> usage: 8ball <question>", color: "cli-info" };
 
-            return { type: "text", value: ballAnswers[Math.floor(Math.random() * ballAnswers.length)] , color: "cli-green" };
+            return { type: "text", value: EIGHT_BALL_ANSWERS[Math.floor(Math.random() * EIGHT_BALL_ANSWERS.length)] , color: "cli-green" };
         }
     },
     {
@@ -344,10 +345,6 @@ export const commands: CommandDefinition[] = [
         run: () => "LOGIN"
     }
 ];
-
-const randomThoughts = ["fact 1", "fact 2", "fact 3", "fact 4"];
-const fortunes = ["fortune 1", "fortune 2", "fortune 3", "fortune 4"];
-const ballAnswers = ["yass", "i don't think so", "let that sink in..", "i guess", "hmmm..", "girl.. call your therapist.", "yes babes", "nope", "let me get back to you on that..", "sure!", "ugh"]
 
 export function getOptions(cmd: CommandDefinition, site: SiteData): string[] {
     const raw = typeof cmd.options === "function" ? cmd.options(site) : (cmd.options ?? []);

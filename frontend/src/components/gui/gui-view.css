@@ -462,6 +462,25 @@ body {
     padding: 0.5rem 0.7rem; font-size: 0.7rem; width: 160px; color: var(--cli-green-dim); z-index: 6;
 }
 
+.desktop-icon--shaking > svg { animation: ballShake 650ms ease-in-out; }
+.eightball-bubble { animation: bubbleIn 220ms ease-out; }
+
+@keyframes ballShake {
+    0%, 100% { transform: translate(0, 0) rotate(0); }
+    20% { transform: translate(-3px, 1px) rotate(-12deg); }
+    40% { transform: translate(3px, -1px) rotate(12deg); }
+    60% { transform: translate(-2px, 1px) rotate(-8deg); }
+    80% { transform: translate(2px, -1px) rotate(6deg); }
+}
+@keyframes bubbleIn {
+    from { opacity: 0; transform: translateY(4px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .desktop-icon--shaking > svg, .eightball-bubble { animation: none; }
+}
+
 .login-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 40; }
 .login-modal-content {
     position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
