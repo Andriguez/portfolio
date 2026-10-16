@@ -196,13 +196,17 @@ export const commands: CommandDefinition[] = [
         })
     },
     {
-        name: "source",
-        usage: "source",
+        name: "git",
+        alias: "source",
+        usage: "git",
         show: false,
-        description: "get the link to the public repo. [implement]",
-        run: () => ({
-            type: "link", value: `>Go to my github repo clicking here<`, url: "https://github.com/Andriguez/portfolio", color: "cli-green"
-        })
+        description: "get the link to check the public repo.",
+        run: () => {
+            const url = import.meta.env.VITE_REPO_URL;
+            if (!url) return { type: "error", value: "the repo is still private..", color: "cli-info"};
+
+           return { type: "link", value: `>>Go to the github repo clicking here<<`, url, color: "cli-green"}
+        }
     },
     {
         name: "stack",
