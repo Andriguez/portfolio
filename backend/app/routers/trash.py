@@ -11,11 +11,13 @@ router = APIRouter(prefix="/api/trash", tags=["trash"])
 REPO = os.environ.get("GITHUB_REPO", "").strip()
 TOKEN = os.environ.get("GITHUB_TOKEN", "").strip()
 
-OK_TTL = 6 * 3600
+OK_TTL = 24 * 3600
 FAIL_TTL = 600
 MAX_COMMITS = 40
 MAX_ITEMS = 12
 DEADLINE_SECONDS = 20
+MAX_PREVIEW_LINES = 50
+MAX_LINE_WIDTH = 140
 
 SKIP_NAME = re.compile(
     r"(^|/)(\.env[^/]*|id_rsa[^/]*|package-lock\.json"
@@ -44,9 +46,9 @@ def _preview(patch: str) -> list[str]:
     for raw in patch.splitlines():
         if not raw.startswith("-") or raw.startswith("---"):
             continue
-        text = raw[1:101]
+        text = raw[1:MAX_LINE_WIDTH + 1]
         lines.append("- [redacted]" if SECRETISH.search(text) else f"- {text}")
-        if len(lines) >= 6:
+        if len(lines) >= MAX_PREVIEW_LINES:
             break
     return lines
 
@@ -86,10 +88,12 @@ def _build_items() -> list[dict]:
                     continue
                 if SKIP_NAME.search(path) or SKIP_DIR.search(path):
                     continue
+                total = f.get("deletions", 0)
                 items.append({
                     "name": path.rsplit("/", 1)[-1],
                     "path": path,
-                    "size": f"{f.get('deletions', 0)} lines",
+                    "size": f"{total} lines",
+                    "totalLines": total,
                     "hash": sha[:7],
                     "commit": message,
                     "date": date,

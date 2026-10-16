@@ -7,4 +7,5 @@ export type TrashItem = {
     date?: string
     preview: string[];
     restoreError: string;
+    totalLines?: number
 };

@@ -549,8 +549,11 @@ body {
 
 .trash-diff {
     margin: 0 0 0.5rem; padding: 0.5rem 0.7rem; font-size: 0.72rem; line-height: 1.5;
-    background: black; border: 1px solid var(--cli-green); overflow-x: auto; border-radius: 4px;
+    max-height: 55vh;
+    background: black; border: 1px solid var(--cli-green); overflow: auto; border-radius: 4px;
 }
+.diff-more { color: var(--cli-green-dim); font-style: italic; margin-top: 0.3rem; }
+
 .diff-del { color: var(--cli-info); }
 .diff-add { color: var(--cli-green); }
 

@@ -12,6 +12,10 @@ body {
     overflow: hidden !important;
 }
 
+a {
+    color: var(--cli-hover)
+}
+
 form {
     display: flex;
     align-items: center;
