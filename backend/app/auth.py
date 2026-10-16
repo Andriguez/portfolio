@@ -1,8 +1,9 @@
 import os
+import jwt
 from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException, Request
-from jose import JWTError, jwt
+from jwt import PyJWTError
 from passlib.context import CryptContext
 
 JWT_SECRET = os.environ["JWT_SECRET"]
@@ -29,7 +30,7 @@ def require_admin(request: Request):
 
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
-    except JWTError:
+    except PyJWTError:
         raise HTTPException(status_code=401, detail="invalid or expired session")
     if payload.get("purpose"):
         raise HTTPException(status_code=401, detail="invalid session")
@@ -49,7 +50,7 @@ def require_pending(request: Request):
 
     try:
         payload = jwt.decode(token or "", JWT_SECRET, algorithms=[ALGORITHM])
-    except JWTError:
+    except PyJWTError:
         raise HTTPException(status_code=401, detail="login expired")
     if payload.get("purpose") != "2fa":
         raise HTTPException(status_code=401, detail="login expired")

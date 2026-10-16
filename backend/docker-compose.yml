@@ -1,5 +1,9 @@
 services:
   db:
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      retries: 20
     image: mysql:8
     restart: unless-stopped
     environment:
@@ -9,23 +13,30 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
+    ports:
+      - "127.0.0.1:3307:3306"
 
   backend:
     build: .
     restart: unless-stopped
     environment:
-      DATABASE_URL:  mysql+pymysql://portfolio_user:${MYSQL_PASSWORD}@db:3306/portfolio
+      DATABASE_URL: mysql+pymysql://portfolio_user:${MYSQL_PASSWORD}@db:3306/portfolio
       JWT_SECRET: ${JWT_SECRET}
       ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH}
       COOKIE_SECURE: ${COOKIE_SECURE:-true}
       TOTP_ENC_KEY: ${TOTP_ENC_KEY}
     depends_on:
-      - db
+      db:
+       condition: service_healthy
     ports:
       - "8000:8000"
     volumes:
       - uploads_data:/app/uploads
       - cv_data:/app/cv_files
+    security_opt: ["no-new-privileges: true"]
+    cap_drop: ["ALL"]
+    read_only: true
+    tmpfs: ["/tmp"]
 
 volumes:
   db_data:
