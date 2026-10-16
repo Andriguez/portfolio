@@ -4,7 +4,6 @@ from fastapi.staticfiles import StaticFiles
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
-from .database import Base, engine
 from .limiter import limiter
 from .routers import auth, content, cv, social_links, uploads, vfs
 
