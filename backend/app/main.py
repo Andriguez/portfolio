@@ -8,8 +8,6 @@ from .database import Base, engine
 from .limiter import limiter
 from .routers import auth, content, cv, social_links, uploads, vfs
 
-Base.metadata.create_all(bind=engine)
-
 app = FastAPI(title="portfolio API")
 
 app.state.limiter = limiter
