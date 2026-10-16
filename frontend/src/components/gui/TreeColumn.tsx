@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { VfsFolder } from "../../types/vfs";
-import { CV_PLACE, type useVfs } from "../../hooks/useVfs";
+import { CV_PLACE, TRASH_PLACE, type useVfs } from "../../hooks/useVfs";
 import {ChevronRight, ChevronDown, Folder, ComputerIcon, House, Trash2, KeyRound, FileUser} from "lucide-react";
 import { useSite } from "../../context/SiteDataContext";
 
@@ -90,11 +90,11 @@ export function TreeColumn({
                     <span className="tree-label">My CV</span>
                 </div>
             )}
-            <div className="tree-row tree-row--pcn">
+            <div className={`tree-row tree-row--pcn ${vfs.place === TRASH_PLACE ? "tree-row--active" : ""}`} onClick={() => vfs.goToPlace(TRASH_PLACE)}>
                 <Trash2 size={15} />
                 <span className="tree-label">Trash</span>
             </div>
-            <div className="tree-row tree-row--pcn" onClick={onLoginClick}>
+            <div className="tree-row tree-row--pcn " onClick={onLoginClick}>
                 <KeyRound size={15} />
                 <span className="tree-label">Login</span>
             </div>

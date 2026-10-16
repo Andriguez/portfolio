@@ -4,7 +4,9 @@ import { fetchVfsTree } from "../api/vfs.ts";
 import { useEffect, useState } from "react";
 
 export const CV_PLACE = "my_cv";
-const PLACES = [CV_PLACE] as const;
+export const TRASH_PLACE = "trash";
+
+const PLACES = [CV_PLACE, TRASH_PLACE] as const;
 export type Place = (typeof PLACES)[number];
 
 
