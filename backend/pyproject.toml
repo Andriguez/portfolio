@@ -1,0 +1,3 @@
+[tool.ruff.lint.per-file-ignores]
+"migrations/versions/*.py" = ["UP007", "UP006", "UP035", "E501", "I001"]
+"migrations/env.py" = ["F401", "E402", "I001"]
