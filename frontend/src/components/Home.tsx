@@ -20,13 +20,10 @@ export function Home() {
         const onTrash = vfs.place === TRASH_PLACE;
 
         const mode : Mode = requestedMode === "gui" || (onTrash && requestedMode !== "cli") ? "gui" : "cli";
-        const open = searchParams.get("open");
         let command: string | null = null;
 
-        if (!onTrash) {
-            if (open) command = `cat ${open.replace(/"/g, "")}`;
-            else if (vfs.place) command = "cv";
-        }
+        if (!onTrash && vfs.place) command = "cv";
+        
 
         return {mode, command: mode === "cli" ? command: null}
     });
@@ -130,6 +127,7 @@ export function Home() {
                     shuttingDown={shuttingDown}
                     setShuttingDown={setShuttingDown}
                     initialCommand={initial.command}
+                    active={mode === "cli"}
                     setViewMode={setMode}
                 />
             </div>

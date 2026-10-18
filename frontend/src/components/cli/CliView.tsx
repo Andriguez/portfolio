@@ -13,6 +13,7 @@ import { cvToNode } from "../../helpers/cvNodes.ts";
 import type { VfsFolder, VfsFile } from "../../types/vfs.ts";
 import { useTheme } from "../../context/ThemeContext.ts";
 import "./cli-view.css"
+import { useSearchParams } from "react-router-dom";
 
 const EMPTY_FOLDER: VfsFolder = { type: "folder", name: "", slug: "", children: [] };
 
@@ -23,10 +24,11 @@ export type CliViewProps = {
     shuttingDown: boolean,
     setShuttingDown: (shuttingDown: boolean) => void,
     initialCommand: string | null;
+    active: boolean;
     setViewMode: Dispatch<SetStateAction<"cli" | "gui">>;
 };
 
-export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown, initialCommand, setViewMode }: CliViewProps ) {
+export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown, initialCommand, setViewMode, active }: CliViewProps ) {
     const { data: site } = useSite();
 
     const { cd, goToPlace, place, currentFolder, resolveFolder } = vfs;
@@ -112,11 +114,17 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
                 color: "cli-info"
             };
         } else {
-            const result = command.run(args, { currentFolder: activeFolder, cd: (target) => cd(target)!, resolveFile: (target) => activeFolder.children.find((c): c is VfsFile => c.type === "file" && c.slug === target) ?? null, resolveFolder, site, place, goToPlace, theme, setTheme });
+            const result = command.run(args, { 
+                currentFolder: activeFolder, cd: (target) => cd(target)!, 
+                resolveFile: (target) => activeFolder.children.find((c): c is VfsFile => c.type === "file" && c.slug === target) ?? null, 
+                resolveFolder, site, place, goToPlace, theme, setTheme, 
+                setOpen: (slug) => { lastOpened.current = slug; vfs.setOpen(slug) } 
+            });
             if (result === "CLEAR") {
                 setLog([]);
                 setHistory((prev) => [...prev, raw]);
                 setHistoryIndex(null);
+                vfs.setOpen(null)
                 setDraft("");
                 return;
             } else if (result === "EXIT") {
@@ -141,7 +149,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
         setHistoryIndex(null);
         setDraft("");
         setPulseKey((k) => k + 1);
-    }, [activeFolder, cd, currentPath, goToPlace, place, resolveFolder, setShuttingDown, setTheme, setViewMode, site, theme]);
+    }, [activeFolder, cd, currentPath, goToPlace, place, resolveFolder, setShuttingDown, setTheme, setViewMode, site, theme, vfs.setOpen]);
 
     function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
             if (e.key === "ArrowUp") {
@@ -171,6 +179,21 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
             }
     }
 
+    const [searchParams] = useSearchParams();
+    const openSlug = searchParams.get("open");
+    const lastOpened = useRef<string | null>(null);
+
+    useEffect(() => {
+        if (!openSlug) {
+            lastOpened.current = null;
+            return;
+        }
+        if (!active || !booted) return;
+        if (lastOpened.current === openSlug) return;
+        lastOpened.current = openSlug;
+        runCommand(`cat "${openSlug.replace(/"/g, "")}"`);
+    }, [openSlug, active, booted, runCommand]);
+
     const containerRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = useCallback(() => {
@@ -198,7 +221,10 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
         };
     }, [scrollToBottom]);
 
+    const [focused, setFocused] = useState(false);
+
     function handleFocus() {
+        setFocused(true);
         scrollToBottom();
         window.setTimeout(scrollToBottom, 350);
     }
@@ -265,12 +291,13 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
                             ref={inputRef}
                             id={"input"}
                             onFocus={handleFocus}
+                            onBlur={() => setFocused(false)}
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={handleKeyDown}
                             style={{ width: `min(${input.length + 0.75}ch, 90%)` }}
                         />
-                        <span className="cli-cursor" />
+                        { focused && (<span className="cli-cursor" />) }
                         {suggestionTail && (
                             <span
                                 className="cli-suggestion"

@@ -8,6 +8,7 @@ export function DirectoryList({ items, onSelect }: {
         description? : string
         itemCount?: number;
         updatedAt?: string;
+        dir?: string;
     }[];
         onSelect: (cmd: string) => void;
 }) {
@@ -21,8 +22,8 @@ export function DirectoryList({ items, onSelect }: {
                     style={{ animationDelay: `${i * 120}ms` }}
                     onClick={(e) => {
                         if (isTouchDevice()) e.stopPropagation();
-                        onSelect(item.isFolder ? `dir ${item.slug}`
-                            : `view ${item.slug}`)}
+                        onSelect(item.isFolder ? `cd ${item.slug}` : `view ${item.slug}`);    
+                    }
                     }
                 >
                     <span className="ls-type-badge">

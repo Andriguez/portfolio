@@ -15,6 +15,7 @@ type CommandContext = {
     theme: "dark" | "light";
     setTheme: (t: "dark" | "light") => void;
     resolveFolder: (target: string) => VfsFolder | null;
+    setOpen: (slug: string | null) => void;
 };
 
 export type CommandDefinition = {
@@ -73,11 +74,11 @@ export const commands: CommandDefinition[] = [
         usage: "ls",
         show: true,
         description: "check what's in here. (folders, files, ¯\\_(ツ)_/¯)",
-        run: (_args, ctx) => {
-            const folder = _args[0] ? ctx.resolveFolder(_args[0]) : ctx.currentFolder;
+        run: (args, ctx) => {
+            const folder = args[0] ? ctx.resolveFolder(args[0]) : ctx.currentFolder;
 
             if (!folder) {
-                return { type: "error", value: `ls: no such page ${_args[0]}.`, color: "cli-info"}
+                return { type: "error", value: `ls: no such page ${args[0]}.`, color: "cli-info"}
             }
 
             return ({
@@ -89,6 +90,7 @@ export const commands: CommandDefinition[] = [
                     description: c.description,
                     itemCount: folder.children.length,
                     updatedAt: c.updatedAt,
+                    dir: args[0]
                 })),
                 color: "cli-green"
             })
@@ -115,7 +117,19 @@ export const commands: CommandDefinition[] = [
 
             if (!ctx.cd(args[0])) return { type: "error", value: `cd: no such folder: ${args[0]}`, color: "cli-info" };
 
-            return { type: "none", color: "cli-green" };
+            const folder = ctx.resolveFolder(args[0]);
+
+            return folder
+            ? {type: "list", items: folder.children.map( (c) => ({
+                name: c.name,
+                    slug: c.slug,
+                    isFolder: c.type === "folder",
+                    description: c.description,
+                    itemCount: folder.children.length,
+                    updatedAt: c.updatedAt,
+                    dir: args[0]
+            })), color: "cli-green"}
+            : { type: "none", color: "cli-green" };
         },
     },
     {
@@ -132,8 +146,15 @@ export const commands: CommandDefinition[] = [
                 return { type: "error", value: "usage: cat <file>", color: "cli-info" };
             }
 
-            const file = ctx.resolveFile(args[0] ?? "");
-            if (!file) return { type: "error", value: `cat: no such file: ${args[0]}`, color: "cli-info"}
+            const slash = args[0].lastIndexOf("/");
+            const dirPart = slash >= 0 ? args[0].slice(0, slash) : "";
+            const slug = slash >= 0 ? args[0].slice(slash + 1) : args[0];
+
+            const folder = dirPart ? ctx.resolveFolder(dirPart) : ctx.currentFolder;
+            const file = folder?.children.find((c): c is VfsFile => c.type === "file" && c.slug === slug) ?? null;
+            if (!file) return { type: "error", value: `cat: no such file: ${args[0]}`, color: "cli-info"};
+
+            if (!dirPart) ctx.setOpen(file.slug)
 
             if (file.cv)
             return { type: "cv-view", cv: file.cv, color: "cli-green" };
