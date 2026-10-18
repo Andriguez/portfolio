@@ -186,6 +186,8 @@ body {
 .tree-disclosure { display: inline-flex; cursor: pointer; }
 .tree-folder-icon { color: var(--cli-info); flex-shrink: 0; }
 
+.tree-toggle { display: none; }
+.tree-drawer-anchor { display: none; }
 
 .grid-column { 
     flex: 1; 
@@ -392,13 +394,19 @@ body {
 
 .login-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 40; }
 .login-modal-content {
-    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    background: var(--cli-panel); border: 1px solid var(--cli-green-dim); border-radius: 6px;
+    position: fixed; 
+    top: 50%; left: 50%; 
+    transform: translate(-50%, -50%);
+    background: var(--gui-bg); 
+    border: 1px solid var(--cli-green-dim); 
+    border-radius: 6px;
     padding: 1.4rem; width: 300px; z-index: 41;
 }
+
 .login-modal-input {
     width: 100%; background: var(--cli-bg); border: 1px solid var(--cli-green-dim); border-radius: 4px;
     padding: 0.5rem 0.7rem; color: var(--cli-green); font-family: inherit; margin-bottom: 0.6rem;
+    font-size: 16px;
 }
 .login-modal-error { color: var(--cli-info); font-size: 0.75rem; margin-top: 0.6rem; }
 .login-modal-actions { display: flex; justify-content: flex-end; gap: 0.6rem; flex-wrap: wrap; }
@@ -570,10 +578,42 @@ body {
     }
 
     .menu-item--mobile-only { display: block; }
+
+    .tree-toggle { display: block; }
+
+    .tree-drawer-anchor {
+        display: block;
+        position: relative;
+        height: 0;
+        z-index: 15;
+    }
+    .tree-drawer {
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        max-height: 55dvh;
+        overflow-y: auto;
+        background: var(--gui-btn);
+        border-bottom: 1px solid var(--cli-green-dim);
+        box-shadow: 0 10px 18px rgba(0, 0, 0, 0.45);
+        animation: drawerIn 140ms ease-out;
+    }
+
+    .tree-drawer .tree-column {
+        display: block;
+        max-width: none;
+        border-right: none;
+    }
+
+}
+
+@keyframes drawerIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .desktop-icon--shaking > svg, .eightball-bubble { animation: none; }
+    .tree-drawer { animation: none; }
 }
 
 @media (orientation: landscape) and (max-height: 500px) {
