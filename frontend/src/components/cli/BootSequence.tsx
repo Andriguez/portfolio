@@ -7,10 +7,10 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
 
     useEffect(() => {
         if (visibleCount >= lines.length) {
-            const t = setTimeout(onComplete, 1000);
+            const t = setTimeout(onComplete, 800);
             return () => clearTimeout(t);
         }
-        const t = setTimeout(() => setVisibleCount((c) => c + 1), 1200);
+        const t = setTimeout(() => setVisibleCount((c) => c + 1), 1000);
         return () => clearTimeout(t);
     });
 

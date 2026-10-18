@@ -347,7 +347,6 @@ body {
 .detail-panel-image { width: 100%; margin-bottom: 1rem; border-radius: 4px; }
 .detail-panel-text { color: var(--cli-green-dim); line-height: 1.6; font-size: 0.9rem; }
 
-
 @media (max-width: 900px) {
     .detail-backdrop { 
         display: block; 
@@ -465,22 +464,73 @@ body {
 }
 
 .desktop-icons {
-    position: fixed; top: 6rem; left: 3rem;
-    display: flex; flex-direction: column; gap: 1.4rem;
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
     z-index: 5;
 }
 .desktop-icon {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    pointer-events: auto;
     display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
-    width: 70px; cursor: pointer; color: var(--cli-green); position: relative;
+    width: 70px; color: var(--cli-green);
     border-radius: 4px;
     padding: 0.5rem;
+    cursor: pointer;
 }
 .desktop-icon:hover { background: rgba(183, 242, 163, 0.05);; }
 .desktop-icon span { font-size: 0.68rem; text-align: center; }
 .desktop-icon-tooltip {
-    position: absolute; left: 100%;
+    position: absolute; top: 100%;
     background: var(--cli-panel); border: 1px solid var(--cli-green-dim); border-radius: 4px;
-    padding: 0.5rem 0.7rem; font-size: 0.7rem; width: 160px; color: var(--cli-green-dim); z-index: 6;
+    padding: 0.5rem 0.7rem; font-size: 0.7rem; color: var(--cli-green-dim); z-index: 6;
+    display: flex; justify-content: center; text-wrap-mode: nowrap; width: auto;
+}
+
+@media (max-width: 600px) {
+    .desktop-icons {
+        inset: 0;
+    }
+
+    .desktop-icon { position: absolute; left: auto; top: auto; }
+
+    .desktop-icon[data-corner="tl"] {
+        left: 0.75rem;
+        top: calc(4rem + var(--i) * 5.6rem);
+    }
+
+    .desktop-icon[data-corner="br"] {
+        right: 0.75rem;
+        bottom: calc(2rem + var(--i) * 5.6rem);
+    }
+
+    .desktop-icon[data-corner="center"] {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+    }
+
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+    .desktop-icons {
+        inset: auto;
+        top: 2rem; right: 0; right: 1rem;
+        display: flex; flex-wrap: wrap; gap: 1rem;
+    }
+
+    .desktop-icon { position: static; }
+
+    .desktop-icon[data-corner="center"] {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+    }
 }
 
 .desktop-icon--shaking > svg { animation: ballShake 650ms ease-in-out; }
@@ -537,6 +587,7 @@ body {
 .menu-item--link { display: flex; align-items: center; justify-content: space-between; text-decoration: none; }
 .menu-divider { height: 1px; background: var(--cli-border); margin: 0.3rem 0; }
 .menu-item--mobile-only { display: none; }
+
 @media (max-width: 525px) { .menu-item--mobile-only { display: block; } }
 
 .info-modal-content { width: min(520px, 92vw); max-height: 80vh; display: flex; flex-direction: column; }
@@ -574,4 +625,5 @@ body {
     background: var(--gui-btn);
     display: flex;
     flex-direction: column;
+    border: 2px solid var(--gui-border);
 }

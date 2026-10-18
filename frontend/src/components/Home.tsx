@@ -129,6 +129,7 @@ export function Home() {
                     shuttingDown={shuttingDown}
                     setShuttingDown={setShuttingDown}
                     initialCommand={initial.command}
+                    setViewMode={setMode}
                 />
             </div>
             <div style={{ display: mode === "gui" ? "block" : "none" }}>
