@@ -8,7 +8,7 @@ import { ExplorerButtons } from './components/ExplorerButtons.tsx';
 import { TreeColumn } from "./components/TreeColumn.tsx";
 import { GridColumn } from "./components/GridColumn.tsx";
 import { DetailPanel } from "./content-panels/DetailPanel.tsx";
-import { ExternalLink, Mail } from "lucide-react";
+import { ExternalLink, Mail, ListTree } from "lucide-react";
 import { useSite } from "../../../context/SiteDataContext.ts";
 import { useTrash } from "../../../hooks/useTrash.ts";
 import { trashToNode } from "../../../helpers/trashNodes.ts";
@@ -163,6 +163,29 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
         else handleOpenFile(item.slug);
     }
 
+    const [treeOpen, setTreeOpen] = useState(false);
+    const navKey = `${vfs.currentPath}|${vfs.place ?? ""}`;
+    const [lastNavKey, setLastNavKey] = useState(navKey);
+    if (lastNavKey !== navKey) {
+        setLastNavKey(navKey);
+        setTreeOpen(false);
+    }
+
+    useEffect(() => {
+        if (!treeOpen) return;
+        function onPointerDown(e: PointerEvent) {
+            if (!(e.target as HTMLElement).closest(".tree-drawer, .tree-toggle")) setTreeOpen(false);
+        }
+        function onKey(e: KeyboardEvent) {
+            if (e.key === "Escape") setTreeOpen(false);
+        }
+        document.addEventListener("pointerdown", onPointerDown);
+        document.addEventListener("keydown", onKey);
+        return () => {
+            document.removeEventListener("pointerdown", onPointerDown);
+            document.removeEventListener("keydown", onKey);
+        };
+    }, [treeOpen]);
 
         return (
         <div>
@@ -179,6 +202,15 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                     <ExplorerButtons onMinimize={handleMinimizeWindow} onClose={handleCloseWindow} />
                 </div>
                 <div className="gui-toolbar">
+                    <button
+                        className="toolbar-btn tree-toggle"
+                        title="folders"
+                        aria-label="show all folders"
+                        aria-expanded={treeOpen}
+                        onClick={() => setTreeOpen((v) => !v)}
+                    >
+                        <ListTree size={14} />
+                    </button>
                     <button title="back" className="toolbar-btn nav-btn" onClick={() => navigate(-1)} aria-label="back">‹</button>
                     <button title="forward" className="toolbar-btn nav-btn" onClick={() => navigate(1)} aria-label="forward">›</button>
 
@@ -237,72 +269,85 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                         )}
                     </div>
 
-                </div>
-                {mobileSearchOpen && (
-                    <div className="mobile-search-row">
-                        <input
-                            className="mobile-search-input"
-                            autoFocus
-                            placeholder="search.."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                        <button className="toolbar-btn search-btn"
-                                onClick={() => setMobileSearchOpen((v) => !v)}
-                                aria-label="search">
-                            ×
-                        </button>
                     </div>
-                )}
-                <div className="gui-body">
-                    <TreeColumn vfs={vfs} expandedPaths={expandedPaths} setExpandedPaths={setExpandedPaths} onLoginClick={() => setLoginOpen(true)} />
-                    <GridColumn vfs={vfs} items={visibleItems} viewMode={viewMode} openedFile={openSlug} onItemClick={handleItemClick} />
-                    {openFile && (
-                        <div className="detail-overlay-wrap">
-                        <div className="detail-backdrop" onClick={handleCloseFile} />
-                            <DetailPanel file={openFile as VfsFile} onClose={handleCloseFile} />
+                    {mobileSearchOpen && (
+                        <div className="mobile-search-row">
+                            <input
+                                className="mobile-search-input"
+                                autoFocus
+                                placeholder="search.."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                            <button className="toolbar-btn search-btn"
+                                    onClick={() => setMobileSearchOpen((v) => !v)}
+                                    aria-label="search">
+                                ×
+                            </button>
                         </div>
                     )}
-                </div>
-                <div className="gui-statusbar">
-                        <span title="content summary" >
-                            {items?.length} items | 
-                            { folderCount > 0 ? ` ${folderCount} folder(s)` : "" }  {fileCount > 0 && vfs.place !== TRASH_PLACE ? `${fileCount} file(s)` : vfs.place === TRASH_PLACE ? `$ git log --diff-filter=D · ${trashSource === "loading" ? "loading..." : trashSource === "github" ? "from git history" : "from archives"}` : "" } 
-                        </span>
-                    <div className="view-toggle">
-                        <button title="grid view" className={viewMode === "grid" ? "view-btn view-btn--active" : "view-btn"} onClick={() => setViewMode("grid")} aria-label="grid view">⊞</button>
-                        <button title="list view" className={viewMode === "list" ? "view-btn view-btn--active" : "view-btn"} onClick={() => setViewMode("list")} aria-label="list view">☰</button>
+                    {treeOpen && (
+                        <div className="tree-drawer-anchor">
+                            <div className="tree-drawer">
+                                <TreeColumn
+                                    vfs={vfs}
+                                    expandedPaths={expandedPaths}
+                                    setExpandedPaths={setExpandedPaths}
+                                    onLoginClick={() => { setTreeOpen(false); setLoginOpen(true); }}
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="gui-body">
+                        <TreeColumn vfs={vfs} expandedPaths={expandedPaths} setExpandedPaths={setExpandedPaths} onLoginClick={() => setLoginOpen(true)} />
+                        <GridColumn vfs={vfs} items={visibleItems} viewMode={viewMode} openedFile={openSlug} onItemClick={handleItemClick} />
+                        {openFile && (
+                            <div className="detail-overlay-wrap">
+                            <div className="detail-backdrop" onClick={handleCloseFile} />
+                                <DetailPanel file={openFile as VfsFile} onClose={handleCloseFile} />
+                            </div>
+                        )}
                     </div>
+                    <div className="gui-statusbar">
+                            <span title="content summary" >
+                                {items?.length} items | 
+                                { folderCount > 0 ? ` ${folderCount} folder(s)` : "" }  {fileCount > 0 && vfs.place !== TRASH_PLACE ? `${fileCount} file(s)` : vfs.place === TRASH_PLACE ? `$ git log --diff-filter=D · ${trashSource === "loading" ? "loading..." : trashSource === "github" ? "from git history" : "from archives"}` : "" } 
+                            </span>
+                        <div className="view-toggle">
+                            <button title="grid view" className={viewMode === "grid" ? "view-btn view-btn--active" : "view-btn"} onClick={() => setViewMode("grid")} aria-label="grid view">⊞</button>
+                            <button title="list view" className={viewMode === "list" ? "view-btn view-btn--active" : "view-btn"} onClick={() => setViewMode("list")} aria-label="list view">☰</button>
+                        </div>
+                    </div>
+                    <svg className="gui-grain" width="100%" height="100%">
+                        <filter id="grain2">
+                            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"
+                                        stitchTiles="stitch"></feTurbulence>
+                        </filter>
+                        <rect width="100%" height="100%" filter="url(#grain2)"></rect>
+                    </svg>
                 </div>
-                <svg className="gui-grain" width="100%" height="100%">
-                    <filter id="grain2">
-                        <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"
-                                      stitchTiles="stitch"></feTurbulence>
-                    </filter>
-                    <rect width="100%" height="100%" filter="url(#grain2)"></rect>
-                </svg>
+                { windowState === "open" && (
+                <div className="gui-desktop-overlay" >
+                    </div>
+                )}
+                { windowState === "minimized" && (
+                        <div title="Start" className="gui-taskbar-pill" onClick={handleRestoreWindow} />
+                )}
+                {
+                    !shuttingDown && (
+                    <div>
+                    <DesktopIcons onRestore={() => { vfs.goToPath(["/"]); handleRestoreWindow(); }} onLoginClick={() => setLoginOpen(true)} onCvClick={() => { if (hasCv) handleCvIcon(); }} onTrashClick={() => {vfs.goToPlace(TRASH_PLACE); handleRestoreWindow(); }} />
+                    </div>
+                )
+                }
+                <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
+                <InfoDialog open={aboutOpen} onOpenChange={setAboutOpen} title="about andi.sys">
+                    <p className="info-text">{site.staticContent.stack_info || "nothing written here yet."}</p>
+                </InfoDialog>
+                <InfoDialog open={changelogOpen} onOpenChange={setChangelogOpen} title="changelog.md">
+                    <div className="info-markdown"><ReactMarkdown>{changelog}</ReactMarkdown></div>
+                </InfoDialog>
             </div>
-            { windowState === "open" && (
-               <div className="gui-desktop-overlay" >
-                </div>
-            )}
-            { windowState === "minimized" && (
-                    <div title="Start" className="gui-taskbar-pill" onClick={handleRestoreWindow} />
-            )}
-            {
-                !shuttingDown && (
-                <div>
-                <DesktopIcons onRestore={() => { vfs.goToPath(["root"]); handleRestoreWindow(); }} onLoginClick={() => setLoginOpen(true)} onCvClick={() => { if (hasCv) handleCvIcon(); }} onTrashClick={() => {vfs.goToPlace(TRASH_PLACE); handleRestoreWindow(); }} />
-                </div>
-            )
-            }
-            <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
-            <InfoDialog open={aboutOpen} onOpenChange={setAboutOpen} title="about andi.sys">
-                <p className="info-text">{site.staticContent.stack_info || "nothing written here yet."}</p>
-            </InfoDialog>
-            <InfoDialog open={changelogOpen} onOpenChange={setChangelogOpen} title="changelog.md">
-                <div className="info-markdown"><ReactMarkdown>{changelog}</ReactMarkdown></div>
-            </InfoDialog>
-        </div>
-    )
+        )
 }
