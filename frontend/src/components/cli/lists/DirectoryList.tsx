@@ -22,7 +22,7 @@ export function DirectoryList({ items, onSelect }: {
                     style={{ animationDelay: `${i * 120}ms` }}
                     onClick={(e) => {
                         if (isTouchDevice()) e.stopPropagation();
-                        onSelect(item.isFolder ? `cd ${item.slug}` : `view ${item.slug}`);    
+                        onSelect(item.isFolder ? `cd ${item.slug}` : `cat ${item.slug}`);    
                     }
                     }
                 >
