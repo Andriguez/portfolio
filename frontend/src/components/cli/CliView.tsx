@@ -34,6 +34,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
     const { cd, goToPlace, place, currentFolder, resolveFolder } = vfs;
     
     const currentPath = vfs.displayPath;
+    const lastOpened = useRef<string | null>(null);
 
     const [ booting, setBooting ] = useState<boolean>(true);
 
@@ -149,7 +150,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
         setHistoryIndex(null);
         setDraft("");
         setPulseKey((k) => k + 1);
-    }, [activeFolder, cd, currentPath, goToPlace, place, resolveFolder, setShuttingDown, setTheme, setViewMode, site, theme, vfs.setOpen]);
+    }, [activeFolder, cd, currentPath, goToPlace, place, resolveFolder, setShuttingDown, setTheme, setViewMode, site, theme, vfs]);
 
     function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
             if (e.key === "ArrowUp") {
@@ -181,7 +182,6 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
 
     const [searchParams] = useSearchParams();
     const openSlug = searchParams.get("open");
-    const lastOpened = useRef<string | null>(null);
 
     useEffect(() => {
         if (!openSlug) {
