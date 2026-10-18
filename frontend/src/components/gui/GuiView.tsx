@@ -4,7 +4,7 @@ import "./gui-view.css"
 
 export function GuiView({ vfs }: { vfs: ReturnType<typeof useVfs> })  {
     return (
-        <div style={{ padding: "4rem 2rem" }}>
+        <div className="gui-wrapper" style={{ padding: "4rem 1.6rem" }}>
             <FileExplorer vfs={vfs} />
             <svg className="gui-grain-extra" width="100%" height="100%">
                 <filter id="guiGrain">

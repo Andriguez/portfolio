@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback, type Dispatch, type SetStateAction } from "react";
 import { useSite } from "../../context/SiteDataContext.ts";
 import { CV_PLACE, useVfs } from "../../hooks/useVfs"
 import type { LogEntry } from "../../types/LogEntry"
@@ -23,9 +23,10 @@ export type CliViewProps = {
     shuttingDown: boolean,
     setShuttingDown: (shuttingDown: boolean) => void,
     initialCommand: string | null;
+    setViewMode: Dispatch<SetStateAction<"cli" | "gui">>;
 };
 
-export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown, initialCommand }: CliViewProps ) {
+export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown, initialCommand, setViewMode }: CliViewProps ) {
     const { data: site } = useSite();
 
     const { cd, goToPlace, place, currentFolder, resolveFolder } = vfs;
@@ -94,7 +95,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
 
     const [loginOpen, setLoginOpen] = useState(false);
 
-    function runCommand(raw: string) {
+    const runCommand = useCallback((raw: string) => {
         const promptPath = currentPath;
         const [cmdName, ...args] = tokenize(raw.toLowerCase())
         if (!cmdName) return;
@@ -107,11 +108,11 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
         if (!command) {
             output = {
                 type: "error",
-                value: `command not found: ${cmdName} — type 'help' to see what's available`,
+                value: `command not found: ${cmdName} — type 'help' to see what's possible.`,
                 color: "cli-info"
             };
         } else {
-            const result = command.run(args, { currentFolder: activeFolder, cd: (target) => cd(target)!, resolveFile, resolveFolder, site, place, goToPlace, theme, setTheme });
+            const result = command.run(args, { currentFolder: activeFolder, cd: (target) => cd(target)!, resolveFile: (target) => activeFolder.children.find((c): c is VfsFile => c.type === "file" && c.slug === target) ?? null, resolveFolder, site, place, goToPlace, theme, setTheme });
             if (result === "CLEAR") {
                 setLog([]);
                 setHistory((prev) => [...prev, raw]);
@@ -127,7 +128,11 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
             } else if (result === "LOGIN") {
                 setLoginOpen(true);
                 return;
+            } else if (result === "SWITCH_MODE") {
+                setViewMode("gui");
+                return;
             }
+
             output = result;
         }
 
@@ -136,9 +141,9 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
         setHistoryIndex(null);
         setDraft("");
         setPulseKey((k) => k + 1);
-    }
+    }, [activeFolder, cd, currentPath, goToPlace, place, resolveFolder, setShuttingDown, setTheme, setViewMode, site, theme]);
 
-        function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
             if (e.key === "ArrowUp") {
                 e.preventDefault();
                 if (history.length === 0) return;
@@ -164,20 +169,39 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
                 e.preventDefault();
                 if (suggestion) setInput(suggestion);
             }
-        }
+    }
 
     const containerRef = useRef<HTMLDivElement>(null);
-    const bottomRef = useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = useCallback(() => {
+        const c = containerRef.current;
+        if (c) c.scrollTop = c.scrollHeight;
+    }, []);
 
     useEffect(() => {
-        const container = containerRef.current;
-        if (!container) return;
-        const isOverflowing = container.scrollHeight > container.clientHeight;
-        if (isOverflowing) {
-            bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-        }
-    }, [log]);
+        scrollToBottom();
+    }, [log, scrollToBottom]);
 
+    useEffect(() => {
+        const vv = window.visualViewport;
+        if (!vv) return;
+        let raf = 0;
+        const onResize = () => {
+            if (document.activeElement !== inputRef.current) return;
+            cancelAnimationFrame(raf);
+            raf = requestAnimationFrame(scrollToBottom);
+        };
+        vv.addEventListener("resize", onResize);
+        return () => {
+            vv.removeEventListener("resize", onResize);
+            cancelAnimationFrame(raf);
+        };
+    }, [scrollToBottom]);
+
+    function handleFocus() {
+        scrollToBottom();
+        window.setTimeout(scrollToBottom, 350);
+    }
 
     useEffect(() => {
         function skipBoot() {
@@ -190,7 +214,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
             window.removeEventListener("keydown", skipBoot);
             window.removeEventListener("pointerdown", skipBoot);
         };
-    }, []);
+    }, [setBooted]);
 
     useEffect(() => {
         const t = setTimeout(() => {
@@ -200,16 +224,12 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
         return () => clearTimeout(t);
     }, []);
 
-    function resolveFile(target: string): VfsFile | null {
-        return activeFolder.children.find((c): c is VfsFile => c.type === "file" && c.slug === target) ?? null
-    }
-
     const ranInitial = useRef(false);
     useEffect(() => {
         if (!booted || !initialCommand || ranInitial.current) return;
         ranInitial.current = true;
         runCommand(initialCommand);
-    }, [booted]);
+    }, [booted, initialCommand, runCommand]);
 
     return (
         <div
@@ -245,7 +265,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
                             ref={inputRef}
                             className={"cli-green"}
                             id={"input"}
-                            autoFocus
+                            onFocus={handleFocus}
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={handleKeyDown}
@@ -266,7 +286,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
                     </span>
                 </div>
             </form>
-                <div ref={bottomRef} />
+                <div style={{ height: "1rem" }}/>
             </div>
             <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
         </div>

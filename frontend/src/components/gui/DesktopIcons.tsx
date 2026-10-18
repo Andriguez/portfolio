@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type CSSProperties } from "react";
 import { ComputerIcon, Trash2, KeyRound, Sparkles, FileUser } from "lucide-react";
 import { EIGHT_BALL_ANSWERS } from "../../data/eightBall";
 
@@ -30,27 +30,39 @@ export function DesktopIcons({
         );
     }
 
+    const PLACEMENT = {
+        pc:     { x: "5%",  y: "12%" },
+        trash:  { x: "86%", y: "82%" },
+        login:  { x: "72%", y: "82%" },
+        cv:     { x: "5%", y: "24%" },
+        ball:   { x: "50%", y: "45%" },
+    };
+
+    const at = (key: keyof typeof PLACEMENT, i: number) => ({
+        "--x": PLACEMENT[key].x, "--y": PLACEMENT[key].y, "--i": i
+    }) as CSSProperties;
+
     return (
         <div className="desktop-icons">
               {/* <div className="desktop-icon">
                 <Camera size={30} />
                 <span>Smile :{`)`}</span>
             </div> */}
-            <div className="desktop-icon" onClick={onRestore}>
+            <div className="desktop-icon" style={at("pc", 0)} data-corner="tl" onClick={onRestore}>
                 <ComputerIcon size={30} />
                 <span>ANDRIGUEZ</span>
             </div>
             { onCvClick && 
-                (<div className="desktop-icon" onClick={onCvClick}>
+                (<div className="desktop-icon" style={at("cv", 1)} data-corner="tl" onClick={onCvClick}>
                     <FileUser size={30} />
                     <span>My CV</span>
                 </div>)
             }
-            <div className="desktop-icon" onClick={onLoginClick}>
+            <div className="desktop-icon" style={at("login", 1)} data-corner="br" onClick={onLoginClick}>
                 <KeyRound size={30} />
                 <span>Login</span>
             </div>
-            <div className={`desktop-icon ${shaking ? "desktop-icon--shaking" : ""}`} onClick={ask8Ball}>
+            <div className={`desktop-icon ${shaking ? "desktop-icon--shaking" : ""}`} style={at("ball",2)} data-corner="center" onClick={ask8Ball}>
                 <Sparkles size={30} />
                 <span>8ball</span>
                 {answer && (
@@ -59,7 +71,7 @@ export function DesktopIcons({
                     </div>
                 )}
             </div>
-            <div className="desktop-icon" onClick={onTrashClick}>
+            <div className="desktop-icon" style={at("trash", 0)} data-corner="br" onClick={onTrashClick}>
                 <Trash2 size={30} />
                 <span>Trash</span>
             </div>

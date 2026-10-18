@@ -24,14 +24,14 @@ export type CommandDefinition = {
     usage: string;
     show: boolean;
     description: string;
-    run: (args: string[], ctx: CommandContext) => CommandOutput | "CLEAR" | "EXIT" | "LOGIN";
+    run: (args: string[], ctx: CommandContext) => CommandOutput | "CLEAR" | "EXIT" | "LOGIN" | "SWITCH_MODE";
 };
 
 export const commands: CommandDefinition[] = [
     {
         name: "hello",
         usage: "hello",
-        description: "read the welcome message.",
+        description: "hello, world. hello, you.",
         show: true,
         run: (_args, ctx) => {
             const hello_msg = ctx.site.staticContent.hello_message;
@@ -44,10 +44,21 @@ export const commands: CommandDefinition[] = [
         }
     },
     {
+        name: "switch-int",
+        usage: "switch-int",
+        description: "if you don't wanna write commands, this one's for you!",
+        show: true,
+        alias: "gui-interface",
+        options: ["or use the switch on the top-left corner"],
+        run: () => {
+            return "SWITCH_MODE";
+        }
+    },
+    {
         name: "help",
         usage: "help",
         show: false,
-        description: "list everything(?) you can do here.",
+        description: "quick guide of the general commands. the ones down here are just for '--extra' fun.",
         run: (_args) => {
                 return {
                     type: "help",
@@ -61,7 +72,7 @@ export const commands: CommandDefinition[] = [
         alias: "dir",
         usage: "ls",
         show: true,
-        description: "check what's in here.",
+        description: "check what's in here. (folders, files, ¯\\_(ツ)_/¯)",
         run: (_args, ctx) => {
             const folder = _args[0] ? ctx.resolveFolder(_args[0]) : ctx.currentFolder;
 
@@ -89,7 +100,7 @@ export const commands: CommandDefinition[] = [
         usage: "cd <page>",
         show: true,
         options: [" .. ","../../ ", "~ ", "directory/folder ", "back "],
-        description: "go into a page; type 'cd back' to go backwards.",
+        description: "go into a folder/page; 'cd back' retreats.",
         run: (args, ctx) => {
             if (!args[0]) return { type: "error", value: "usage: cd <folder>", color: "cli-info" };
 
@@ -112,7 +123,7 @@ export const commands: CommandDefinition[] = [
         alias: "view",
         usage: "cat <file>",
         show: true,
-        description: "open and read a page's entry.",
+        description: "open a file/entry and read (no meow).",
         run: (args, ctx) => {
             if (!args[0]) {
                 if (ctx.place === CV_PLACE && ctx.site.cvs.length > 0)
@@ -134,7 +145,7 @@ export const commands: CommandDefinition[] = [
         name: "links",
         usage: "links <media>",
         show: true,
-        description: "let's get friendly :).",
+        description: "list my social profiles.. let's get friendly :).",
         options: (site) => site.links.map((l) => l.name.toLowerCase()),
         run: (_args, ctx) => {
             const links = ctx.site.links;
@@ -187,7 +198,7 @@ export const commands: CommandDefinition[] = [
         show: true,
         usage: "contact",
         options: [],
-        description: "come on.. send me an email.",
+        description: "come on, send me an email!",
         run: () => ({
             type: "link",
             value: `>> send me an email to andhriguez@outlook.com <<`,
@@ -200,7 +211,7 @@ export const commands: CommandDefinition[] = [
         alias: "source",
         usage: "git",
         show: false,
-        description: "get the link to check the public repo.",
+        description: "get the link to the public repo.",
         run: () => {
             const url = import.meta.env.VITE_REPO_URL;
             if (!url) return { type: "error", value: "the repo is still private..", color: "cli-info"};
@@ -209,10 +220,11 @@ export const commands: CommandDefinition[] = [
         }
     },
     {
-        name: "stack",
-        usage: "stack",
+        name: "tech-stack",
+        alias: "stack",
+        usage: "tech-stack",
         show: false,
-        description: "lists the technology used for this portfolio. [implement]",
+        description: "read about the technology i used on this portfolio.",
         run: (_args, ctx) => {
            const stack_msg = ctx.site.staticContent.stack_info;
 
@@ -222,6 +234,16 @@ export const commands: CommandDefinition[] = [
                 color: "cli-dim"
            }
         }
+    },
+     {
+        name: "changelog",
+        usage: "changelog",
+        show: false,
+        description: "check what i have been doing in here.",
+
+        run: () => ({
+            type: "changelog", file: changelog ,color: "cli-green"
+        })
     },
     {
         name: "echo",
@@ -237,9 +259,10 @@ export const commands: CommandDefinition[] = [
     },
     {
         name: "date",
+        alias: "when",
         usage: "date",
         show: false,
-        description: "in case you were wondering: when are we??",
+        description: "just a reminder of WHEN we are.",
         run: () => ({
             type: "text",
             value: new Date().toString(),
@@ -251,7 +274,7 @@ export const commands: CommandDefinition[] = [
         usage: "pwd",
         alias: "where",
         show: false,
-        description: "wanna know where you at?",
+        description: "wanna know WHERE (in the system) you at?",
         run: (_args, ctx: CommandContext) => ({
             type: "text",
             value: ctx.currentFolder.name,
@@ -287,37 +310,27 @@ export const commands: CommandDefinition[] = [
         options: ["question", "?"],
         description: "you have doubts, i have answers.. let's go!",
         run: (args) => {
-            if (!args[0]) return { type: "error", value: "ehh, what was the question?? <br> usage: 8ball <question>", color: "cli-info" };
+            if (!args[0]) return { type: "error", value: "ehh, what was the question?? <br> usage: 8ball <question|?>", color: "cli-info" };
 
             return { type: "text", value: EIGHT_BALL_ANSWERS[Math.floor(Math.random() * EIGHT_BALL_ANSWERS.length)] , color: "cli-green" };
         }
-    },
-    {
-        name: "changelog",
-        usage: "changelog",
-        show: false,
-        description: "check what i have been doing in here.",
-
-        run: () => ({
-            type: "changelog", file: changelog ,color: "cli-green"
-        })
     },
     {
         name: "clear",
         usage: "clear",
         show: false,
         alias: "cls",
-        description: "wipe the screen.",
+        description: "wipe the screen clean.",
         run: () => "CLEAR",
     },
      {
         name: "theme",
         usage: "theme <mode>",
         show: true,
-        options: ["dark", "light"],
-        description: "change the theme of the terminal or leave empty to switch.",
+        options: ["dark", "light", "switch"],
+        description: "change the site's theme.",
         run: (args, ctx) => {
-            if (!args[0]) {
+            if (!args[0] || args[0] === "switch") {
                 const next = ctx.theme === "dark" ? "light" : "dark";
                 ctx.setTheme(next);
                 return { type: "text", value:  `Theme changed to ${next}`, color: "cli-green"};

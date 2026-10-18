@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import changelog from "../../helpers/changelog.ts";
@@ -118,6 +118,28 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     const [searchQuery, setSearchQuery] = useState("");
     const [menuOpen, setMenuOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!menuOpen) return;
+
+        function handlePointerDown(e: PointerEvent) {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+                setMenuOpen(false);
+            }
+        }
+
+        function handleKey(e: KeyboardEvent) {
+            if (e.key === "Escape") setMenuOpen(false);
+        }
+
+        document.addEventListener("pointerdown", handlePointerDown);
+        document.addEventListener("keydown", handleKey);
+        return () => {
+            document.removeEventListener("pointerdown", handlePointerDown);
+            document.removeEventListener("keydown", handleKey);
+        }
+    }, [menuOpen])
 
     const searchResults = searchQuery && vfs.root ? searchVfs(vfs.root, searchQuery) : null;
     const visibleItems = searchResults ? searchResults.map((r) => r.node) : items;
@@ -189,26 +211,26 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                         🔍︎︎
                     </button>
 
-                    <div className="toolbar-menu">
+                    <div className="toolbar-menu" ref={menuRef}>
                         <button title="options" className="toolbar-btn menu-btn" onClick={() => setMenuOpen((v) => !v)} aria-label="menu">⋮</button>
                         {menuOpen && (
                             <div className="toolbar-menu-dropdown">
                                 <div className="menu-item">
                                     <ThemeToggle />
                                 </div>
-                                <div className="menu-item" onClick={() => { setAboutOpen(true); setMenuOpen(false); }}>about andi.sys</div>
-                                <div className="menu-item" onClick={() => { setChangelogOpen(true); setMenuOpen(false); }}>read changelog.md</div>
+                                <div className="menu-item" onClick={() => { setAboutOpen(true); }}>about andi.sys</div>
+                                <div className="menu-item" onClick={() => { setChangelogOpen(true); }}>read changelog.md</div>
                                 {hasCv && (
-                                    <div className="menu-item menu-item--mobile-only" onClick={() => { vfs.goToPlace(CV_PLACE); setMenuOpen(false); }}>check my CV</div>
+                                    <div className="menu-item menu-item--mobile-only" onClick={() => { vfs.goToPlace(CV_PLACE); }}>check my CV</div>
                                 )}
 
                                 {site.links.length > 0 && <div className="menu-divider" />}
                                 {site.links.map((l) => (
-                                    <a key={l.id} className="menu-item menu-item--link" href={l.url} target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>
+                                    <a key={l.id} className="menu-item menu-item--link" href={l.url} target="_blank" rel="noopener noreferrer">
                                         go to {l.name.toLowerCase()} <ExternalLink size={11} />
                                     </a>
                                 ))}
-                                <a key={"email"} className="menu-item menu-item--link" href="mailto:andhriguez@oulook.com" onClick={() => setMenuOpen(false)}>
+                                <a key={"email"} className="menu-item menu-item--link" href="mailto:andhriguez@oulook.com">
                                     send me an email <Mail size={11} />
                                 </a>
                             </div>
@@ -245,9 +267,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                 <div className="gui-statusbar">
                         <span title="content summary" >
                             {items?.length} items | 
-                            { folderCount > 0 ? `${folderCount} folder(s)` : "" }  {fileCount > 0 ? `${fileCount} file(s)` : "" } | 
-                            {vfs.place === TRASH_PLACE ? ` $ git log --diff-filter=D · ${trashSource === "github" ? "from git history" : "from archives"}` : ""}
-
+                            { folderCount > 0 ? ` ${folderCount} folder(s)` : "" }  {fileCount > 0 && vfs.place !== TRASH_PLACE ? `${fileCount} file(s)` : vfs.place === TRASH_PLACE ? `$ git log --diff-filter=D · ${trashSource === "loading" ? "loading..." : trashSource === "github" ? "from git history" : "from archives"}` : "" } 
                         </span>
                     <div className="view-toggle">
                         <button title="grid view" className={viewMode === "grid" ? "view-btn view-btn--active" : "view-btn"} onClick={() => setViewMode("grid")} aria-label="grid view">⊞</button>
@@ -269,9 +289,13 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
             { windowState === "minimized" && (
                     <div title="Start" className="gui-taskbar-pill" onClick={handleRestoreWindow} />
             )}
-             <div>
+            {
+                !shuttingDown && (
+                <div>
                 <DesktopIcons onRestore={handleRestoreWindow} onLoginClick={() => setLoginOpen(true)} onCvClick={() => { if (hasCv) handleCvIcon(); }} onTrashClick={() => {vfs.goToPlace(TRASH_PLACE); handleRestoreWindow(); }} />
                 </div>
+            )
+            }
             <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
             <InfoDialog open={aboutOpen} onOpenChange={setAboutOpen} title="about andi.sys">
                 <p className="info-text">{site.staticContent.stack_info || "nothing written here yet."}</p>

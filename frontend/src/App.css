@@ -41,8 +41,8 @@ body {
 
 .status-line {
     position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
+    top: 1.2rem;
+    right: 0.8rem;
     font-size: 0.65rem;
     letter-spacing: 0.05em;
     color: var(--cli-info);
@@ -53,8 +53,8 @@ body {
 
 .interface-switch {
     position: absolute;
-    top: 0.5rem;
-    left: 0.75rem;
+    top: 0.6rem;
+    left: 1rem;
     z-index: 999;
 }
 
@@ -107,4 +107,24 @@ body {
 .SwitchRoot[data-state="unchecked"] .switch-icon--left,
 .SwitchRoot[data-state="checked"] .switch-icon--right {
     color: var(--cli-bg);
+}
+
+html {
+    -webkit-text-size-adjust: 100%;   /* iOS Safari */
+    text-size-adjust: 100%;           /* Chrome on Android */
+}
+
+
+@media (orientation: landscape) and (max-height: 350px) {
+    .status-line {
+        display: none;
+    }
+
+    .interface-switch {
+        display: none;
+    }
+
+    .gui-wrapper {
+        padding: 1rem 2rem !important;
+    }
 }
