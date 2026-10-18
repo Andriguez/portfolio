@@ -1,5 +1,5 @@
-import { useSite } from "../../context/SiteDataContext";
-import { type CommandDefinition, commands, getOptions } from "../../types/commands";
+import { useSite } from "../../../context/SiteDataContext";
+import { type CommandDefinition, commands, getOptions } from "../../../types/commands";
 
 export function HelpList({ showExtra }: { showExtra: boolean }) {
     const { data: site } = useSite();

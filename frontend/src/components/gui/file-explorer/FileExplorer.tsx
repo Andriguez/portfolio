@@ -1,23 +1,23 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
-import changelog from "../../helpers/changelog.ts";
+import changelog from "../../../helpers/changelog.ts";
 
-import { useVfs, searchVfs, CV_PLACE, TRASH_PLACE } from "../../hooks/useVfs"
-import { ExplorerButtons } from './ExplorerButtons';
-import { TreeColumn } from "./TreeColumn";
-import { GridColumn } from "./GridColumn";
-import { DetailPanel } from "./DetailPanel";
+import { useVfs, searchVfs, CV_PLACE, TRASH_PLACE } from "../../../hooks/useVfs.ts"
+import { ExplorerButtons } from './components/ExplorerButtons.tsx';
+import { TreeColumn } from "./components/TreeColumn.tsx";
+import { GridColumn } from "./components/GridColumn.tsx";
+import { DetailPanel } from "./content-panels/DetailPanel.tsx";
 import { ExternalLink, Mail } from "lucide-react";
-import { useSite } from "../../context/SiteDataContext.ts";
-import { useTrash } from "../../hooks/useTrash.ts";
-import { trashToNode } from "../../helpers/trashNodes.ts";
-import { cvToNode } from "../../helpers/cvNodes.ts";
-import type {VfsFile, VfsNode} from "../../types/vfs.ts";
-import {ThemeToggle} from "./ThemeToggle.tsx";
-import {DesktopIcons} from "./DesktopIcons.tsx";
-import {LoginModal} from "./LoginModal.tsx";
-import { InfoDialog } from "./InfoDialog.tsx";
+import { useSite } from "../../../context/SiteDataContext.ts";
+import { useTrash } from "../../../hooks/useTrash.ts";
+import { trashToNode } from "../../../helpers/trashNodes.ts";
+import { cvToNode } from "../../../helpers/cvNodes.ts";
+import type {VfsFile, VfsNode} from "../../../types/vfs.ts";
+import {ThemeToggle} from "./components/ThemeToggle.tsx";
+import {DesktopIcons} from "../DesktopIcons.tsx";
+import {LoginModal} from "../modals/LoginModal.tsx";
+import { InfoDialog } from "../modals/InfoDialog.tsx";
 
 export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -292,7 +292,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
             {
                 !shuttingDown && (
                 <div>
-                <DesktopIcons onRestore={handleRestoreWindow} onLoginClick={() => setLoginOpen(true)} onCvClick={() => { if (hasCv) handleCvIcon(); }} onTrashClick={() => {vfs.goToPlace(TRASH_PLACE); handleRestoreWindow(); }} />
+                <DesktopIcons onRestore={() => { vfs.goToPath(["root"]); handleRestoreWindow(); }} onLoginClick={() => setLoginOpen(true)} onCvClick={() => { if (hasCv) handleCvIcon(); }} onTrashClick={() => {vfs.goToPlace(TRASH_PLACE); handleRestoreWindow(); }} />
                 </div>
             )
             }

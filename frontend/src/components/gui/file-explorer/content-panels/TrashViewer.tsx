@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { TrashItem } from "../../types/trash";
+import type { TrashItem } from "../../../../types/trash";
 import { ExternalLink, X } from "lucide-react";
 
 export function TrashViewer({ item, onClose }: { item: TrashItem, onClose: () => void }) {

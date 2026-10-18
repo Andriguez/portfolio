@@ -1,4 +1,4 @@
-import { isTouchDevice } from "../../helpers/is-touch-device"
+import { isTouchDevice } from "../../../helpers/is-touch-device"
 
 export function DirectoryList({ items, onSelect }: {
     items: {

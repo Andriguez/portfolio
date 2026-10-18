@@ -1,6 +1,6 @@
-import { API_URL } from "../../api/client";
-import { CV_PLACE } from "../../hooks/useVfs";
-import type { Cv } from "../../types/cv";
+import { API_URL } from "../../../api/client";
+import { CV_PLACE } from "../../../hooks/useVfs";
+import type { Cv } from "../../../types/cv";
 
 const formatSize = (b: number) => (b < 1024 * 1024 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`);
 

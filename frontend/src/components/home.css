@@ -1,42 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=VT323&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Space+Grotesk:wght@400;500&amp;display=swap');
-
-:root[data-theme='dark'] {
-    --cli-bg: #0C100D;
-    --cli-panel: #0d120b;
-    --cli-green: #b4d3ab;
-    --cli-green-dim: #6FA65C;
-    --cli-prompter: #7458dc;
-    --cli-info: #c92c3a;
-    /* cli-info: #da9743; */
-
-    --gui-bg: #14181D;
-    --gui-panel: #1D232B;
-    --gui-border: #333B44;
-    --gui-text: #E7E3D8;
-    --gui-btn:  #0C100D;
-    --gui-desktop-overlay: #0C100D;
-
-}
-
-:root[data-theme='light'] {
-    --cli-bg: #EDE8DC;
-    --cli-panel: #f6f3f3;
-    --cli-green: #1f3523;
-    --cli-green-dim: #98aa87;
-    --cli-prompter: #a899e4;
-    --cli-info: #87080c;
-
-    --gui-bg: #474e55;
-    --gui-panel: #373e47;
-    --gui-border: #1d2023;
-    --gui-text: #252424;
-    --gui-btn: #5d6465;
-
-    --gui-desktop-overlay: #bbb9b531;
-}
-
-body {
-    background-color: #060906 !important;
+.screen {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, var(--cli-panel) 0%, var(--cli-bg) 100%);
 }
 
 .status-line {
@@ -109,11 +74,6 @@ body {
     color: var(--cli-bg);
 }
 
-html {
-    -webkit-text-size-adjust: 100%;   /* iOS Safari */
-    text-size-adjust: 100%;           /* Chrome on Android */
-}
-
 
 @media (orientation: landscape) and (max-height: 350px) {
     .status-line {
@@ -127,4 +87,60 @@ html {
     .gui-wrapper {
         padding: 1rem 2rem !important;
     }
+}
+
+
+.glitch {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(183, 242, 163, 0.5);
+    pointer-events: none;
+    opacity: 0;
+    animation: glitchFlash 220ms ease-out;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 6px 2px white;
+}
+
+@keyframes glitchFlash {
+    0%   { opacity: 0; transform: translateX(0); }
+    30%  { opacity: 0.8; transform: translateX(4px); }
+    60%  { opacity: 0; }
+    100% { opacity: 0; }
+}
+
+
+.grain {
+    position: absolute;
+    inset: 0;
+    opacity: 0.2;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+}
+
+
+.scanline--reverse {
+    animation-direction: reverse;
+}
+
+.scanline {
+    position: absolute;
+    left: 0; right: 0;
+    height: 70px;
+    background: linear-gradient(to bottom, transparent, rgba(183, 242, 163, 0.06), transparent);
+    animation: sweep 15s linear;
+    pointer-events: none;
+}
+
+@keyframes sweep {
+    0% { top: -60px; }
+    100% { top: 100%; }
+}
+
+.vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.7) 100%);
+    pointer-events: none;
 }

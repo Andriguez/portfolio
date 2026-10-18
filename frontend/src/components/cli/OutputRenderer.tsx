@@ -1,17 +1,17 @@
 import type { CommandOutput } from "../../types/CommandOutput"
-import { DirectoryList } from "./DirectoryList";
-import { TypewriterText } from "./TypeWriterText";
-import { HelpList } from "./HelpList";
+import { DirectoryList } from "./lists/DirectoryList";
+import { TypewriterText } from "./effects/TypeWriterText";
+import { HelpList } from "./lists/HelpList";
 import { FileContentCard } from "./FileContentCard";
-import { CvList } from "./CvList";
-import { LinkList } from "./LinkList";
+import { CvList } from "./lists/CvList";
+import { LinkList } from "./lists/LinkList";
 import ReactMarkdown from "react-markdown";
-import { CvViewer } from "../gui/CvViewer";
+import { CvViewer } from "../gui/file-explorer/content-panels/CvViewer";
 
 export function OutputRenderer({ output, runCommand }: { output: CommandOutput, runCommand: ((cmd: string) => void) }) {
     if (output.type === "none") return null;
 
-    if (output.type === "text" || output.type == "error") return <TypewriterText text={output.value} color={output.color} />;
+    if (output.type === "text" || output.type == "error") return <TypewriterText text={output.value} />;
 
     if (output.type === "list") return <DirectoryList items={output.items} onSelect={runCommand} />;
 

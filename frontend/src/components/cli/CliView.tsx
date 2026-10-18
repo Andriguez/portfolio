@@ -6,9 +6,9 @@ import type { CommandOutput } from "../../types/CommandOutput"
 import { LogLine } from "./LogLine"
 import { commands, getOptions } from "../../types/commands"
 import { tokenize } from "../../helpers/tokenize"
-import { BootSequence } from "./BootSequence"
+import { BootSequence } from "./effects/BootSequence.tsx"
 import { isTouchDevice } from "../../helpers/is-touch-device"
-import {LoginModal} from "../gui/LoginModal.tsx";
+import {LoginModal} from "../gui/modals/LoginModal.tsx";
 import { cvToNode } from "../../helpers/cvNodes.ts";
 import type { VfsFolder, VfsFile } from "../../types/vfs.ts";
 import { useTheme } from "../../context/ThemeContext.ts";
@@ -238,7 +238,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
         >
             <div
                 ref={containerRef}
-                className={"panel invisible-scrollbar"}
+                className={"cli-panel invisible-scrollbar"}
             >
                 { !booting && <BootSequence onComplete={() => setBooted(true)} /> }
             {log.map((entry, i) => (
@@ -263,7 +263,6 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
                     <span style={{ display: "inline-flex", alignItems: "center", minWidth: "3ch", flex: 1}}>
                         <input
                             ref={inputRef}
-                            className={"cli-green"}
                             id={"input"}
                             onFocus={handleFocus}
                             value={input}
@@ -274,8 +273,8 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
                         <span className="cli-cursor" />
                         {suggestionTail && (
                             <span
+                                className="cli-suggestion"
                                 onClick={() => suggestion && setInput(suggestion)}
-                                style={{ opacity: 0.35, cursor: "pointer" }}
                             >
                                 {suggestionTail}
                             </span>

@@ -1,5 +1,5 @@
 import { useVfs } from "../../hooks/useVfs"
-import { FileExplorer } from "./FileExplorer";
+import { FileExplorer } from "./file-explorer/FileExplorer";
 import "./gui-view.css"
 
 export function GuiView({ vfs }: { vfs: ReturnType<typeof useVfs> })  {

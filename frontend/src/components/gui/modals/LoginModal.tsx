@@ -1,7 +1,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { useState } from "react";
 import { useNavigate} from "react-router-dom";
-import { apiFetch } from "../../api/client";
+import { apiFetch } from "../../../api/client";
 
 export function LoginModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
     const [password, setPassword] = useState("");

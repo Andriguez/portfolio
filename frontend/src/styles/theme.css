@@ -1,0 +1,34 @@
+:root[data-theme='dark'] {
+    --cli-bg: #0C100D;
+    --cli-panel: #0d120b;
+    --cli-green: #b4d3ab;
+    --cli-green-dim: #6FA65C;
+    --cli-prompter: #7458dc;
+    --cli-info: #c92c3a;
+    /* cli-info: #da9743; */
+
+    --gui-bg: #14181D;
+    --gui-panel: #1D232B;
+    --gui-border: #333B44;
+    --gui-text: #E7E3D8;
+    --gui-btn:  #0C100D;
+    --gui-desktop-overlay: #0C100D;
+
+}
+
+:root[data-theme='light'] {
+    --cli-bg: #EDE8DC;
+    --cli-panel: #f6f3f3;
+    --cli-green: #1f3523;
+    --cli-green-dim: #98aa87;
+    --cli-prompter: #a899e4;
+    --cli-info: #87080c;
+
+    --gui-bg: #474e55;
+    --gui-panel: #373e47;
+    --gui-border: #1d2023;
+    --gui-text: #252424;
+    --gui-btn: #5d6465;
+
+    --gui-desktop-overlay: #bbb9b531;
+}
