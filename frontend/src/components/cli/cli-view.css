@@ -1,41 +1,4 @@
-*, *::before, *::after {
-    box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-    background: #000;
-    font-family: 'IBM Plex Mono', monospace;
-    height: 100%;
-    width: 100%;
-
-    overflow: hidden !important;
-}
-
-a {
-    color: var(--cli-hover)
-}
-
-form {
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-}
-
-input {
-    font-family: monospace;
-    background: transparent;
-    line-height: 1.2em;
-    font-size: 16px;
-    padding: 0;
-    margin: 0;
-
-    border: none;
-    outline: none;
-    caret-color: transparent;
-}
-
-.panel {
+.cli-panel {
     position: absolute;
     inset: 0;
     padding: 3rem 1rem 2rem 1rem;
@@ -51,9 +14,26 @@ input {
     text-align: left !important;
 }
 
-.cli {
+.cli-panel input {
+    font-family: monospace;
+    background: transparent;
+    line-height: 1.2em;
+    font-size: 16px;
+    padding: 0;
+    margin: 0;
+
     color: var(--cli-green);
-    padding: 24px;
+    text-shadow: 1px 0 0 rgba(255, 45, 85, 0.5), -1px 0 0 rgba(0, 255, 255, 0.5);
+
+    border: none;
+    outline: none;
+    caret-color: transparent;
+}
+
+.cli-panel form {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
 .cli-boot {
@@ -64,21 +44,12 @@ input {
     font-weight: bold !important;
 }
 
-.cli-green {
-    color: var(--cli-green);
-    text-shadow: 1px 0 0 rgba(255, 45, 85, 0.5), -1px 0 0 rgba(0, 255, 255, 0.5);
-}
-.cli-dim { color: var(--cli-green-dim); text-shadow: none; }
-.cli-error { color: var(--cli-error); }
-
 .cli-prompter {
     color: var(--cli-prompter);
     text-shadow: 0 0 1px var(--cli-prompter), 0 0 8px rgba(255, 180, 84, 0.3);
     padding: 0;
     margin-right: 6px;
 }
-
-.cli-info { color: var(--cli-info); }
 
 .cli-cursor {
     display: inline-block;
@@ -91,14 +62,13 @@ input {
     margin-left: -6px;
 }
 
-@keyframes blink { 50% { opacity: 0; } }
-
-.c-type {
-    overflow: hidden;
-    white-space: nowrap;
-    animation: type 2.2s steps(28) 1 both;
-    width: 28ch;
+.cli-suggestion {
+    opacity: 0.25;
+    color: var(--cli-green);
+    cursor: pointer;
 }
+
+@keyframes blink { 50% { opacity: 0; } }
 @keyframes type { from { width: 0; } }
 
 .log-block {
@@ -118,6 +88,10 @@ input {
     margin-top: 0.25rem;
 }
 
+.log-line {
+    color: var(--cli-green);
+}
+
 .ls-row {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -128,6 +102,7 @@ input {
     animation: fadeInList 250ms ease-out forwards;
     opacity: 0;
 }
+
 .ls-row:hover { background: rgba(183, 242, 163, 0.06); }
 .ls-type-badge { display: inline-flex; gap: 0.4em; color: #6c7c66; font-size: 0.7em; }
 .ls-type-glyph { color: var(--cli-info); font-weight: 700; }
@@ -261,10 +236,6 @@ input {
     animation: cliPowerOn 400ms ease-in reverse both;
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .cli-power-on { animation: none; }
-}
-
 .cv-list-row { display: grid; grid-template-columns: auto 1fr; column-gap: 0.8em; padding: 0.3rem 0; opacity: 0; animation: fadeInList 200ms ease-out forwards; }
 .cv-list-type { color: var(--cli-green); font-weight: 600; }
 .cv-list-name { color: var(--cli-green-dim); font-size: 0.85em; }
@@ -320,5 +291,7 @@ input {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .cli-power-on { animation: none; }
+    .cli-power-off {animation: none;}
     .link-key { animation: none; opacity: 1; }
 }

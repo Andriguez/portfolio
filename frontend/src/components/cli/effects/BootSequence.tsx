@@ -19,7 +19,7 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
             {lines.slice(0, visibleCount).map((line, i) => (
 
                 <div key={i} className={"log-line-shadow"}>
-                    <TypewriterText text={line} color={"cli-green"} speed={20} />
+                    <TypewriterText text={line} speed={20} />
                 </div>
             ))}
         </div>

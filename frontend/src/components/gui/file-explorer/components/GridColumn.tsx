@@ -1,5 +1,5 @@
-import type { useVfs } from "../../hooks/useVfs";
-import type { VfsNode } from "../../types/vfs";
+import type { useVfs } from "../../../../hooks/useVfs.ts";
+import type { VfsNode } from "../../../../types/vfs.ts";
 import { ExplorerItem } from "./ExplorerItem.tsx";
 import * as React from "react";
 

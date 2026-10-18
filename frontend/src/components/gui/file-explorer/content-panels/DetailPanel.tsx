@@ -1,6 +1,6 @@
-import type {VfsFile} from "../../types/vfs";
+import type {VfsFile} from "../../../../types/vfs.ts";
 import { X } from "lucide-react";
-import {SafeHtml} from "../SafeHtml.tsx";
+import {SafeHtml} from "../../../SafeHtml.tsx";
 import { CvViewer } from "./CvViewer.tsx";
 import { TrashViewer } from "./TrashViewer.tsx";
 

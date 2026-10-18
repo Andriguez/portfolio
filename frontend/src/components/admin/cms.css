@@ -1,5 +1,8 @@
-/* src/components/admin/admin-panel.css */
+@import url("../../styles/index.css");
 
+body {
+    background: var(--cli-bg);
+}
 .admin-panel {
     max-height: 95vh;
     margin: 2rem auto;
@@ -7,8 +10,9 @@
     font-family: 'IBM Plex Mono', monospace;
     color: var(--cli-green);
     overflow-y: auto;
+}
 
-    button {
+.admin-panel button {
         background: transparent;
         border: 1px solid var(--cli-green-dim);
         color: var(--cli-green-dim);
@@ -18,8 +22,6 @@
         font-family: inherit;
         cursor: pointer;
         margin-right: 0.4rem;
-    }
-
 }
 
 .admin-header {
@@ -90,7 +92,7 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
     padding: 0.6rem 0.7rem;
-    border-bottom: 1px solid white;
+    border-bottom: 1px solid var(--cli-green);
 }
 
 .admin-table td, .image-table td {
@@ -143,7 +145,7 @@
 
 .admin-form {
     background: #3b3d47;
-    border: 1px solid white;
+    border: 1px solid var(--cli-green);
     border-radius: 6px;
     padding: 1.5rem;
     width: 100%;
@@ -169,7 +171,7 @@
 .admin-form select,
 .admin-form textarea {
     background: var(--cli-bg);
-    border: 1px solid white;
+    border: 1px solid var(--cli-green);
     border-radius: 4px;
     padding: 0.5rem 0.7rem;
     color: var(--cli-green);
@@ -180,8 +182,7 @@
 .admin-form input:focus,
 .admin-form select:focus,
 .admin-form textarea:focus {
-    outline: none;
-    border-color: var(--cli-green);
+    border: 1px solid var(--cli-green);
 }
 
 .admin-form textarea {

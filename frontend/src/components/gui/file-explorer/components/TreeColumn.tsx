@@ -1,8 +1,8 @@
 import { useState } from "react";
-import type { VfsFolder } from "../../types/vfs";
-import { CV_PLACE, TRASH_PLACE, type useVfs } from "../../hooks/useVfs";
+import type { VfsFolder } from "../../../../types/vfs";
+import { CV_PLACE, TRASH_PLACE, type useVfs } from "../../../../hooks/useVfs";
 import {ChevronRight, ChevronDown, Folder, ComputerIcon, House, Trash2, KeyRound, FileUser} from "lucide-react";
-import { useSite } from "../../context/SiteDataContext";
+import { useSite } from "../../../../context/SiteDataContext";
 
 type TreeVfs = ReturnType<typeof useVfs>;
 

@@ -2,11 +2,9 @@ import { useState, useEffect } from "react";
 
 export function TypewriterText({
                                    text,
-                                   color,
                                    speed = 20
                                }: {
     text: string;
-    color: string
     speed?: number;
 }) {
     const [progress, setProgress] = useState({ text, count: 0});
@@ -26,5 +24,5 @@ export function TypewriterText({
         return () => clearInterval(interval);
     }, [text, speed]);
 
-    return <div className={`log-line ${color}`}>{revealed}</div>;
+    return <div className={`log-line`}>{revealed}</div>;
 }
