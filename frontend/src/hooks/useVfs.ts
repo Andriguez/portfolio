@@ -106,13 +106,21 @@ export function useVfs() {
         }
     });
 
+    function setOpen(slug: string | null) {
+        const params = new URLSearchParams(location.search);
+        if (slug) params.set("open", slug);
+        else params.delete("open");
+        const search = params.toString();
+        navigate({ pathname: location.pathname, search: search ? `?${search}` : "" }, { replace: true });
+    }
+
 
     return { 
         root, loading, error,
         currentFolder, currentPath: "/" + pathParts.join("/"),
         displayPath: place ? "/" + place : "/" + pathParts.join("/"),
         resolveFolder, pathParts, place, cd, goToPath, 
-        goToPlace, resolveFile, getFolder,
+        goToPlace, resolveFile, getFolder, setOpen
     };
 }
 
