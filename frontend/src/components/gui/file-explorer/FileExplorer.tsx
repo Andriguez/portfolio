@@ -252,9 +252,6 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                                 </div>
                                 <div className="menu-item" onClick={() => { setAboutOpen(true); }}>about andi.sys</div>
                                 <div className="menu-item" onClick={() => { setChangelogOpen(true); }}>read changelog.md</div>
-                                {hasCv && (
-                                    <div className="menu-item menu-item--mobile-only" onClick={() => { vfs.goToPlace(CV_PLACE); }}>check my CV</div>
-                                )}
 
                                 {site.links.length > 0 && <div className="menu-divider" />}
                                 {site.links.map((l) => (
