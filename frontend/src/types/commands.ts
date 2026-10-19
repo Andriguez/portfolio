@@ -88,7 +88,7 @@ export const commands: CommandDefinition[] = [
                     slug: c.slug,
                     isFolder: c.type === "folder",
                     description: c.description,
-                    itemCount: folder.children.length,
+                    itemCount: c.type === "folder" ? (c.children?.length ?? 0) : undefined,
                     updatedAt: c.updatedAt,
                     dir: args[0]
                 })),
@@ -104,7 +104,9 @@ export const commands: CommandDefinition[] = [
         options: [" .. ","../../ ", "~ ", "directory/folder ", "back "],
         description: "go into a folder/page; 'cd back' retreats.",
         run: (args, ctx) => {
-            if (!args[0]) return { type: "error", value: "usage: cd <folder>", color: "cli-info" };
+            const folder = ctx.resolveFolder(args[0]);
+
+            if (!folder) return { type: "error", value: `cd: no such folder: ${args[0]}`, color: "cli-info" };
 
             const clean = args[0].replace(/^~?\/+/, "").replace(/\/+$/, "").toLowerCase();
             if (clean === "cv") {
@@ -115,9 +117,7 @@ export const commands: CommandDefinition[] = [
                 return { type: "none", color: "cli-green" };
             }
 
-            if (!ctx.cd(args[0])) return { type: "error", value: `cd: no such folder: ${args[0]}`, color: "cli-info" };
-
-            const folder = ctx.resolveFolder(args[0]);
+            ctx.cd(args[0])
 
             return folder
             ? {type: "list", items: folder.children.map( (c) => ({
@@ -125,9 +125,8 @@ export const commands: CommandDefinition[] = [
                     slug: c.slug,
                     isFolder: c.type === "folder",
                     description: c.description,
-                    itemCount: folder.children.length,
+                    itemCount: c.type === "folder" ? (c.children?.length ?? 0) : undefined,
                     updatedAt: c.updatedAt,
-                    dir: args[0]
             })), color: "cli-green"}
             : { type: "none", color: "cli-green" };
         },
