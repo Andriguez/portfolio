@@ -27,6 +27,7 @@ services:
       TOTP_ENC_KEY: ${TOTP_ENC_KEY}
       GITHUB_REPO: ${GITHUB_REPO:-}
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
     depends_on:
       db:
        condition: service_healthy

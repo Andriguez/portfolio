@@ -1,0 +1,27 @@
+andriguez.dev {
+    encode zstd gzip
+    request_body {
+        max_size 12MB
+    }
+    header {
+        Strict-Transport-Security "max-age=31536000"
+        X-Content-Type-Options nosniff
+        Referrer-Policy strict-origin-when-cross-origin
+    }
+
+    handle /api/* {
+        reverse_proxy backend:8000
+    }
+    handle /uploads/* {
+        reverse_proxy backend:8000
+    }
+    handle {
+        root * /srv/frontend
+        try_files {path} /index.html
+        file_server
+    }
+}
+
+www.andriguez.dev {
+    redir https://andriguez.dev{uri} permanent
+}
