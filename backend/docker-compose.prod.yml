@@ -2,10 +2,6 @@ services:
   db:
     image: mysql:8
     restart: unless-stopped
-    security_opt: ["no-new-privileges:true"]
-    cap_drop: ["ALL"]
-    read_only: true
-    tmpfs: ["/tmp"]
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: portfolio
@@ -20,6 +16,10 @@ services:
   backend:
     build: .
     restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    read_only: true
+    tmpfs: ["/tmp"]
     environment:
       DATABASE_URL: mysql+pymysql://portfolio_user:${MYSQL_PASSWORD}@db:3306/portfolio
       JWT_SECRET: ${JWT_SECRET}
