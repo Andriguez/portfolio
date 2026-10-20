@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CopyIcon, Trash2 as DeleteIcon, ExternalLink } from "lucide-react";
+import { CopyIcon, Trash2 as DeleteIcon, ExternalLink, Download } from "lucide-react";
 import { apiFetch, API_URL } from "../../api/client";
 import type { Cv } from "../../types/cv"
 
@@ -84,7 +84,7 @@ export function CvManager() {
             ) : (
                 <table className="admin-table">
                     <thead>
-                        <tr><th>type</th><th>name</th><th>size</th><th># downloads</th><th>Date</th><th>actions</th></tr>
+                        <tr><th>type</th><th>name</th><th>size</th><th># <Download size={10} /></th><th>Date</th><th>actions</th></tr>
                     </thead>
                     <tbody>
                         {cvs.map((cv) => (

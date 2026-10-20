@@ -60,10 +60,11 @@ export const commands: CommandDefinition[] = [
         usage: "help",
         show: false,
         description: "quick guide of the general commands. the ones down here are just for '--extra' fun.",
-        run: (_args) => {
+        options: ["--extra"], 
+        run: (args) => {
                 return {
                     type: "help",
-                    extra: _args[0] === "--extra" || _args[0] === "—extra" ? true : false,
+                    extra: args[0] === "--extra" || args[0] === "—extra" || args[0] === "-extra" ? true : false,
                     color: "cli-green"
                 }
         },
@@ -165,7 +166,7 @@ export const commands: CommandDefinition[] = [
         name: "links",
         usage: "links <media>",
         show: true,
-        description: "list my social profiles.. let's get friendly :).",
+        description: "list my social profiles. let's get friendly :).",
         options: (site) => site.links.map((l) => l.name.toLowerCase()),
         run: (_args, ctx) => {
             const links = ctx.site.links;
@@ -270,7 +271,7 @@ export const commands: CommandDefinition[] = [
         alias: "say",
         show: false,
         usage: "echo <text>",
-        description: "prints input back, like an online parrot.",
+        description: "prints input back, like an e-parrot.",
         run: (args) => {
             if (args.length === 0) return { type: "error", value: "usage: echo <text>", color: "cli-info" };
 
@@ -282,7 +283,7 @@ export const commands: CommandDefinition[] = [
         alias: "when",
         usage: "date",
         show: false,
-        description: "just a reminder of WHEN we are.",
+        description: "just a reminder of WHEN we are (now).",
         run: () => ({
             type: "text",
             value: new Date().toString(),
@@ -353,7 +354,7 @@ export const commands: CommandDefinition[] = [
             if (!args[0] || args[0] === "switch") {
                 const next = ctx.theme === "dark" ? "light" : "dark";
                 ctx.setTheme(next);
-                return { type: "text", value:  `Theme changed to ${next}`, color: "cli-green"};
+                return { type: "text", value:  `theme changed to ${next}`, color: "cli-green"};
             }
 
             const name = args[0].toLowerCase();
@@ -362,7 +363,7 @@ export const commands: CommandDefinition[] = [
 
             ctx.setTheme(name)
 
-            return { type: "text", value: `Theme changed to ${name}`, color: "cli-green" };
+            return { type: "text", value: `theme changed to ${name}`, color: "cli-green" };
         }
     },
     {
