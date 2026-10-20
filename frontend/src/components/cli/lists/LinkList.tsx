@@ -2,7 +2,7 @@ import { useState, type CSSProperties } from "react";
 
 type LinkItem = { id: number; name: string; url: string };
 
-const DEFAULT_HINT = "tap or click a button to open it in a new tab";
+const DEFAULT_HINT = "press a button to open in a new tab";
 
 function displayUrl(url: string) {
     try {
