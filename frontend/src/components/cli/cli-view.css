@@ -90,6 +90,7 @@
 
 .log-line {
     color: var(--cli-green);
+    white-space: pre-line;
 }
 
 .ls-row {
