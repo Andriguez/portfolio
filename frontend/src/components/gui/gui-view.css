@@ -278,7 +278,7 @@ body {
 .detail-panel-close { background: transparent; border: none; color: var(--cli-green-dim); cursor: pointer; }
 .detail-panel-close:hover { color: var(--cli-green); }
 .detail-panel-body { padding: 1rem; }
-.detail-panel-image { width: 100%; margin-bottom: 1rem; border-radius: 4px; }
+.detail-panel-image { display: block; margin: 1.5rem auto; border-radius: 4px; }
 .detail-panel-text { color: var(--cli-green-dim); line-height: 1.6; font-size: 0.9rem; }
 
 .gui-grain {
