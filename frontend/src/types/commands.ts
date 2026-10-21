@@ -40,7 +40,7 @@ export const commands: CommandDefinition[] = [
             return {
                 type: "text",
                 value: hello_msg,
-                color: "cli-dim"
+                color: "cli-green"
             };
         }
     },
@@ -252,7 +252,7 @@ export const commands: CommandDefinition[] = [
            return {
                 type: "text",
                 value: stack_msg,
-                color: "cli-dim"
+                color: "cli-green"
            }
         }
     },

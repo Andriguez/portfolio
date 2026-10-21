@@ -11,7 +11,7 @@ import { CvViewer } from "../gui/file-explorer/content-panels/CvViewer";
 export function OutputRenderer({ output, runCommand }: { output: CommandOutput, runCommand: ((cmd: string) => void) }) {
     if (output.type === "none") return null;
 
-    if (output.type === "text" || output.type == "error") return <TypewriterText text={output.value} />;
+    if (output.type === "text" || output.type == "error") return <TypewriterText text={output.value} color={output.color} />;
 
     if (output.type === "list") return <DirectoryList items={output.items} onSelect={runCommand} />;
 
