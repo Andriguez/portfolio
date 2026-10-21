@@ -30,7 +30,7 @@ body {
 }
 
 a {
-  color: var(--cli-hover)
+  color: var(--gui-text)
 }
 
 h1,

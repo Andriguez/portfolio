@@ -89,7 +89,6 @@
 }
 
 .log-line {
-    color: var(--cli-green);
     white-space: pre-line;
 }
 
@@ -171,11 +170,14 @@
 .content-card-title {
     color: var(--cli-prompter);
     margin-bottom: 1.5rem;
+    font-weight: bold;
 }
 
 .content-card-image {
     display: block;
     margin: 1.5rem auto;
+    max-width: 100%;
+    height: auto;
 }
 
 @keyframes materialize {
