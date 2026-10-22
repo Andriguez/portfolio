@@ -43,7 +43,7 @@ jobs:
       DATABASE_URL: mysql+pymysql://portfolio_user:test@127.0.0.1:3306/portfolio
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.14"
           cache: pip
