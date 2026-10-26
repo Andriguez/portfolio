@@ -63,7 +63,7 @@ def use_recovery_code(db: Session, code: str) -> bool:
 
 
 ## must check for the limiter:
-# if you ever put this behind a reverse proxy or CDN, it'll see the proxy's IP instead of the real visitor's unless you configure trusted-proxy headers.
+# putting this behind a reverse proxy or CDN, will make the server see the proxy's IP instead of the real visitor's unless trusted-proxy headers are configured.
 @router.post("/login")
 @limiter.limit("5/minute")
 def login(request: Request, payload: LoginRequest, response: Response, db: DbSession):
