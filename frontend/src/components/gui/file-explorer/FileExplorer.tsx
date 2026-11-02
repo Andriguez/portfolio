@@ -259,7 +259,7 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                                         go to {l.name.toLowerCase()} <ExternalLink size={11} />
                                     </a>
                                 ))}
-                                <a key={"email"} className="menu-item menu-item--link" href="mailto:andhriguez@oulook.com">
+                                <a key={"email"} className="menu-item menu-item--link" href="mailto:contact@andriguez.dev">
                                     send me an email <Mail size={11} />
                                 </a>
                             </div>
