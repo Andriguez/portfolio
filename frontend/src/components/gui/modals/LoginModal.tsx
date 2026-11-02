@@ -61,7 +61,8 @@ export function LoginModal({ open, onOpenChange }: { open: boolean; onOpenChange
                             { 
                                 step === "code" && (
                                     <input
-                                    type="numeric"
+                                    type="text"
+                                    inputMode="numeric"
                                     autoFocus
                                     autoComplete="one-time-code"
                                     className="login-modal-input"

@@ -13,8 +13,23 @@ from ..database import DbSession, UploadFileAn
 
 router = APIRouter(prefix="/api/uploads", tags=["uploads"])
 
+IMAGE_SIGNATURES = {
+    "image/jpeg": [b"\xff\xd8\xff"],
+    "image/png":  [b"\x89PNG\r\n\x1a\n"],
+    "image/gif":  [b"GIF87a", b"GIF89a"],
+}
+
+def sniff_image_type(contents: bytes) -> str | None:
+    for mime, sigs in IMAGE_SIGNATURES.items():
+        if any(contents.startswith(sig) for sig in sigs):
+            return mime
+
+    if len(contents) > 12 and contents[:4] == b"RIFF" and contents[8:12] == b"WEBP":
+        return "image/webp"
+    return None
+
 UPLOAD_DIR = "/app/uploads"
-ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif", "image/jfif"}
+ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 ALLOWED_EXT = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".jfif"}
 MAX_SIZE = 5 * 1024 * 1024  # 5MB
 
@@ -28,7 +43,11 @@ async def upload_image(file: UploadFileAn):
 
     contents = await file.read()
     if len(contents) > MAX_SIZE:
-        raise HTTPException(status_code=400, detail=f"file too large (max {MAX_SIZE}")
+        raise HTTPException(status_code=400, detail=f"file too large (max {MAX_SIZE})")
+
+    real_type = sniff_image_type(contents)
+    if real_type is None or real_type not in ALLOWED_TYPES:
+        raise HTTPException(status_code=400, detail="file is not a supported image type")
 
     ext = os.path.splitext(file.filename or "")[1].lower()
     if ext not in ALLOWED_EXT:

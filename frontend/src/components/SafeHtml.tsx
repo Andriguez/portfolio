@@ -1,9 +1,10 @@
 import DOMPurify from "dompurify";
-import type { MouseEvent } from "react";
+import { useMemo, type MouseEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
 export function SafeHtml({ html, className }: { html: string | undefined; className?: string }) {
     const navigate = useNavigate();
+        const clean = useMemo(() => DOMPurify.sanitize(html ?? ""), [html]);
 
     function handleClick(e: MouseEvent<HTMLDivElement>) {
         if (e.defaultPrevented || e.button !== 0) return;
@@ -30,7 +31,7 @@ export function SafeHtml({ html, className }: { html: string | undefined; classN
         <div 
             className={className} 
             onClick={handleClick}
-            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html ?? "") }}
+            dangerouslySetInnerHTML={{ __html: clean }}
         />
     );
 }

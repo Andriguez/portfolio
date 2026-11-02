@@ -11,9 +11,10 @@ from sqlalchemy.orm import Session
 from .. import models
 from ..auth import (
     PENDING_COOKIE,
+    check_secret,
     create_access_token,
     create_pending_token,
-    pwd_context,
+    hash_secret,
     require_admin,
     require_pending,
     verify_password,
@@ -56,14 +57,12 @@ def use_recovery_code(db: Session, code: str) -> bool:
     for rc in (
         db.query(models.RecoveryCode).filter(models.RecoveryCode.used.is_(False)).all()
     ):
-        if pwd_context.verify(code, rc.code_hash):
+        if check_secret(code, rc.code_hash):
             rc.used = True
             return True
     return False
 
 
-## must check for the limiter:
-# putting this behind a reverse proxy or CDN, will make the server see the proxy's IP instead of the real visitor's unless trusted-proxy headers are configured.
 @router.post("/login")
 @limiter.limit("5/minute")
 def login(request: Request, payload: LoginRequest, response: Response, db: DbSession):
@@ -174,6 +173,6 @@ def enable_2fa(request: Request, payload: TotpRequest, db: DbSession):
     db.query(models.RecoveryCode).delete()
 
     for c in codes:
-        db.add(models.RecoveryCode(code_hash=pwd_context.hash(c)))
+        db.add(models.RecoveryCode(code_hash=hash_secret(c)))
     db.commit()
     return {"recovery_codes": [f"{c[:5]}-{c[5:]}" for c in codes]}

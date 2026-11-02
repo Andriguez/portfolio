@@ -37,7 +37,7 @@ def list_links(db: DbSession):
 
 
 @router.post("", dependencies=[Depends(require_admin)])
-def create_linkn(payload: SocialLinkIn, db: DbSession):
+def create_link(payload: SocialLinkIn, db: DbSession):
     link = models.SocialLink(**payload.model_dump())
     db.add(link)
     db.commit()

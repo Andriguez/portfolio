@@ -8,7 +8,7 @@ RUN groupadd --system --gid 10001 app \
 
 
 WORKDIR /app
-COPY app/requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY alembic.ini .
