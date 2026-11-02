@@ -35,7 +35,7 @@ export function DirectoryList({ items, onSelect }: {
                         {item.isFolder ? ` dir ${item.slug}` : ` view ${item.slug}`}
                     </span>
                     <div className="ls-meta">
-                        {item.isFolder ? `${item.itemCount} items` : item.description ?? ""}
+                        {item.isFolder ? `${item.itemCount} item(s)` : item.description ?? ""}
                         {" · andi · "}
                         { item.updatedAt ? String(new Date(item.updatedAt).toLocaleDateString()) : "—"}
                     </div>

@@ -29,6 +29,10 @@ body {
   overflow: hidden;
 }
 
+button {
+  font: inherit;
+}
+
 a {
   color: var(--gui-text)
 }
