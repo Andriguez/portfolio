@@ -1,0 +1,46 @@
+andriguez.dev {
+    encode zstd gzip
+    request_body {
+        max_size 12MB
+    }
+    header {
+        defer
+        Strict-Transport-Security "max-age=31536000"
+        X-Content-Type-Options nosniff
+        Referrer-Policy strict-origin-when-cross-origin
+        X-Frame-Options SAMEORIGIN
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        Cross-Origin-Opener-Policy same-origin
+        Content-Security-Policy-Report-Only "default-src 'self'; img-src 'self' data:;
+            style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+            font-src 'self' https://fonts.gstatic.com; frame-ancestors 'self';
+            base-uri 'self'; form-action 'self'; object-src 'none'"
+    }
+
+    handle /api/* {
+        reverse_proxy backend:8000
+    }
+    handle /uploads/* {
+        reverse_proxy backend:8000
+    }
+    handle {
+        root * /srv/frontend
+
+        # SPA fallback for app routes only
+        @spaRoute {
+            not file
+            not path_regexp (^|/)\.|\.[A-Za-z0-9]+$
+        }
+        rewrite @spaRoute  /index.html
+
+        file_server
+    }
+
+    handle_errors 404 {
+        respond "404: not found" 404
+    }
+}
+
+www.andriguez.dev {
+    redir https://andriguez.dev{uri} permanent
+}
