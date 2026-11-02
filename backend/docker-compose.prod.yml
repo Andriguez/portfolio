@@ -38,7 +38,7 @@ services:
     ports: ["80:80", "443:443", "443:443/udp"]
     depends_on: [backend]
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy:/etc/caddy:ro
       - ../frontend/dist:/srv/frontend:ro
       - caddy_data:/data
       - caddy_config:/config
