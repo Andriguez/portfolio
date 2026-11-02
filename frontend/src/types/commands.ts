@@ -105,11 +105,9 @@ export const commands: CommandDefinition[] = [
         options: [" .. ","../../ ", "~ ", "directory/folder ", "back "],
         description: "go into a folder/page; 'cd back' retreats.",
         run: (args, ctx) => {
-            const folder = ctx.resolveFolder(args[0]);
+            const target = (args[0] ?? "~").toLowerCase();
+            const clean = target.replace(/^~?\/+/, "").replace(/\/+$/, "");
 
-            if (!folder) return { type: "error", value: `cd: no such folder: ${args[0]}`, color: "cli-info" };
-
-            const clean = args[0].replace(/^~?\/+/, "").replace(/\/+$/, "").toLowerCase();
             if (clean === "cv") {
                 if (ctx.site.cvs.length === 0)
                     return { type: "error", value: "cd: no cv available just yet..", color: "cli-info"}
@@ -118,7 +116,10 @@ export const commands: CommandDefinition[] = [
                 return { type: "none", color: "cli-green" };
             }
 
-            ctx.cd(args[0])
+            const folder = ctx.resolveFolder(target);
+            if (!folder) return { type: "error", value: `cd: no such folder: ${args[0]}`, color: "cli-info" };
+
+            ctx.cd(target)
 
             return folder
             ? {type: "list", items: folder.children.map( (c) => ({
@@ -202,15 +203,15 @@ export const commands: CommandDefinition[] = [
             if (!args[0]) return { type: "cv-list", cvs, color: "cli-green" };
 
             const cv = cvs.find((c) => c.type === args[0].toLowerCase());
-            if (cv)return {type: "cv-view", cv: cv, color: "cli-green"}
+            if (cv) return {
+                type: "cv-view", cv: cv, color: "cli-green"
+            }
             
-            if (!cv) return { 
+            return { 
                 type: "error", 
                 value: `no cv version "${args[0]}". available: ${cvs.map((c) => c.type).join(", ")}`,
                 color: "cli-info" 
             };
-
-            return { type: "cv-list", cvs: [cv], color: "cli-green" };
         }
     },
     {
@@ -298,7 +299,7 @@ export const commands: CommandDefinition[] = [
         description: "wanna know WHERE (in the system) you at?",
         run: (_args, ctx: CommandContext) => ({
             type: "text",
-            value: ctx.currentFolder.name,
+            value: `${ctx.currentFolder.name} (${ctx.currentFolder.slug})`,
             color: "cli-green"
         })
     },
@@ -331,7 +332,7 @@ export const commands: CommandDefinition[] = [
         options: ["question", "?"],
         description: "you have doubts, i have answers.. let's go!",
         run: (args) => {
-            if (!args[0]) return { type: "error", value: "ehh, what was the question?? <br> usage: 8ball <question|?>", color: "cli-info" };
+            if (!args[0]) return { type: "error", value: "ehh, what was the question?? usage: 8ball <question|?>", color: "cli-info" };
 
             return { type: "text", value: EIGHT_BALL_ANSWERS[Math.floor(Math.random() * EIGHT_BALL_ANSWERS.length)] , color: "cli-green" };
         }

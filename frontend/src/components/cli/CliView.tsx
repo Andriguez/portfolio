@@ -100,7 +100,8 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
 
     const runCommand = useCallback((raw: string) => {
         const promptPath = currentPath;
-        const [cmdName, ...args] = tokenize(raw.toLowerCase())
+        const [cmd, ...args] = tokenize(raw)
+        const cmdName = cmd?.toLowerCase();
         if (!cmdName) return;
 
         const command = commands.find((c) => c.name === cmdName || c.alias === cmdName);

@@ -41,7 +41,7 @@ def serialize(cv_file: models.CvFile, admin: bool = False):
     }
 
     if admin:
-        data["id"] = (cv_file.id,)
+        data["id"] = (cv_file.id)
         data["download_count"] = cv_file.download_count
 
     return data

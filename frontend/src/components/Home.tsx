@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Switch } from "radix-ui";
 import { Terminal, Eye } from "lucide-react";
+import { StatusLine } from "./StatusLine";
 import { useVfs } from "../hooks/useVfs";
 import { CliView } from "./cli/CliView";
 import { GuiView } from "./gui/GuiView";
@@ -55,21 +56,6 @@ export function Home() {
         return () => clearTimeout(timeout);
     }, []);
 
-    const [uptimeSeconds, setUptimeSeconds] = useState(0);
-
-    useEffect(() => {
-        if (!booted) return;
-        const interval = setInterval(() => setUptimeSeconds((s) => s + 1), 1000);
-        return () => clearInterval(interval);
-    }, [booted]);
-
-    function formatUptime(total: number) {
-        const h = Math.floor(total / 3600).toString().padStart(2, "0");
-        const m = Math.floor((total % 3600) / 60).toString().padStart(2, "0");
-        const s = Math.floor(total % 60).toString().padStart(2, "0");
-        return `${h}:${m}:${s}`;
-    }
-
     const [glitchStyle, setGlitch] = useState({
         key: 0,
         top: "20%",
@@ -98,13 +84,7 @@ export function Home() {
 
     return(
         <div className="screen">
-            {
-                booted && (
-                    <div className="status-line">
-                        andi.sys — user: guest — uptime {formatUptime(uptimeSeconds)}
-                    </div>
-                )
-            }
+            <StatusLine booted={booted} />
             { booted && <div className="interface-switch">
                 <Switch.Root
                     id="interface-mode"

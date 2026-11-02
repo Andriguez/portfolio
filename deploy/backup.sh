@@ -28,4 +28,4 @@ rclone copy "$DEST" r2crypt: --max-age 2d
 echo "done: $DEST"
 
 
-#15 3 * * * /srv/portfolio/backend/backup.sh >> srv/backups/backup.log 2>&1
+#15 3 * * * /srv/portfolio/deploy/backup.sh >> /srv/backups/backup.log 2>&1

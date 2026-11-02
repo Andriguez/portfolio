@@ -1,22 +1,27 @@
 import os
 from datetime import UTC, datetime, timedelta
 
+import bcrypt
 import jwt
 from fastapi import HTTPException, Request
 from jwt import PyJWTError
-from passlib.context import CryptContext
 
 JWT_SECRET = os.environ["JWT_SECRET"]
 ALGORITHM = "HS256"
 ADMIN_PASSWORD_HASH = os.environ["ADMIN_PASSWORD_HASH"]
 PENDING_COOKIE = "pending_2fa"
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+def hash_secret(secret: str) -> str:
+    return bcrypt.hashpw(secret.encode(), bcrypt.gensalt()).decode()
 
+def check_secret(secret: str, secret_hash: str) -> bool:
+    data = secret.encode()
+    if len(data) > 72:
+        return False
+    return bcrypt.checkpw(data, secret_hash.encode())
 
 def verify_password(password: str) -> bool:
-    return pwd_context.verify(password, ADMIN_PASSWORD_HASH)
-
+    return check_secret(password, ADMIN_PASSWORD_HASH)
 
 def create_access_token() -> str:
     expire = datetime.now(UTC) + timedelta(hours=2)

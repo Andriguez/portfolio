@@ -1,3 +1,4 @@
+name: backend
 services:
   db:
     healthcheck:
@@ -17,7 +18,8 @@ services:
       - "127.0.0.1:3307:3306"
 
   backend:
-    build: .
+    build:
+      context: ../backend
     restart: unless-stopped
     environment:
       DATABASE_URL: mysql+pymysql://portfolio_user:${MYSQL_PASSWORD}@db:3306/portfolio

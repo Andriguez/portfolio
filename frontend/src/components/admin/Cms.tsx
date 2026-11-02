@@ -5,7 +5,7 @@ import {SafeHtml} from "../SafeHtml.tsx";
 import type { UploadedFile } from "../../types/UploadedFile.ts";
 import {useNavigate} from "react-router-dom";
 import { CopyIcon, DeleteIcon, EditIcon } from "lucide-react";
-import { apiFetch, assertApiUrl } from "../../api/client.ts";
+import { apiFetch, toAPIUrl } from "../../api/client.ts";
 import { StaticContentEditor } from './StaticContentEditor.tsx';
 import { SocialLinksManager } from './SocialLinksManager.tsx';
 import { CvManager } from './CvManager.tsx';
@@ -70,7 +70,7 @@ export function CMS(){
         const { url } = await res.json();
 
         if (source === "node_edit") {
-            const imageUrl = assertApiUrl(url);
+            const imageUrl = toAPIUrl(url);
 
             setEditing((prev) => (prev ? { ...prev, image: imageUrl } : prev));
         } else if (source === "upload_manager") {
@@ -230,7 +230,7 @@ export function CMS(){
                     <tbody>
                         {files.map((f) => (
                             <tr key={f.name}>
-                                <td><img src={assertApiUrl(f.url)} alt={f.name} className="admin-thumb" /></td>
+                                <td><img src={toAPIUrl(f.url)} alt={f.name} className="admin-thumb" /></td>
                                 <td>{formatSize(f.size)}</td>
                                 <td>{f.used_by.length > 0 ? f.used_by.join(", ") : "—"}</td>
                                 <td>

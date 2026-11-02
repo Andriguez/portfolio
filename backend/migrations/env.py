@@ -1,8 +1,9 @@
 import os
 
 from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv("./.env")
+load_dotenv(Path(__file__).resolve().parents[2] / "deploy" / ".env")
 
 from logging.config import fileConfig
 

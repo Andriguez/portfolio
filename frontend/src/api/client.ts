@@ -7,7 +7,7 @@ export function apiFetch(path: string, options: RequestInit = {}) {
     });
 }
 
-export function assertApiUrl(path: string | null | undefined) {
+export function toAPIUrl(path: string | null | undefined) {
     if (!path) return "";
 
     return path.startsWith("http") ? path : `${API_URL}${path}`;
