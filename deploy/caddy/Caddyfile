@@ -33,13 +33,18 @@ andriguez.dev {
     handle {
         root * /srv/frontend
 
+        # only cache public assets for a year
+        header /assets/* Cache-Control "public, max-age=31536000, immutable"
+
+        @notAssets not path /assets/*
+        header @notAssets Cache-Control "no-cache"
+
         # SPA fallback for app routes only
         @spaRoute {
             not file
             not path_regexp (^|/)\.|\.[A-Za-z0-9]+$
         }
         rewrite @spaRoute /index.html
-
         file_server
     }
 
