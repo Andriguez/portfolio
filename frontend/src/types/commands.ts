@@ -223,8 +223,8 @@ export const commands: CommandDefinition[] = [
         description: "come on, send me an email!",
         run: () => ({
             type: "link",
-            value: `>> send me an email to andhriguez@outlook.com <<`,
-            url: "mailto:andhriguez@outlook.com",
+            value: `>> send me an email to contact@andriguez.dev <<`,
+            url: "mailto:contact@andriguez.dev",
             color: "cli-green"
         })
     },
