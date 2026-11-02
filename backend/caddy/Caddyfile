@@ -1,8 +1,4 @@
-andriguez.dev {
-    encode zstd gzip
-    request_body {
-        max_size 12MB
-    }
+(security_headers) {
     header {
         defer
         Strict-Transport-Security "max-age=31536000"
@@ -16,6 +12,15 @@ andriguez.dev {
             font-src 'self' https://fonts.gstatic.com; frame-ancestors 'self';
             base-uri 'self'; form-action 'self'; object-src 'none'"
     }
+}
+
+andriguez.dev {
+    encode zstd gzip
+    request_body {
+        max_size 12MB
+    }
+
+    import security_headers
 
     handle /api/* {
         reverse_proxy backend:8000
@@ -31,16 +36,18 @@ andriguez.dev {
             not file
             not path_regexp (^|/)\.|\.[A-Za-z0-9]+$
         }
-        rewrite @spaRoute  /index.html
+        rewrite @spaRoute /index.html
 
         file_server
     }
 
-    handle_errors 404 {
-        respond "404: not found" 404
+    handle_errors {
+        import security_headers
+        respond "{err.status_code}: {err.status_text}" {err.status_code}
     }
 }
 
 www.andriguez.dev {
+    import security_headers
     redir https://andriguez.dev{uri} permanent
 }
