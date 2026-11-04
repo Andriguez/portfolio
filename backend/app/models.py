@@ -10,6 +10,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import backref, relationship
 from sqlalchemy.sql import func
@@ -24,6 +25,7 @@ class NodeType(str, enum.Enum):
 
 class VfsNode(Base):
     __tablename__ = "vfs_nodes"
+    __table_args__ = (UniqueConstraint("parent_id", "slug", name="uq_parent_slug"),)
 
     id = Column(Integer, primary_key=True, index=True)
     parent_id = Column(Integer, ForeignKey("vfs_nodes.id"), nullable=True)

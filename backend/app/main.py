@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 import os
 
 from fastapi import FastAPI
@@ -8,8 +9,28 @@ from slowapi.errors import RateLimitExceeded
 
 from .limiter import limiter
 from .routers import auth, content, cv, social_links, trash, uploads, vfs
+from .database import sessionLocal
+from . import models
 
-app = FastAPI(title="portfolio API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    db = sessionLocal()
+    try:
+        root_node = db.query(models.VfsNode).filter(models.VfsNode.parent_id.is_(None)).first()
+        if not root_node:
+            root_node = models.VfsNode(
+                type="folder",
+                name="root",
+                slug="root",
+            )
+            db.add(root_node)
+            db.commit()
+    finally:
+        db.close()
+
+    yield
+
+app = FastAPI(title="portfolio API", lifespan=lifespan)
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)

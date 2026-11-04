@@ -20,6 +20,15 @@ def check_reserved(db: Session, parent_id: int | None, slug: str):
             status_code=400, detail=f'"{slug}" is reserved for site routing.'
         )
 
+def check_valid_parent(db: Session, parent_id: int):
+    parent = db.get(models.VfsNode, parent_id)
+    if not parent:
+        raise HTTPException(status_code=404, detail="parent node not found")
+    if parent.type != "folder":
+        raise HTTPException(
+            status_code=400, detail="node can only be a child of a folder"
+        )
+
 
 @router.get("", response_model=list[schemas.VfsNodeOut])
 def list_nodes(db: DbSession):
@@ -30,8 +39,12 @@ def list_nodes(db: DbSession):
     "", response_model=schemas.VfsNodeOut, dependencies=[Depends(require_admin)]
 )
 def create_node(payload: schemas.VfsNodeCreate, db: DbSession):
-    check_reserved(db, payload.parent_id, payload.slug)
+    if payload.parent_id is None:
+        raise HTTPException(status_code=400, detail="root nodes cannot be created")
 
+    check_valid_parent(db, payload.parent_id)
+    check_reserved(db, payload.parent_id, payload.slug)
+ 
     node = models.VfsNode(**payload.model_dump())
     db.add(node)
     db.commit()
@@ -49,8 +62,24 @@ def update_node(node_id: int, payload: schemas.VfsNodeUpdate, db: DbSession):
     if not node:
         raise HTTPException(status_code=404, detail="node not found")
 
-    if payload.slug is not None:
-        check_reserved(db, node.parent_id, payload.slug)
+    final_slug = payload.slug if payload.slug is not None else node.slug
+    final_parent_id = (payload.parent_id if payload.parent_id is not None else node.parent_id)
+
+    if node.parent_id is None:
+        raise HTTPException(status_code=400, detail="root node cannot be updated")
+
+    if final_parent_id is not None and final_parent_id != node.parent_id:
+        check_valid_parent(db, final_parent_id)
+        if final_parent_id == node.id:
+            raise HTTPException(
+                status_code=400, detail="node cannot be its own parent"
+            )
+        if node.children:
+            raise HTTPException(
+                status_code=400, detail="node with children cannot be moved"
+            )
+
+    check_reserved(db, final_parent_id, final_slug)
 
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(node, field, value)
@@ -66,6 +95,8 @@ def delete_node(node_id: int, db: DbSession):
         raise HTTPException(status_code=404, detail="node not found")
     if node.children:
         raise HTTPException(status_code=400, detail="node has children nodes")
+    if node.parent_id is None:
+        raise HTTPException(status_code=400, detail="root nodes cannot be deleted")
     db.delete(node)
     db.commit()
     return {"ok": True}

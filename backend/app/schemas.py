@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class VfsNodeBase(BaseModel):
@@ -14,17 +14,18 @@ class VfsNodeBase(BaseModel):
 
 
 class VfsNodeCreate(VfsNodeBase):
-    parent_id: int | None = None
+    slug: str = Field(pattern=r"^[a-zA-Z0-9_-]+$")
+    parent_id: int
 
 
 class VfsNodeUpdate(BaseModel):
     name: str | None = None
-    slug: str | None = None
+    slug: str = Field(default=None, pattern=r"^[a-zA-Z0-9_-]+$")
     description: str | None = None
     title: str | None = None
     body: str | None = None
     image: str | None = None
-    parent_id: int | None = None
+    parent_id: int = Field(default=None)
 
 
 class VfsNodeOut(VfsNodeBase):
