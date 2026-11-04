@@ -11,10 +11,6 @@ import { SocialLinksManager } from './SocialLinksManager.tsx';
 import { CvManager } from './CvManager.tsx';
 import { SecurityPanel } from './SecurityPanel.tsx';
 
-
-// TO-DO
-// Have to figure out why when creating a node in the root folder it defaults to null and breaks navigation
-// Should be careful when adding new nodes
 type CMSNode = {
     id: number;
     parent_id: number | null;
@@ -36,6 +32,8 @@ export function CMS(){
     const [reloadKey, setReloadKey] = useState(0);
     const reload = () => setReloadKey((k) => k + 1);
 
+    const rootId = nodes.find((n) => n.parent_id === null)?.id;
+
     useEffect(() => {
         let cancelled = false;
         apiFetch("/api/vfs")
@@ -55,7 +53,7 @@ export function CMS(){
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(editing),
         });
-        if (!res.ok) { setError("save failed — check you're still logged in"); return; }
+        if (!res.ok) { setError(await readError(res, "failed to save content")); return; }
         setEditing(null);
         reload();
     }
@@ -83,13 +81,13 @@ export function CMS(){
     async function handleNodeDelete(id: number) {
         if (!confirm("delete this node? this can't be undone.")) return;
         const res = await apiFetch(`/api/vfs/${id}`, { method: "DELETE" });
-        if (!res.ok) { setError("delete failed — does it still have children?"); return; }
+        if (!res.ok) { setError(await readError(res, "delete failed — does it still have children?")); return; }
         reload();
     }
 
     async function handleLogout() {
         const res = await apiFetch("/api/logout", { method: "POST" });
-        if (!res.ok) { setError("logout failed"); return; }
+        if (!res.ok) { setError(await readError(res, "logout failed")); return; }
         else {navigate("/")}
     }
 
@@ -133,7 +131,7 @@ export function CMS(){
         useIsAuthed() && <div className="admin-panel">
             <div className="admin-header">
                 <h2>CONTENT MANAGER</h2>
-                <button onClick={() => setEditing({ type: "file", parent_id: null })}>+ new node</button>
+                <button onClick={() => setEditing({ type: "file", parent_id: rootId })}>+ new node</button>
                 <button className="logout-btn" onClick={handleLogout}>Log Out</button>
             </div>
             <table className="admin-table">
@@ -145,10 +143,15 @@ export function CMS(){
                         <td>{n.name}</td>
                         <td>{n.type}</td>
                         <td>{n.slug}</td><td>{n.parent_id ?? "—"}</td>
-                        <td>
-                            <button onClick={() => setEditing(n)}><EditIcon size="12px"/></button>
-                            <button onClick={() => handleNodeDelete(n.id)}><DeleteIcon size="12px" /></button>
-                        </td>
+                            
+                                {n.id !== rootId ? (
+                                    <td>
+                                        <button onClick={() => setEditing(n)}><EditIcon size="12px"/></button>
+                                        <button onClick={() => handleNodeDelete(n.id)}><DeleteIcon size="12px" /></button>
+                                    </td>
+                                ) : (
+                                    <td>—</td>
+                                )}
                     </tr>
                 ))}
                 </tbody>
@@ -164,8 +167,8 @@ export function CMS(){
                             </select>
                         </label>
                         <label>parent
-                            <select value={editing.parent_id ?? ""} onChange={(e) => setEditing({ ...editing, parent_id: e.target.value ? Number(e.target.value) : null })}>
-                                { nodes.filter((n) => n.type === "folder").map((n) => (<option key={n.id} value={n.id}> {n.name} </option>))}
+                            <select value={editing.parent_id ?? ""} onChange={(e) => setEditing({ ...editing, parent_id: e.target.value ? Number(e.target.value) : rootId })}>
+                                { nodes.filter((n) => n.type === "folder" && n.id !== editing.id).map((n) => (<option key={n.id} value={n.id}> {n.name} </option>))}
                             </select>
                         </label>
                         <label>name
@@ -200,7 +203,7 @@ export function CMS(){
                         )}
                         <div className="admin-form-actions">
                             <button onClick={() => setEditing(null)}>cancel</button>
-                            <button onClick={handleSave}>save</button>
+                            <button disabled={!editing.name?.trim() || !editing.slug?.trim()} onClick={handleSave}>save</button>
                         </div>
                         {error && <div className="admin-error">{error}</div>}
                     </div>
@@ -267,4 +270,25 @@ function formatSize(size: number): string {
     if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
 
     return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+type ApiValidationError = { loc?: (string | number)[]; msg?: string };
+
+async function readError(res: Response, fallback: string): Promise<string> {
+    try {
+        const data = await res.json();
+        const detail = data?.detail;
+        if (typeof detail === "string") return detail;
+        if (Array.isArray(detail)) {
+            return detail
+                .map((d: ApiValidationError) => {
+                    const field = d.loc?.[d.loc.length - 1];
+                    return field ? `${field}: ${d.msg ?? "invalid"}` : d.msg ?? "invalid";
+                })
+                .join(" · ");
+        }
+    } catch {
+        // body wasn't JSON
+    }
+    return fallback;
 }

@@ -37,7 +37,7 @@ andriguez.dev {
         header /assets/* Cache-Control "public, max-age=31536000, immutable"
 
         @notAssets not path /assets/*
-        header @notAssets Cache-Control "no-cache"
+        header @notAssets ?Cache-Control "no-cache"
 
         # SPA fallback for app routes only
         @spaRoute {
