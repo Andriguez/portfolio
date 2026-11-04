@@ -31,10 +31,10 @@ function resolvePath(root: VfsFolder, base: string[], target: string): string[] 
         const node = findNode(root, working); // <- uses the passed-in root now
         if (!node || node.type !== "folder") return null;
 
-        const child = node.children.find((c) => c.slug === seg && c.type === "folder");
+        const child = node.children.find((c) => ((c.slug === seg) || (c.name === seg)) && c.type === "folder");
         if (!child) return null;
 
-        working = [...working, seg];
+        working = [...working, child.slug];
     }
     return working;
 }
@@ -66,7 +66,7 @@ export function useVfs() {
 
     function resolveFile(target: string) {
         if (!currentFolder) return null;
-        return currentFolder.children.find((c) => c.slug === target && c.type === "file") ?? null;
+        return currentFolder.children.find((c) => (c.slug === target || c.name === target) && c.type === "file") ?? null;
     }
 
     function getFolder(path: string[]): VfsFolder | null {

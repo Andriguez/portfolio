@@ -76,7 +76,7 @@ export const commands: CommandDefinition[] = [
         show: true,
         description: "check what's in here. (folders, files, ¯\\_(ツ)_/¯)",
         run: (args, ctx) => {
-            const folder = args[0] ? ctx.resolveFolder(args[0]) : ctx.currentFolder;
+            const folder = args.length ? ctx.resolveFolder(args.join(" ")) : ctx.currentFolder;
 
             if (!folder) {
                 return { type: "error", value: `ls: no such page ${args[0]}.`, color: "cli-info"}
@@ -105,7 +105,7 @@ export const commands: CommandDefinition[] = [
         options: [" .. ","../../ ", "~ ", "directory/folder ", "back "],
         description: "go into a folder/page; 'cd back' retreats.",
         run: (args, ctx) => {
-            const target = (args[0] ?? "~").toLowerCase();
+            const target = args.length ? args.join(" ") : "~";
             const clean = target.replace(/^~?\/+/, "").replace(/\/+$/, "");
 
             if (clean === "cv") {
@@ -152,7 +152,7 @@ export const commands: CommandDefinition[] = [
             const slug = slash >= 0 ? args[0].slice(slash + 1) : args[0];
 
             const folder = dirPart ? ctx.resolveFolder(dirPart) : ctx.currentFolder;
-            const file = folder?.children.find((c): c is VfsFile => c.type === "file" && c.slug === slug) ?? null;
+            const file = folder?.children.find((c): c is VfsFile => c.type === "file" && (c.slug === slug || c.name === slug)) ?? null;
             if (!file) return { type: "error", value: `cat: no such file: ${args[0]}`, color: "cli-info"};
 
             if (!dirPart) ctx.setOpen(file.slug)
