@@ -70,13 +70,28 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
 
         const typed = parts[0];
         const cmd = commands.find((c) => c.name === typed || c.alias === typed);
+
         const opts = cmd ? getOptions(cmd, site) : [];
 
-        const candidates: string[] = opts.length > 0
-            ? opts
-            : (Array.isArray(activeFolder?.children) ? activeFolder.children : [])
-                .map((c) => c.slug)
-                .filter((s): s is string => typeof s === "string");
+        const slash = lastWord.lastIndexOf("/");
+        if (slash !== -1) {
+            const dirPart = lastWord.slice(0, slash + 1);
+            const partial = lastWord.slice(slash + 1);
+            const resolved = resolveFolder(dirPart);
+            if (!resolved) return null;
+            
+            const children = resolved.children.filter((c) => c.type === "folder" || c.type === "file");
+            const match = children.find((c) => c.slug.startsWith(partial) && c.slug !== partial);
+            if (match) return [...parts.slice(0, -1), dirPart + match.slug].join(" ");
+            return null;
+        }
+
+        const currentChildren = (Array.isArray(activeFolder?.children) ? activeFolder.children : [])
+        .map((c) => [c.slug, c.name].filter((v): v is string => !!v))
+        .flat()
+        .filter((s): s is string => typeof s === "string");
+
+        const candidates: string[] = [...opts, ...currentChildren];
 
         const word = lastWord.toLowerCase();
         const match = candidates.find((s) => s.toLowerCase().startsWith(word) && s.toLowerCase() !== word);
