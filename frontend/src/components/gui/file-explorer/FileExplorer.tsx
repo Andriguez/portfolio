@@ -239,8 +239,9 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
 
                     <button className="toolbar-btn search-btn"
                             onClick={() => setMobileSearchOpen((v) => !v)}
-                            aria-label="search">
-                        🔍︎︎
+                            aria-label="search"
+                            style={{fontSize: "12px"}}>
+                        🔍︎
                     </button>
 
                     <div className="toolbar-menu" ref={menuRef}>
