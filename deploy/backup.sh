@@ -6,12 +6,13 @@ DC="docker compose -f docker-compose.prod.yml"
 DEST=/srv/backups
 STAMP=$(date +%F-%H%M)
 
+echo "=== backup started $($STAMP) ==="
+
 umask 077
 mkdir -p "$DEST"
 
 echo "--database--"
-$DC exec -T db sh -c 'exec mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" --single-transaction --routines --databases portfolio' \
-    | gzip > "$DEST/db-$STAMP.sql.gz"
+$DC exec -T db sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysqldump -uroot --single-transaction --routines --databases portfolio' | gzip > "$DEST/db-$STAMP.sql.gz"
 
 echo "--uploaded files--"
 $DC exec -T backend tar czf - -C /app uploads cv_files > "$DEST/files-$STAMP.tgz"
@@ -28,4 +29,5 @@ rclone copy "$DEST" r2crypt: --max-age 2d
 echo "done: $DEST"
 
 
-#15 3 * * * /srv/portfolio/deploy/backup.sh >> /srv/backups/backup.log 2>&1
+#crontab entry to run this script every day at 3:15 AM
+#15 3 * * * /bin/bash /srv/portfolio/deploy/backup.sh >> /srv/backups/backup.log 2>&1
