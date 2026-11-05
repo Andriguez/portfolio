@@ -84,7 +84,7 @@ def download_cv(request: Request, cv_type: str, db: DbSession):
         media_type="application/pdf",
         filename=cv_file.filename,
         content_disposition_type="attachment",
-        cache_control="no-store",
+        headers={"Cache-Control": "no-store"},
     )
 
 
@@ -101,7 +101,7 @@ def view_cv(cv_type: str, db: DbSession):
         media_type="application/pdf",
         filename=cv.filename,
         content_disposition_type="inline",
-        cache_control="no-store",
+        headers={"Cache-Control": "no-store"},
     )
 
 

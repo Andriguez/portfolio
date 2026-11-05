@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import type { VfsNode, VfsFolder } from "../types/vfs";
 import { fetchVfsTree } from "../api/vfs.ts";
 import { useEffect, useState } from "react";
+import { apiFetch } from "../api/client.ts";
 
 export const CV_PLACE = "my_cv";
 export const TRASH_PLACE = "trash";
@@ -137,4 +138,42 @@ export function searchVfs(root: VfsFolder, query: string): { node: VfsNode; path
     }
     walk(root, []);
     return results;
+}
+
+type NodeContent = { title?: string; body?: string; image?: string };
+type BodyState =
+    | { status: "loading" }
+    | { status: "error" }
+    | ({ status: "ready" } & NodeContent);
+
+const cache = new Map<number, NodeContent>();
+type Fetched = { id: number; state: BodyState };
+
+export function useNodeBody(id: number): BodyState {
+    const [fetched, setFetched] = useState<Fetched | null>(null);
+
+    useEffect(() => {
+        if (cache.has(id)) return;
+
+        let cancelled = false;
+        apiFetch(`/api/vfs/${id}`)
+            .then((res) => (res.ok ? res.json() : Promise.reject(new Error(String(res.status)))))
+            .then((data) => {
+                const content: NodeContent = {
+                    title: data.title ?? undefined,
+                    body: data.body ?? undefined,
+                    image: data.image ?? undefined,
+                };
+                cache.set(id, content);
+                if (!cancelled) setFetched({ id, state: { status: "ready", ...content } });
+            })
+            .catch(() => { if (!cancelled) setFetched({ id, state: { status: "error" } }); });
+
+        return () => { cancelled = true; };
+    }, [id]);
+
+    const cached = cache.get(id);
+    if (cached) return { status: "ready", ...cached };
+    if (fetched?.id === id) return fetched.state;
+    return { status: "loading" };
 }
