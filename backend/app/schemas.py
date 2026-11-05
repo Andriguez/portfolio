@@ -2,6 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+
 class VfsNodeFields(BaseModel):
     type: str
     name: str
