@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+set -a; source "$(dirname "$0")/.env"; set +a
 
 cd "$(dirname "$0")"
 DC="docker compose -f docker-compose.prod.yml"
@@ -27,7 +28,7 @@ find "$DEST" -type f \( -name 'db-*.sql.gz' -o -name 'files-*.tgz' \) -mtime +14
 rclone copy "$DEST" r2crypt: --max-age 2d
 
 echo "done: $DEST"
-
+curl -fsS -m 10 --retry 3 "$BACKUP_HEARTBEAT_URL" > /dev/null
 
 #crontab entry to run this script every day at 3:15 AM
 #15 3 * * * /bin/bash /srv/portfolio/deploy/backup.sh >> /srv/backups/backup.log 2>&1
