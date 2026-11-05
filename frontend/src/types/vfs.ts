@@ -1,7 +1,7 @@
 import type { TrashItem } from "./trash";
 
 export type VfsBase = {
-    id: number;
+    id?: number;
     name: string;
     slug: string;
     description?: string;
