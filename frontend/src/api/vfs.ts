@@ -20,10 +20,11 @@ export async function fetchVfsTree(): Promise<VfsFolder> {
         const node: VfsNode =
             n.type === "folder" 
             ? { 
-                type: "folder", name: n.name, slug: n.slug,
+                id: n.id, type: "folder", name: n.name, slug: n.slug,
                 description: n.description ?? undefined, children: [], 
             }
             : { 
+                id: n.id,
                 type: "file", name: n.name, 
                 slug: n.slug, description: n.description ?? undefined,
                 updatedAt: n.updated_at ?? undefined,

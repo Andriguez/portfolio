@@ -1,6 +1,6 @@
 import "./cms.css";
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {SafeHtml} from "../SafeHtml.tsx";
 import type { UploadedFile } from "../../types/UploadedFile.ts";
 import {useNavigate} from "react-router-dom";
@@ -31,6 +31,7 @@ export function CMS(){
     const navigate = useNavigate();
     const [reloadKey, setReloadKey] = useState(0);
     const reload = () => setReloadKey((k) => k + 1);
+    const lastNodeRef = useRef<number | null>(null);
 
     const rootId = nodes.find((n) => n.parent_id === null)?.id;
 
@@ -43,6 +44,12 @@ export function CMS(){
         return () => { cancelled = true; };
     }, [reloadKey]);
 
+    async function handleEditClick(node: CMSNode) {
+        apiFetch(`/api/vfs/${node.id}`)
+        .then((res) => (res.ok ? res.json() : Promise.reject(new Error(String(res.status)))))
+        .then((data: CMSNode) => {if (lastNodeRef.current === data.id) {setError(null); setEditing(data);} })
+            .catch(() => setError("couldn't load node info."));
+    }
 
     async function handleSave() {
         if (!editing) return;
@@ -146,7 +153,7 @@ export function CMS(){
                             
                                 {n.id !== rootId ? (
                                     <td>
-                                        <button onClick={() => setEditing(n)}><EditIcon size="12px"/></button>
+                                        <button onClick={() => {handleEditClick(n); lastNodeRef.current = n.id}}><EditIcon size="12px"/></button>
                                         <button onClick={() => handleNodeDelete(n.id)}><DeleteIcon size="12px" /></button>
                                     </td>
                                 ) : (

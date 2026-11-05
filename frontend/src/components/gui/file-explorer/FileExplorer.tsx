@@ -1,169 +1,77 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import changelog from "../../../helpers/changelog.ts";
 
-import { useVfs, searchVfs, CV_PLACE, TRASH_PLACE } from "../../../hooks/useVfs.ts"
+import { useVfs, CV_PLACE, TRASH_PLACE } from "../../../hooks/useVfs.ts"
 import { ExplorerButtons } from './components/ExplorerButtons.tsx';
 import { TreeColumn } from "./components/TreeColumn.tsx";
 import { GridColumn } from "./components/GridColumn.tsx";
 import { DetailPanel } from "./content-panels/DetailPanel.tsx";
 import { ExternalLink, Mail, ListTree } from "lucide-react";
-import { useSite } from "../../../context/SiteDataContext.ts";
-import { useTrash } from "../../../hooks/useTrash.ts";
-import { trashToNode } from "../../../helpers/trashNodes.ts";
-import { cvToNode } from "../../../helpers/cvNodes.ts";
 import type {VfsFile, VfsNode} from "../../../types/vfs.ts";
 import {ThemeToggle} from "./components/ThemeToggle.tsx";
 import {DesktopIcons} from "../DesktopIcons.tsx";
 import {LoginModal} from "../modals/LoginModal.tsx";
 import { InfoDialog } from "../modals/InfoDialog.tsx";
+import { useContextClose } from "../../../hooks/useContextClose.ts";
+import { useWindowState } from "../../../hooks/useWindowState.ts";
+import { useExplorerSearch } from "../../../hooks/useExplorerSearch.ts";
+import { usePlaceItems } from "../../../hooks/usePlaceItems.ts";
+import { useSite } from "../../../context/SiteDataContext.ts";
+import { useOpenFile } from "../../../hooks/useOpenFile.ts";
+import { useNavigate } from "react-router-dom";
+import { useExpandedPaths } from "../../../hooks/useExpandedPaths.ts";
+
 
 export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
-    const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
     
-    const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
-    const [syncedPath, setSyncedPath] = useState(vfs.currentPath);
-
+    const { expandedPaths, setExpandedPaths } = useExpandedPaths()
     const [loginOpen, setLoginOpen] = useState(false);
 
     const { data: site } = useSite();
     
-    const inCv = vfs.place === CV_PLACE;
-    const cvNodes = useMemo(() => site.cvs.map(cvToNode), [site.cvs]);
-    const hasCv = site.cvs.length > 0;
-
-
-    const inTrash = vfs.place === TRASH_PLACE;
-    const { items: trashItems, source: trashSource } = useTrash(inTrash);
-    const trashNodes = useMemo(() => trashItems.map(trashToNode), [trashItems]);
-
-    const placeNodes = inCv ? cvNodes : inTrash ? trashNodes : null;
-    const placeLabel = inCv ? "My CV" : inTrash ? "Trash" : null;
-
-    const openSlug = searchParams.get("open");
-    const openFile = openSlug
-    ? ((placeNodes ? placeNodes.find((n) => n.slug === openSlug) : vfs.resolveFile(openSlug)) ?? null)
-    : null;
-    const items: VfsNode[] = placeNodes ?? (vfs.currentFolder?.children ?? []);
-
+    const place = usePlaceItems(vfs, site);
+    const fileAction = useOpenFile(vfs, place.nodes)
 
     const [aboutOpen, setAboutOpen] = useState(false);
     const [changelogOpen, setChangelogOpen] = useState(false);
 
+    const win = useWindowState()
 
-    if (syncedPath !== vfs.currentPath) {
-        setSyncedPath(vfs.currentPath);
-        setExpandedPaths((prev) => {
-            const next = new Set(prev);
-            let acc = "";
-            for (const part of vfs.pathParts) {
-                acc = acc ? `${acc}/${part}` : part;
-                next.add(acc);
-            }
-            return next;
-        });
-    }
+    function handleCvIcon() { vfs.goToPlace(CV_PLACE); win.restore(); }
 
-    function handleOpenFile(slug: string) { 
-        setSearchParams((prev) => {
-            const next = new URLSearchParams(prev);
-            next.set("open", slug);
-            return next;
-        });
-    }
-
-    const handleCloseFile = useCallback(() => {
-        setSearchParams((prev) => {
-            const next = new URLSearchParams(prev);
-            next.delete("open");
-            return next;
-        }, { replace: true });
-    }, [setSearchParams]);
-
-    function handleCvIcon() { vfs.goToPlace(CV_PLACE); handleRestoreWindow(); }
-
-    useEffect(() => {
-        if (!openFile) return;
-         function handleKey(e: KeyboardEvent) {
-            if (e.key === "Escape") handleCloseFile();
-        }
-        window.addEventListener("keydown", handleKey);
-        return () => window.removeEventListener("keydown", handleKey);
-    }, [openFile, handleCloseFile]);
-
-    type WindowState = "open" | "minimizing" | "minimized" | "restoring";
-    const [windowState, setWindowState] = useState<WindowState>("open");
-
-    function handleMinimizeWindow() {
-        setWindowState("minimizing");
-        setTimeout(() => setWindowState("minimized"), 320);
-    }
-    function handleRestoreWindow() {
-        setWindowState("restoring");
-        setTimeout(() => setWindowState("open"), 320);
-    }
-
-    const [shuttingDown, setShuttingDown] = useState(false);
-
-    function handleCloseWindow() {
-        setShuttingDown(true);
-        setTimeout(() => window.close(), 500);
-    }
-
-    const folderCount = items?.filter((i) => i.type === "folder").length;
-    const fileCount = items?.filter((i) => i.type === "file").length;
+    const folderCount = place.items?.filter((i) => i.type === "folder").length;
+    const fileCount = place.items?.filter((i) => i.type === "file").length;
 
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-    const [searchQuery, setSearchQuery] = useState("");
+
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
+    const [treeOpen, setTreeOpen] = useState(false);
+   
+    useContextClose(menuOpen, () => setMenuOpen(false), (t) => !!menuRef.current?.contains(t));
+    useContextClose(treeOpen, () => setTreeOpen(false), (t) => t instanceof Element && !!t.closest(".tree-drawer, .tree-toggle"))
 
-    useEffect(() => {
-        if (!menuOpen) return;
-
-        function handlePointerDown(e: PointerEvent) {
-            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-                setMenuOpen(false);
-            }
-        }
-
-        function handleKey(e: KeyboardEvent) {
-            if (e.key === "Escape") setMenuOpen(false);
-        }
-
-        document.addEventListener("pointerdown", handlePointerDown);
-        document.addEventListener("keydown", handleKey);
-        return () => {
-            document.removeEventListener("pointerdown", handlePointerDown);
-            document.removeEventListener("keydown", handleKey);
-        }
-    }, [menuOpen])
-
-    const searchResults = searchQuery && vfs.root ? searchVfs(vfs.root, searchQuery) : null;
-    const visibleItems = searchResults ? searchResults.map((r) => r.node) : items;
-
-    const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+    const search = useExplorerSearch(vfs.root, place.items);
 
     function handleItemClick(item: VfsNode) {
-        if (searchResults) {
-            const match = searchResults.find((r) => r.node === item);
+        if (search.searchResults) {
+            const match = search.searchResults.find((r) => r.node === item);
             if (!match) return;
             if (item.type === "folder") {
                 vfs.goToPath(match.path);
             } else {
                 navigate(`/${match.path.slice(0, -1).join("/")}?open=${item.slug}`);
             }
-            setSearchQuery("");
+            search.setSearchQuery("");
             return;
         }
 
         if (item.type === "folder") vfs.cd(item.slug)
-        else handleOpenFile(item.slug);
+        else fileAction.open(item.slug);
     }
 
-    const [treeOpen, setTreeOpen] = useState(false);
     const navKey = `${vfs.currentPath}|${vfs.place ?? ""}`;
     const [lastNavKey, setLastNavKey] = useState(navKey);
     if (lastNavKey !== navKey) {
@@ -171,35 +79,14 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
         setTreeOpen(false);
     }
 
-    useEffect(() => {
-        if (!treeOpen) return;
-        function onPointerDown(e: PointerEvent) {
-            if (!(e.target as HTMLElement).closest(".tree-drawer, .tree-toggle")) setTreeOpen(false);
-        }
-        function onKey(e: KeyboardEvent) {
-            if (e.key === "Escape") setTreeOpen(false);
-        }
-        document.addEventListener("pointerdown", onPointerDown);
-        document.addEventListener("keydown", onKey);
-        return () => {
-            document.removeEventListener("pointerdown", onPointerDown);
-            document.removeEventListener("keydown", onKey);
-        };
-    }, [treeOpen]);
-
         return (
         <div>
-            <div className={`gui ${
-                windowState === "minimizing" ? "gui-window--minimizing"
-                    : windowState === "minimized" ? "gui-window--hidden"
-                        : windowState === "restoring" ? "gui-window--restoring"
-                            : ""
-                } ${shuttingDown ? "cli-power-off" : ""}`}
+            <div className={`gui ${win.guiClassName}`}
             >
 
                 <div className="gui-titlebar">
                     <span>portfolio</span>
-                    <ExplorerButtons onMinimize={handleMinimizeWindow} onClose={handleCloseWindow} />
+                    <ExplorerButtons onMinimize={win.minimize} onClose={win.close} />
                 </div>
                 <div className="gui-toolbar">
                     <button
@@ -215,8 +102,8 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                     <button title="forward" className="toolbar-btn nav-btn" onClick={() => navigate(1)} aria-label="forward">›</button>
 
                     <div className="address-field themed-scrollbar">
-                        {placeLabel ? (
-                            <span className="crumb-pill">{placeLabel}</span>
+                        {place.label ? (
+                            <span className="crumb-pill">{place.label}</span>
                         ) : (
                             <>
                                 <span className="crumb-pill" onClick={() => vfs.goToPath([])}>home</span>
@@ -233,12 +120,12 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                     <input
                         className="search-field"
                         placeholder="search.."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        value={search.searchQuery}
+                        onChange={(e) => search.setSearchQuery(e.target.value)}
                     />
 
                     <button className="toolbar-btn search-btn"
-                            onClick={() => setMobileSearchOpen((v) => !v)}
+                            onClick={() => search.setMobileSearchOpen((v) => !v)}
                             aria-label="search"
                             style={{fontSize: "12px"}}>
                         🔍︎
@@ -268,17 +155,17 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                     </div>
 
                     </div>
-                    {mobileSearchOpen && (
+                    {search.mobileSearchOpen && (
                         <div className="mobile-search-row">
                             <input
                                 className="mobile-search-input"
                                 autoFocus
                                 placeholder="search.."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                value={search.searchQuery}
+                                onChange={(e) => search.setSearchQuery(e.target.value)}
                             />
                             <button className="toolbar-btn search-btn"
-                                    onClick={() => setMobileSearchOpen((v) => !v)}
+                                    onClick={() => search.setMobileSearchOpen((v) => !v)}
                                     aria-label="search">
                                 ×
                             </button>
@@ -291,26 +178,46 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                                     vfs={vfs}
                                     expandedPaths={expandedPaths}
                                     setExpandedPaths={setExpandedPaths}
-                                    onLoginClick={() => { setTreeOpen(false); setLoginOpen(true); }}
+                                    onLoginClick={
+                                        () => { 
+                                            setTreeOpen(false); setLoginOpen(true); 
+                                        }}
                                 />
                             </div>
                         </div>
                     )}
 
                     <div className="gui-body">
-                        <TreeColumn vfs={vfs} expandedPaths={expandedPaths} setExpandedPaths={setExpandedPaths} onLoginClick={() => setLoginOpen(true)} />
-                        <GridColumn vfs={vfs} items={visibleItems} viewMode={viewMode} openedFile={openSlug} onItemClick={handleItemClick} />
-                        {openFile && (
+                        <TreeColumn 
+                            vfs={vfs} 
+                            expandedPaths={expandedPaths} 
+                            setExpandedPaths={setExpandedPaths}
+                            onLoginClick={() => setLoginOpen(true)} 
+                        />
+                        <GridColumn 
+                            vfs={vfs}
+                            items={search.visibleItems}
+                            viewMode={viewMode}
+                            openedFile={fileAction.openSlug}
+                            onItemClick={handleItemClick} 
+                        />
+                        {fileAction.openFile && (
                             <div className="detail-overlay-wrap">
-                            <div className="detail-backdrop" onClick={handleCloseFile} />
-                                <DetailPanel file={openFile as VfsFile} onClose={handleCloseFile} />
+                            <div className="detail-backdrop" onClick={fileAction.close} />
+                                <DetailPanel file={fileAction.openFile as VfsFile} onClose={fileAction.close} />
                             </div>
                         )}
                     </div>
                     <div className="gui-statusbar">
                             <span title="content summary" >
-                                {items?.length} items | 
-                                { folderCount > 0 ? ` ${folderCount} folder(s)` : "" }  {fileCount > 0 && vfs.place !== TRASH_PLACE ? `${fileCount} file(s)` : vfs.place === TRASH_PLACE ? `$ git log --diff-filter=D · ${trashSource === "loading" ? "loading..." : trashSource === "github" ? "from git history" : "from archives"}` : "" } 
+                                {search.visibleItems?.length} item(s) | 
+                                { !search.searchQuery && folderCount > 0 ? ` ${folderCount} folder(s)` : "" } 
+                                 {
+                                    !search.searchQuery && fileCount > 0 && vfs.place !== TRASH_PLACE ? ` ${fileCount} file(s)` 
+                                    : vfs.place === TRASH_PLACE ? ` $ git log --diff-filter=D · ${place.trashSource === "loading" ? "loading..." 
+                                    : place.trashSource === "github" ? "from git history" : "from archives"}` 
+                                 : "" 
+                                 } 
                             </span>
                         <div className="view-toggle">
                             <button title="grid view" className={viewMode === "grid" ? "view-btn view-btn--active" : "view-btn"} onClick={() => setViewMode("grid")} aria-label="grid view">⊞</button>
@@ -325,17 +232,17 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                         <rect width="100%" height="100%" filter="url(#grain2)"></rect>
                     </svg>
                 </div>
-                { windowState === "open" && (
+                { win.state === "open" && (
                 <div className="gui-desktop-overlay" >
                     </div>
                 )}
-                { windowState === "minimized" && (
-                        <div title="Start" className="gui-taskbar-pill" onClick={handleRestoreWindow} />
+                { win.state === "minimized" && (
+                        <div title="Start" className="gui-taskbar-pill" onClick={win.restore} />
                 )}
                 {
-                    !shuttingDown && (
+                    !win.shuttingDown && (
                     <div>
-                    <DesktopIcons onRestore={() => { vfs.goToPath(["/"]); handleRestoreWindow(); }} onLoginClick={() => setLoginOpen(true)} onCvClick={() => { if (hasCv) handleCvIcon(); }} onTrashClick={() => {vfs.goToPlace(TRASH_PLACE); handleRestoreWindow(); }} />
+                    <DesktopIcons onRestore={() => { vfs.goToPath([]); win.restore(); }} onLoginClick={() => setLoginOpen(true)} onCvClick={() => { if (place.hasCv) handleCvIcon(); }} onTrashClick={() => {vfs.goToPlace(TRASH_PLACE); win.restore(); }} />
                     </div>
                 )
                 }

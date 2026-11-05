@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, defer
 
 from .. import models, schemas
 from ..auth import require_admin
@@ -30,10 +30,16 @@ def check_valid_parent(db: Session, parent_id: int):
         )
 
 
-@router.get("", response_model=list[schemas.VfsNodeOut])
+@router.get("", response_model=list[schemas.VfsNodeSummary])
 def list_nodes(db: DbSession):
-    return db.query(models.VfsNode).all()
+    return db.query(models.VfsNode).options(defer(models.VfsNode.body)).all()
 
+@router.get("/{node_id}", response_model=schemas.VfsNodeOut)
+def get_node(node_id: int, db: DbSession):
+    node = db.get(models.VfsNode, node_id)
+    if not node:
+        raise HTTPException(status_code=404, detail="node not found")
+    return node
 
 @router.post(
     "", response_model=schemas.VfsNodeOut, dependencies=[Depends(require_admin)]

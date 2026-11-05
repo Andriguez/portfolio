@@ -7,7 +7,7 @@ DC="docker compose -f docker-compose.prod.yml"
 DEST=/srv/backups
 STAMP=$(date +%F-%H%M)
 
-echo "=== backup started $($STAMP) ==="
+echo "=== backup started $STAMP ==="
 
 umask 077
 mkdir -p "$DEST"

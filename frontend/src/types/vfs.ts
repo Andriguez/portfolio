@@ -1,10 +1,10 @@
 import type { TrashItem } from "./trash";
 
 export type VfsBase = {
+    id: number;
     name: string;
     slug: string;
     description?: string;
-    id?: number;
     parentId?: number | null;
     cv?: { type: string; size: number; filename: string; uploaded_at: string;};
     trash?: TrashItem;
@@ -13,8 +13,8 @@ export type VfsBase = {
 export type VfsFile = VfsBase & {
     type: "file";
     content?: {
-        title: string;
-        body: string;
+        title?: string;
+        body?: string;
         image?: string;
     };
     updatedAt?: string;
