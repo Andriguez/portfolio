@@ -4,6 +4,9 @@ set -euo pipefail
 cd "$(dirname "$0")"
 DC="docker compose -f docker-compose.prod.yml"
 
+echo "backup before deploy"
+/bin/bash "$(dirname "$0")/backup.sh" || { echo "backup failed, deploy aborted"; exit 1; }
+
 echo "pulling last version repo"
 git pull --ff-only
 
