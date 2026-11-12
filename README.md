@@ -129,7 +129,7 @@ Both suites run in CI on every push and pull request.
 - Uploads are checked by their file signature (magic bytes), not just by extension or MIME type.
 - Slugs are validated (`^[a-z0-9_-]+$`), unique per folder (database constraint), and reserved names like `cv` and `trash` can't be used in the root. Moves that would put a folder inside itself are refused, and the root can't be renamed, moved or deleted.
 **HTTP hardening (Caddy)**
-- HSTS, a Content-Security-Policy, `X-Frame-Options: DENY` (clickjacking protection for the admin), `Permissions-Policy` and `Cross-Origin-Opener-Policy`.
+- HSTS, a Content-Security-Policy, `X-Frame-Options: SAMEORIGIN` with `frame-ancestors 'self'` (other sites can't embed the admin in a frame, preventing clickjacking), `Permissions-Policy`, `Referrer-Policy`, `X-Content-Type-Options: nosniff` and `Cross-Origin-Opener-Policy`.
 - The `Server` header from the backend is removed, and unknown sensitive paths such as `/.env` and `/.git/` return real 404s.
 - Hashed static assets are cached long-term; CV downloads are served with `Cache-Control: no-store`.
 **Containers and infrastructure**
