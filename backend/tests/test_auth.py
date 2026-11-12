@@ -1,8 +1,9 @@
-import pyotp
-
-from conftest import TEST_PASSWORD
-import jwt
 import time
+
+import jwt
+import pyotp
+from conftest import TEST_PASSWORD
+
 
 def login(client, password):
     return client.post("/api/login", json={"password": password})
@@ -51,7 +52,6 @@ def test_login_rate_limit(client):
     assert rate_limited_response.status_code == 429
 
 def test_pending_token_refused(client, totp_admin):
-    totp_admin
     login_response = login(client, TEST_PASSWORD)
     assert login_response.status_code == 200
 
