@@ -140,7 +140,7 @@ Both suites run in CI on every push and pull request.
 <!-- TODO after WireGuard: "SSH and the admin are only reachable through a WireGuard tunnel; public requests to the admin routes get a 404." -->
  
 **Backups**
-- A nightly cron job dumps the database and archives the uploads, then copies both to Cloudflare R2 through an **rclone crypt** remote, so file contents and names are encrypted before they leave the server. Copies older than 14 days are removed. Restoring a dump has been tested.
+- A nightly cron job dumps the database and archives the uploads, then copies both to Cloudflare R2 through an **rclone crypt** remote, so file contents and names are encrypted before they leave the server. Copies older than 14 days are removed.
 ## Deployment and operations
  
 - Changes go one way: **PC → GitHub → server**. Nothing is edited on the server by hand; `deploy/deploy.sh` applies changes and takes a backup first.

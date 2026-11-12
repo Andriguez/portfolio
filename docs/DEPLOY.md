@@ -151,7 +151,7 @@ docker compose -f docker-compose.prod.yml config -q   # no output means OK
  
 ### 1.8 First start
  
-<!-- TODO: describe how frontend/dist gets onto the server (built on the PC and copied with scp, or built by deploy.sh) -->
+<!-- TODO: frontend/dist is built on the PC and copied with scp, next step is to do it through the CI -->
  
 ```bash
 mkdir -p /srv/portfolio/frontend/dist     # Caddy serves the built frontend from here
@@ -281,7 +281,7 @@ env -i HOME=/home/<user> PATH=/usr/bin:/bin /bin/bash /srv/portfolio/deploy/back
  
 ### 4.4 Restoring a backup
  
-<!-- TODO: fill in after the restore test, with the commands that actually worked -->
+<!-- TODO: check again after the restore test -->
  
 1. Download a dump: `rclone copy r2crypt:db-YYYY-MM-DD-HHMM.sql.gz /tmp/restore/`
 2. Check the archive: `gunzip -t /tmp/restore/db-*.sql.gz`
@@ -303,5 +303,5 @@ env -i HOME=/home/<user> PATH=/usr/bin:/bin /bin/bash /srv/portfolio/deploy/back
 | Backend errors | `docker compose -f docker-compose.prod.yml logs --tail=100 backend` |
 | Backup didn't run | `tail /srv/backups/backup.log`; `grep CRON /var/log/syslog \| grep backup` |
 | Locked out of SSH | Hetzner Cloud Console → server → Console (web terminal) |
-<!-- TODO after WireGuard: add the WireGuard setup and how to get back in if the tunnel breaks -->
+<!-- TODO add the WireGuard setup and how to get back in if the tunnel breaks -->
  
