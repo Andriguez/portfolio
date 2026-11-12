@@ -80,8 +80,7 @@ npm run dev
 ```
  
 - The site runs at the address Vite prints (by default `http://localhost:5173`).
-<!-- TODO: one line on how to set the local admin password (which .env variable, and how to make its bcrypt hash) -->
- 
+- To set the admin password, create a bcrypt hash with `docker run --rm -it caddy:2 caddy hash-password` and put it in `deploy/.env` as `ADMIN_PASSWORD_HASH='...'` (single quotes, because the hash contains `$` signs).
 - The CMS is at `/admin`. Locally you can log in with the password only; 2FA can be enrolled from the CMS.
 - The root folder of the content tree is created automatically on first start.
 **Creating a migration** after changing a model (from `deploy/`, with the backend folder mounted so the file lands in the repo):
@@ -184,3 +183,4 @@ I designed this project and made its architecture, design and security decisions
 ## License
  
 No license: all rights reserved. You're welcome to read the code and learn from it, but please don't reuse it as your own.
+ 
