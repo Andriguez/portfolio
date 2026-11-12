@@ -11,7 +11,7 @@ JWT_SECRET = os.environ.setdefault("JWT_SECRET", "test-secret-not-real-012345678
 ADMIN_PASSWORD_HASH = os.environ.setdefault("ADMIN_PASSWORD_HASH", bcrypt.hashpw(ENCODED_PASSWORD, bcrypt.gensalt()).decode())
 DATABASE_URL = os.environ.setdefault("DATABASE_URL", "mysql+pymysql://test:test@localhost/test")
 CORS_ORIGINS=os.environ.setdefault("CORS_ORIGINS", "true")
-TOTP_ENC_KEY = os.environ.setdefault("TOTP_ENC_KEY", "uUNk1ucHx_PVX_LrcCns3KgWAokSnjxWrH63bf6DtC4=")
+TOTP_ENC_KEY = os.environ.setdefault("TOTP_ENC_KEY", "uUNk1ucHx_PVX_LrcCns3KgWAokSnjxWrH63bf6DtC4=") # gitleaks:allow
 COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "true")
 REPO = os.environ.setdefault("GITHUB_REPO", "Andriguez/portfolio")
 TOKEN = os.environ.setdefault("GITHUB_TOKEN", "test-secret-not-real-0123456789")
