@@ -3,13 +3,8 @@
 An interactive portfolio that looks like a retro terminal, with a second mode styled as a desktop file explorer. Both modes show the same content, which is managed through a small CMS behind two-factor login.
  
 **Live:** https://andriguez.dev
- 
-<!-- TODO: add the screenshots/GIFs, e.g. recorded with ScreenToGif or the browser's recorder -->
-| CLI mode | GUI mode |
-| --- | --- |
-| ![CLI mode](docs/screenshots/cli.gif) | ![GUI mode](docs/screenshots/gui.gif) |
- 
----
+
+<img width="900" height="864" alt="portfolio_showcase_low" src="https://github.com/user-attachments/assets/66f625b3-f7a7-4ccb-be3f-c126ce181b04" />
  
 ## Contents
  
