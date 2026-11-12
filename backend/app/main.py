@@ -11,6 +11,7 @@ from . import models
 from .database import sessionLocal
 from .limiter import limiter
 from .routers import auth, content, cv, social_links, trash, uploads, vfs
+from .routers.uploads import UPLOAD_DIR
 
 
 @asynccontextmanager
@@ -46,7 +47,7 @@ app.add_middleware(
     allow_headers=["Content-Type"],
 )
 
-app.mount("/uploads", StaticFiles(directory="/app/uploads"), name="uploads")
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 app.include_router(vfs.router)
 app.include_router(auth.router)
