@@ -66,7 +66,7 @@ def _build_items() -> list[dict]:
 
     with httpx.Client(base_url="https://api.github.com", headers=headers, timeout=8) as client:
         listing = client.get(f"/repos/{REPO}/commits", params={"per_page": MAX_COMMITS})
-        listing.raise_for_status()                      # a private repo answers 404 here
+        listing.raise_for_status()
 
         for commit in listing.json():
             if len(items) >= MAX_ITEMS or time.monotonic() > deadline:
