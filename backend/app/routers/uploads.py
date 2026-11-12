@@ -28,7 +28,7 @@ def sniff_image_type(contents: bytes) -> str | None:
         return "image/webp"
     return None
 
-UPLOAD_DIR = "/app/uploads"
+UPLOAD_DIR = os.environ.get("UPLOAD_DIR", "/app/uploads")
 ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 ALLOWED_EXT = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".jfif"}
 MAX_SIZE = 5 * 1024 * 1024  # 5MB

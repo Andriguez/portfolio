@@ -1,4 +1,5 @@
 import os
+import tempfile
 
 import bcrypt
 import pyotp
@@ -14,6 +15,10 @@ TOTP_ENC_KEY = os.environ.setdefault("TOTP_ENC_KEY", "uUNk1ucHx_PVX_LrcCns3KgWAo
 COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "true")
 REPO = os.environ.setdefault("GITHUB_REPO", "Andriguez/portfolio")
 TOKEN = os.environ.setdefault("GITHUB_TOKEN", "test-secret-not-real-0123456789")
+
+TEST_FILES_DIR = tempfile.mkdtemp(prefix="portfolio-tests-")
+os.environ.setdefault("CV_DIR", os.path.join(TEST_FILES_DIR, "cv_files"))
+os.environ.setdefault("UPLOAD_DIR", os.path.join(TEST_FILES_DIR, "uploads"))
 
 import pytest
 from fastapi.testclient import TestClient

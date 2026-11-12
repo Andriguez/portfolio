@@ -14,7 +14,7 @@ from ..auth import require_admin
 from ..database import DbSession, UploadFileAn
 from ..limiter import limiter
 
-CV_DIR = "/app/cv_files"
+CV_DIR = os.environ.get("CV_DIR", "/app/cv_files")
 router = APIRouter(prefix="/api/cv", tags=["cv"])
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 TYPE_RE = re.compile(r"^[a-z0-9][a-z0-9-]{1,29}$")
