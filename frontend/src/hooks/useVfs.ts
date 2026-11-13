@@ -1,9 +1,11 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import type { VfsNode, VfsFolder } from "../types/vfs";
 import { fetchVfsTree } from "../api/vfs.ts";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "../api/client.ts";
 import { findNode, resolvePath } from "../helpers/vfsPath.ts";
+import { changelogToNode } from "../helpers/changelogToNode.ts";
+import { useSite } from "../context/SiteDataContext.ts";
 
 export const CV_PLACE = "my_cv";
 export const TRASH_PLACE = "trash";
@@ -11,23 +13,37 @@ export const TRASH_PLACE = "trash";
 const PLACES = [CV_PLACE, TRASH_PLACE] as const;
 export type Place = (typeof PLACES)[number];
 
-
-
 export function useVfs() {
-    const [root, setRoot] = useState<VfsFolder | null>(null);
+    const [rawRoot, setRawRoot] = useState<VfsFolder | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const location = useLocation();
     const navigate = useNavigate();
+    const { data: site } = useSite();
 
     useEffect(() => {
         let cancelled = false;
         fetchVfsTree()
-            .then((tree) => { if (!cancelled) setRoot(tree); })
+            .then((tree) => { if (!cancelled) setRawRoot(tree); })
             .catch((err) => { if (!cancelled) setError(err.message); })
             .finally(() => { if (!cancelled) setLoading(false); });
         return () => { cancelled = true; };
     }, []);
+
+    const root = useMemo<VfsFolder | null>(() => {
+        if (!rawRoot) return null;
+
+        const changelog = changelogToNode(site.changelog, rawRoot.id ?? 0);
+        if (!changelog) return rawRoot;
+
+        return {
+            ...rawRoot,
+            children: [
+                ...rawRoot.children,
+                changelog,
+            ],
+        };
+    }, [rawRoot, site.changelog])
 
     const rawParts = location.pathname.split("/").filter(Boolean);
     const place = rawParts.length === 1 ? (PLACES.find((p) => p === rawParts[0]) ?? null) : null

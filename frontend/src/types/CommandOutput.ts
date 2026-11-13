@@ -11,4 +11,3 @@ export type CommandOutput =
     | { type: "cv-list"; cvs: Cv[]; color: string}
     | { type: "cv-view"; cv: Cv; color: string}
     | { type: "link-list"; links: { id: number; name: string; url: string }[]; color: string }
-    | { type: "changelog"; file: string; color: string};

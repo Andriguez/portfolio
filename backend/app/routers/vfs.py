@@ -7,7 +7,7 @@ from ..database import DbSession
 
 router = APIRouter(prefix="/api/vfs", tags=["vfs"])
 
-RESERVED_ROOT_SLUGS = {"my_cv", "admin", "api", "uploads", "cv", "trash"}
+RESERVED_ROOT_SLUGS = {"my_cv", "admin", "api", "uploads", "cv", "trash", "changelog"}
 
 
 def check_reserved(db: Session, parent_id: int | None, slug: str):

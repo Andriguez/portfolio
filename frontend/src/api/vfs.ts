@@ -50,7 +50,6 @@ export async function fetchVfsTree(): Promise<VfsFolder> {
         if (parent?.type === "folder") parent.children.push(node);
     }
 
-
     if (roots.length !== 1) throw new Error(`expected exactly one root folder, found ${roots.length}`);
 
     return roots[0];

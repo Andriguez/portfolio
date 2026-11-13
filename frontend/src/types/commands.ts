@@ -2,7 +2,6 @@ import type { VfsFolder, VfsFile } from "./vfs";
 import type { CommandOutput } from "./CommandOutput";
 import type { SiteData } from "../hooks/useSiteData";
 import { CV_PLACE, type Place } from "../hooks/useVfs";
-import changelog from "../helpers/changelog";
 import { EIGHT_BALL_ANSWERS } from "../data/eightBall";
 
 type CommandContext = {
@@ -256,16 +255,6 @@ export const commands: CommandDefinition[] = [
                 color: "cli-green"
            }
         }
-    },
-     {
-        name: "changelog",
-        usage: "changelog",
-        show: false,
-        description: "check what i have been doing in here.",
-
-        run: () => ({
-            type: "changelog", file: changelog ,color: "cli-green"
-        })
     },
     {
         name: "echo",
