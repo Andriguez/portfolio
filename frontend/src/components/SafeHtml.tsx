@@ -2,9 +2,16 @@ import DOMPurify from "dompurify";
 import { useMemo, type MouseEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
+ DOMPurify.addHook("afterSanitizeAttributes", (node) => {
+            if (node.tagName === "IMG") {
+                node.setAttribute("loading", "lazy");
+                node.setAttribute("decoding", "async");
+            }
+        });
+
 export function SafeHtml({ html, className }: { html: string | undefined; className?: string }) {
     const navigate = useNavigate();
-        const clean = useMemo(() => DOMPurify.sanitize(html ?? ""), [html]);
+    const clean = useMemo(() => DOMPurify.sanitize(html ?? ""), [html]);
 
     function handleClick(e: MouseEvent<HTMLDivElement>) {
         if (e.defaultPrevented || e.button !== 0) return;
