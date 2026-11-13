@@ -8,10 +8,10 @@ import { LinkList } from "./lists/LinkList";
 import ReactMarkdown from "react-markdown";
 import { CvViewer } from "../gui/file-explorer/content-panels/CvViewer";
 
-export function OutputRenderer({ output, runCommand }: { output: CommandOutput, runCommand: ((cmd: string) => void) }) {
+export function OutputRenderer({ output, runCommand, skip }: { output: CommandOutput, runCommand: ((cmd: string) => void), skip: boolean }) {
     if (output.type === "none") return null;
 
-    if (output.type === "text" || output.type == "error") return <TypewriterText text={output.value} color={output.color} />;
+    if (output.type === "text" || output.type == "error") return <TypewriterText text={output.value} color={output.color} skip={skip} />;
 
     if (output.type === "list") return <DirectoryList items={output.items} onSelect={runCommand} />;
 

@@ -284,7 +284,7 @@ export function CliView({ vfs, booted, setBooted, shuttingDown, setShuttingDown,
             >
                 { !booting && <BootSequence onComplete={() => setBooted(true)} /> }
             {log.map((entry, i) => (
-                <LogLine key={i} entry={entry} runCommand={runCommand} />
+                <LogLine key={i} entry={entry} runCommand={runCommand} skip={i < log.length - 1}/>
             ))}
             <form
                 onSubmit={(e) => {
