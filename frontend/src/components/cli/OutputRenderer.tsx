@@ -5,7 +5,6 @@ import { HelpList } from "./lists/HelpList";
 import { FileContentCard } from "./FileContentCard";
 import { CvList } from "./lists/CvList";
 import { LinkList } from "./lists/LinkList";
-import ReactMarkdown from "react-markdown";
 import { CvViewer } from "../gui/file-explorer/content-panels/CvViewer";
 
 export function OutputRenderer({ output, runCommand, skip }: { output: CommandOutput, runCommand: ((cmd: string) => void), skip: boolean }) {
@@ -18,8 +17,6 @@ export function OutputRenderer({ output, runCommand, skip }: { output: CommandOu
     if (output.type === "help") return <HelpList showExtra={output.extra}/>
 
     if (output.type === "markdown") return <FileContentCard file={output.file} />
-
-    if (output.type === "changelog") return <div className="content-card"><ReactMarkdown children={output.file} /></div>
 
     if (output.type === "link") return <a href={output.url} target="_blank" rel="noopener noreferrer">{output.value}</a>
 

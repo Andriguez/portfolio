@@ -1,6 +1,4 @@
 import { useRef, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import changelog from "../../../helpers/changelog.ts";
 
 import { useVfs, CV_PLACE, TRASH_PLACE } from "../../../hooks/useVfs.ts"
 import { ExplorerButtons } from './components/ExplorerButtons.tsx';
@@ -35,7 +33,6 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
     const fileAction = useOpenFile(vfs, place.nodes)
 
     const [aboutOpen, setAboutOpen] = useState(false);
-    const [changelogOpen, setChangelogOpen] = useState(false);
 
     const win = useWindowState()
 
@@ -139,8 +136,6 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                                     <ThemeToggle />
                                 </div>
                                 <div className="menu-item" onClick={() => { setAboutOpen(true); }}>about andi.sys</div>
-                                <div className="menu-item" onClick={() => { setChangelogOpen(true); }}>read changelog.md</div>
-
                                 {site.links.length > 0 && <div className="menu-divider" />}
                                 {site.links.map((l) => (
                                     <a key={l.id} className="menu-item menu-item--link" href={l.url} target="_blank" rel="noopener noreferrer">
@@ -249,9 +244,6 @@ export function FileExplorer( {vfs}: { vfs: ReturnType<typeof useVfs>}) {
                 <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
                 <InfoDialog open={aboutOpen} onOpenChange={setAboutOpen} title="about andi.sys">
                     <p className="info-text">{site.staticContent.stack_info || "nothing written here yet."}</p>
-                </InfoDialog>
-                <InfoDialog open={changelogOpen} onOpenChange={setChangelogOpen} title="changelog.md">
-                    <div className="info-markdown"><ReactMarkdown>{changelog}</ReactMarkdown></div>
                 </InfoDialog>
             </div>
         )
